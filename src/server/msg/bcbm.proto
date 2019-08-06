@@ -25,6 +25,12 @@ enum MessageID {
     MsgJoinRoomR = 8 ;
     MsgLeaveRoom = 9 ;
     MsgLeaveRoomR = 10 ;
+    MsgGrabDealer = 11 ;
+    MsgAutoBet = 12 ;
+    MsgAutoBetR = 13 ;
+    MsgBetInfoB = 14 ;
+    MsgDealersB = 15 ;
+    MsgPlayersB = 16 ;
 }
 
 // 8个投注区域
@@ -139,7 +145,8 @@ message AutoBetR {
 
 // 错误码枚举
 enum ErrorCode {
-    SUCCESS = 0;
+    Success = 0;
+    GrabDealerInsuffcientBalance = 1; // 上庄钱不够
 }
 // 错误
 message Error {

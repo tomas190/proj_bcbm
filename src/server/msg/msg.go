@@ -10,9 +10,14 @@ import (
 var Processor = protobuf.NewProcessor()
 
 func init() {
+	// 消息
 	Processor.Register(&Error{})
 	Processor.Register(&Ping{})
 	Processor.Register(&Pong{})
+
+	// 登录登出 进房离房 上庄下庄
+	// 上庄10把自动下庄-可配置
+	// 庄家金额 < 50000 自动下庄-可配置
 	Processor.Register(&Login{})
 	Processor.Register(&LoginR{})
 	Processor.Register(&Logout{})
@@ -21,6 +26,9 @@ func init() {
 	Processor.Register(&JoinRoomR{})
 	Processor.Register(&LeaveRoom{})
 	Processor.Register(&LeaveRoomR{})
+	Processor.Register(&GrabDealer{})
+	Processor.Register(&AutoBet{})
+	Processor.Register(&AutoBetR{})
 
 	// 特定情况触发的广播消息
 	Processor.Register(&BetInfoB{})

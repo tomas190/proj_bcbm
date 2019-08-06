@@ -9,11 +9,19 @@ import (
 )
 
 func init()  {
-	handler(&msg.Ping{}, handlePing)
+	handlerReg(&msg.Ping{}, handlePing)
+
+	handlerReg(&msg.Login{}, handleLogin)
+	handlerReg(&msg.Logout{}, handleLogout)
+	handlerReg(&msg.JoinRoom{}, handleJoinRoom)
+	handlerReg(&msg.LeaveRoom{}, handleLeaveRoom)
+
+	handlerReg(&msg.GrabDealer{}, handleGrabDealer)
+	handlerReg(&msg.AutoBet{}, handleAutoBet)
 }
 
-// 异步处理
-func handler(m interface{}, h interface{}) {
+// 注册消息处理函数
+func handlerReg(m interface{}, h interface{}) {
 	skeleton.RegisterChanRPC(reflect.TypeOf(m), h)
 }
 
@@ -41,5 +49,15 @@ func handleJoinRoom(args []interface{})  {
 
 // 离开房间
 func handleLeaveRoom(args []interface{})  {
+
+}
+
+// 上庄
+func handleGrabDealer(args []interface{})  {
+
+}
+
+// 自动续注
+func handleAutoBet(args []interface{})  {
 
 }
