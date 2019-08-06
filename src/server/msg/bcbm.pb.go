@@ -20,6 +20,131 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
+// 消息ID
+// Ping 为客户端发送的心跳, Pong 服务器心跳响应
+// 其余规则 B为广播消息 R为单点推送 无B也无R为客户端请求消息
+type MessageID int32
+
+const (
+	MessageID_MsgError      MessageID = 0
+	MessageID_MsgPing       MessageID = 1
+	MessageID_MsgPong       MessageID = 2
+	MessageID_MsgLogin      MessageID = 3
+	MessageID_MsgLoginR     MessageID = 4
+	MessageID_MsgLogout     MessageID = 5
+	MessageID_MsgLogoutR    MessageID = 6
+	MessageID_MsgJoinRoom   MessageID = 7
+	MessageID_MsgJoinRoomR  MessageID = 8
+	MessageID_MsgLeaveRoom  MessageID = 9
+	MessageID_MsgLeaveRoomR MessageID = 10
+)
+
+var MessageID_name = map[int32]string{
+	0:  "MsgError",
+	1:  "MsgPing",
+	2:  "MsgPong",
+	3:  "MsgLogin",
+	4:  "MsgLoginR",
+	5:  "MsgLogout",
+	6:  "MsgLogoutR",
+	7:  "MsgJoinRoom",
+	8:  "MsgJoinRoomR",
+	9:  "MsgLeaveRoom",
+	10: "MsgLeaveRoomR",
+}
+
+var MessageID_value = map[string]int32{
+	"MsgError":      0,
+	"MsgPing":       1,
+	"MsgPong":       2,
+	"MsgLogin":      3,
+	"MsgLoginR":     4,
+	"MsgLogout":     5,
+	"MsgLogoutR":    6,
+	"MsgJoinRoom":   7,
+	"MsgJoinRoomR":  8,
+	"MsgLeaveRoom":  9,
+	"MsgLeaveRoomR": 10,
+}
+
+func (x MessageID) String() string {
+	return proto.EnumName(MessageID_name, int32(x))
+}
+
+func (MessageID) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{0}
+}
+
+// 8个投注区域
+type AreaCode int32
+
+const (
+	AreaCode__AreaCode          AreaCode = 0
+	AreaCode_AreaCodeBenzGolden AreaCode = 1
+	AreaCode_AreaCodeBenz       AreaCode = 2
+	AreaCode_AreaCodeBMWGolden  AreaCode = 3
+	AreaCode_AreaCodeBMW        AreaCode = 4
+	AreaCode_AreaCodeAudiGolden AreaCode = 5
+	AreaCode_AreaCodeAudi       AreaCode = 6
+	AreaCode_AreaCodeVWGolden   AreaCode = 7
+	AreaCode_AreaCodeVW         AreaCode = 8
+)
+
+var AreaCode_name = map[int32]string{
+	0: "_AreaCode",
+	1: "AreaCodeBenzGolden",
+	2: "AreaCodeBenz",
+	3: "AreaCodeBMWGolden",
+	4: "AreaCodeBMW",
+	5: "AreaCodeAudiGolden",
+	6: "AreaCodeAudi",
+	7: "AreaCodeVWGolden",
+	8: "AreaCodeVW",
+}
+
+var AreaCode_value = map[string]int32{
+	"_AreaCode":          0,
+	"AreaCodeBenzGolden": 1,
+	"AreaCodeBenz":       2,
+	"AreaCodeBMWGolden":  3,
+	"AreaCodeBMW":        4,
+	"AreaCodeAudiGolden": 5,
+	"AreaCodeAudi":       6,
+	"AreaCodeVWGolden":   7,
+	"AreaCodeVW":         8,
+}
+
+func (x AreaCode) String() string {
+	return proto.EnumName(AreaCode_name, int32(x))
+}
+
+func (AreaCode) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{1}
+}
+
+// 错误码枚举
+type ErrorCode int32
+
+const (
+	ErrorCode_SUCCESS ErrorCode = 0
+)
+
+var ErrorCode_name = map[int32]string{
+	0: "SUCCESS",
+}
+
+var ErrorCode_value = map[string]int32{
+	"SUCCESS": 0,
+}
+
+func (x ErrorCode) String() string {
+	return proto.EnumName(ErrorCode_name, int32(x))
+}
+
+func (ErrorCode) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{2}
+}
+
 type Ping struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -82,17 +207,769 @@ func (m *Pong) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Pong proto.InternalMessageInfo
 
+// 用户信息
+type UserInfo struct {
+	UserID               uint32   `protobuf:"varint,1,opt,name=UserID,proto3" json:"UserID,omitempty"`
+	Money                float64  `protobuf:"fixed64,2,opt,name=Money,proto3" json:"Money,omitempty"`
+	Avatar               string   `protobuf:"bytes,3,opt,name=Avatar,proto3" json:"Avatar,omitempty"`
+	NickName             string   `protobuf:"bytes,4,opt,name=NickName,proto3" json:"NickName,omitempty"`
+	BetCount             float64  `protobuf:"fixed64,5,opt,name=BetCount,proto3" json:"BetCount,omitempty"`
+	WinCount             uint32   `protobuf:"varint,6,opt,name=WinCount,proto3" json:"WinCount,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UserInfo) Reset()         { *m = UserInfo{} }
+func (m *UserInfo) String() string { return proto.CompactTextString(m) }
+func (*UserInfo) ProtoMessage()    {}
+func (*UserInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{2}
+}
+
+func (m *UserInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UserInfo.Unmarshal(m, b)
+}
+func (m *UserInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UserInfo.Marshal(b, m, deterministic)
+}
+func (m *UserInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserInfo.Merge(m, src)
+}
+func (m *UserInfo) XXX_Size() int {
+	return xxx_messageInfo_UserInfo.Size(m)
+}
+func (m *UserInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_UserInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UserInfo proto.InternalMessageInfo
+
+func (m *UserInfo) GetUserID() uint32 {
+	if m != nil {
+		return m.UserID
+	}
+	return 0
+}
+
+func (m *UserInfo) GetMoney() float64 {
+	if m != nil {
+		return m.Money
+	}
+	return 0
+}
+
+func (m *UserInfo) GetAvatar() string {
+	if m != nil {
+		return m.Avatar
+	}
+	return ""
+}
+
+func (m *UserInfo) GetNickName() string {
+	if m != nil {
+		return m.NickName
+	}
+	return ""
+}
+
+func (m *UserInfo) GetBetCount() float64 {
+	if m != nil {
+		return m.BetCount
+	}
+	return 0
+}
+
+func (m *UserInfo) GetWinCount() uint32 {
+	if m != nil {
+		return m.WinCount
+	}
+	return 0
+}
+
+// 当前每个区域的投注信息，每秒广播一次
+type BetInfoB struct {
+	CountBenzGolden      float64  `protobuf:"fixed64,1,opt,name=CountBenzGolden,proto3" json:"CountBenzGolden,omitempty"`
+	CountBenz            float64  `protobuf:"fixed64,2,opt,name=CountBenz,proto3" json:"CountBenz,omitempty"`
+	CountBMWGolden       float64  `protobuf:"fixed64,3,opt,name=CountBMWGolden,proto3" json:"CountBMWGolden,omitempty"`
+	CountBMW             float64  `protobuf:"fixed64,4,opt,name=CountBMW,proto3" json:"CountBMW,omitempty"`
+	CountAudiGolden      float64  `protobuf:"fixed64,5,opt,name=CountAudiGolden,proto3" json:"CountAudiGolden,omitempty"`
+	CountAudi            float64  `protobuf:"fixed64,6,opt,name=CountAudi,proto3" json:"CountAudi,omitempty"`
+	CountVWGolden        float64  `protobuf:"fixed64,7,opt,name=CountVWGolden,proto3" json:"CountVWGolden,omitempty"`
+	CountVW              float64  `protobuf:"fixed64,8,opt,name=CountVW,proto3" json:"CountVW,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *BetInfoB) Reset()         { *m = BetInfoB{} }
+func (m *BetInfoB) String() string { return proto.CompactTextString(m) }
+func (*BetInfoB) ProtoMessage()    {}
+func (*BetInfoB) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{3}
+}
+
+func (m *BetInfoB) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_BetInfoB.Unmarshal(m, b)
+}
+func (m *BetInfoB) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_BetInfoB.Marshal(b, m, deterministic)
+}
+func (m *BetInfoB) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BetInfoB.Merge(m, src)
+}
+func (m *BetInfoB) XXX_Size() int {
+	return xxx_messageInfo_BetInfoB.Size(m)
+}
+func (m *BetInfoB) XXX_DiscardUnknown() {
+	xxx_messageInfo_BetInfoB.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BetInfoB proto.InternalMessageInfo
+
+func (m *BetInfoB) GetCountBenzGolden() float64 {
+	if m != nil {
+		return m.CountBenzGolden
+	}
+	return 0
+}
+
+func (m *BetInfoB) GetCountBenz() float64 {
+	if m != nil {
+		return m.CountBenz
+	}
+	return 0
+}
+
+func (m *BetInfoB) GetCountBMWGolden() float64 {
+	if m != nil {
+		return m.CountBMWGolden
+	}
+	return 0
+}
+
+func (m *BetInfoB) GetCountBMW() float64 {
+	if m != nil {
+		return m.CountBMW
+	}
+	return 0
+}
+
+func (m *BetInfoB) GetCountAudiGolden() float64 {
+	if m != nil {
+		return m.CountAudiGolden
+	}
+	return 0
+}
+
+func (m *BetInfoB) GetCountAudi() float64 {
+	if m != nil {
+		return m.CountAudi
+	}
+	return 0
+}
+
+func (m *BetInfoB) GetCountVWGolden() float64 {
+	if m != nil {
+		return m.CountVWGolden
+	}
+	return 0
+}
+
+func (m *BetInfoB) GetCountVW() float64 {
+	if m != nil {
+		return m.CountVW
+	}
+	return 0
+}
+
+// 庄家信息，每次有人上庄或者下庄都要广播
+type DealersB struct {
+	Dealer               []*UserInfo `protobuf:"bytes,1,rep,name=Dealer,proto3" json:"Dealer,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *DealersB) Reset()         { *m = DealersB{} }
+func (m *DealersB) String() string { return proto.CompactTextString(m) }
+func (*DealersB) ProtoMessage()    {}
+func (*DealersB) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{4}
+}
+
+func (m *DealersB) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DealersB.Unmarshal(m, b)
+}
+func (m *DealersB) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DealersB.Marshal(b, m, deterministic)
+}
+func (m *DealersB) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DealersB.Merge(m, src)
+}
+func (m *DealersB) XXX_Size() int {
+	return xxx_messageInfo_DealersB.Size(m)
+}
+func (m *DealersB) XXX_DiscardUnknown() {
+	xxx_messageInfo_DealersB.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DealersB proto.InternalMessageInfo
+
+func (m *DealersB) GetDealer() []*UserInfo {
+	if m != nil {
+		return m.Dealer
+	}
+	return nil
+}
+
+// 玩家列表/排行榜，每次有玩家加入或者离开都要广播
+type PlayersB struct {
+	Players              []*UserInfo `protobuf:"bytes,1,rep,name=Players,proto3" json:"Players,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *PlayersB) Reset()         { *m = PlayersB{} }
+func (m *PlayersB) String() string { return proto.CompactTextString(m) }
+func (*PlayersB) ProtoMessage()    {}
+func (*PlayersB) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{5}
+}
+
+func (m *PlayersB) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PlayersB.Unmarshal(m, b)
+}
+func (m *PlayersB) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PlayersB.Marshal(b, m, deterministic)
+}
+func (m *PlayersB) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PlayersB.Merge(m, src)
+}
+func (m *PlayersB) XXX_Size() int {
+	return xxx_messageInfo_PlayersB.Size(m)
+}
+func (m *PlayersB) XXX_DiscardUnknown() {
+	xxx_messageInfo_PlayersB.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PlayersB proto.InternalMessageInfo
+
+func (m *PlayersB) GetPlayers() []*UserInfo {
+	if m != nil {
+		return m.Players
+	}
+	return nil
+}
+
+// 登入游戏
+type Login struct {
+	UserID               uint32   `protobuf:"varint,1,opt,name=UserID,proto3" json:"UserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Login) Reset()         { *m = Login{} }
+func (m *Login) String() string { return proto.CompactTextString(m) }
+func (*Login) ProtoMessage()    {}
+func (*Login) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{6}
+}
+
+func (m *Login) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Login.Unmarshal(m, b)
+}
+func (m *Login) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Login.Marshal(b, m, deterministic)
+}
+func (m *Login) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Login.Merge(m, src)
+}
+func (m *Login) XXX_Size() int {
+	return xxx_messageInfo_Login.Size(m)
+}
+func (m *Login) XXX_DiscardUnknown() {
+	xxx_messageInfo_Login.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Login proto.InternalMessageInfo
+
+func (m *Login) GetUserID() uint32 {
+	if m != nil {
+		return m.UserID
+	}
+	return 0
+}
+
+// 登入响应
+type LoginR struct {
+	User                 *UserInfo `protobuf:"bytes,1,opt,name=User,proto3" json:"User,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *LoginR) Reset()         { *m = LoginR{} }
+func (m *LoginR) String() string { return proto.CompactTextString(m) }
+func (*LoginR) ProtoMessage()    {}
+func (*LoginR) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{7}
+}
+
+func (m *LoginR) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LoginR.Unmarshal(m, b)
+}
+func (m *LoginR) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LoginR.Marshal(b, m, deterministic)
+}
+func (m *LoginR) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LoginR.Merge(m, src)
+}
+func (m *LoginR) XXX_Size() int {
+	return xxx_messageInfo_LoginR.Size(m)
+}
+func (m *LoginR) XXX_DiscardUnknown() {
+	xxx_messageInfo_LoginR.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LoginR proto.InternalMessageInfo
+
+func (m *LoginR) GetUser() *UserInfo {
+	if m != nil {
+		return m.User
+	}
+	return nil
+}
+
+// 登出游戏
+type Logout struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Logout) Reset()         { *m = Logout{} }
+func (m *Logout) String() string { return proto.CompactTextString(m) }
+func (*Logout) ProtoMessage()    {}
+func (*Logout) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{8}
+}
+
+func (m *Logout) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Logout.Unmarshal(m, b)
+}
+func (m *Logout) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Logout.Marshal(b, m, deterministic)
+}
+func (m *Logout) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Logout.Merge(m, src)
+}
+func (m *Logout) XXX_Size() int {
+	return xxx_messageInfo_Logout.Size(m)
+}
+func (m *Logout) XXX_DiscardUnknown() {
+	xxx_messageInfo_Logout.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Logout proto.InternalMessageInfo
+
+// 登出响应
+type LogoutR struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *LogoutR) Reset()         { *m = LogoutR{} }
+func (m *LogoutR) String() string { return proto.CompactTextString(m) }
+func (*LogoutR) ProtoMessage()    {}
+func (*LogoutR) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{9}
+}
+
+func (m *LogoutR) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LogoutR.Unmarshal(m, b)
+}
+func (m *LogoutR) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LogoutR.Marshal(b, m, deterministic)
+}
+func (m *LogoutR) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LogoutR.Merge(m, src)
+}
+func (m *LogoutR) XXX_Size() int {
+	return xxx_messageInfo_LogoutR.Size(m)
+}
+func (m *LogoutR) XXX_DiscardUnknown() {
+	xxx_messageInfo_LogoutR.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LogoutR proto.InternalMessageInfo
+
+// 加入房间
+type JoinRoom struct {
+	RoomID               uint32   `protobuf:"varint,1,opt,name=RoomID,proto3" json:"RoomID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *JoinRoom) Reset()         { *m = JoinRoom{} }
+func (m *JoinRoom) String() string { return proto.CompactTextString(m) }
+func (*JoinRoom) ProtoMessage()    {}
+func (*JoinRoom) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{10}
+}
+
+func (m *JoinRoom) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_JoinRoom.Unmarshal(m, b)
+}
+func (m *JoinRoom) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_JoinRoom.Marshal(b, m, deterministic)
+}
+func (m *JoinRoom) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_JoinRoom.Merge(m, src)
+}
+func (m *JoinRoom) XXX_Size() int {
+	return xxx_messageInfo_JoinRoom.Size(m)
+}
+func (m *JoinRoom) XXX_DiscardUnknown() {
+	xxx_messageInfo_JoinRoom.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_JoinRoom proto.InternalMessageInfo
+
+func (m *JoinRoom) GetRoomID() uint32 {
+	if m != nil {
+		return m.RoomID
+	}
+	return 0
+}
+
+// 加入房间响应
+type JoinRoomR struct {
+	CurDealers           *UserInfo `protobuf:"bytes,1,opt,name=CurDealers,proto3" json:"CurDealers,omitempty"`
+	CurBetInfo           *BetInfoB `protobuf:"bytes,2,opt,name=CurBetInfo,proto3" json:"CurBetInfo,omitempty"`
+	Players              *UserInfo `protobuf:"bytes,3,opt,name=Players,proto3" json:"Players,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *JoinRoomR) Reset()         { *m = JoinRoomR{} }
+func (m *JoinRoomR) String() string { return proto.CompactTextString(m) }
+func (*JoinRoomR) ProtoMessage()    {}
+func (*JoinRoomR) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{11}
+}
+
+func (m *JoinRoomR) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_JoinRoomR.Unmarshal(m, b)
+}
+func (m *JoinRoomR) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_JoinRoomR.Marshal(b, m, deterministic)
+}
+func (m *JoinRoomR) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_JoinRoomR.Merge(m, src)
+}
+func (m *JoinRoomR) XXX_Size() int {
+	return xxx_messageInfo_JoinRoomR.Size(m)
+}
+func (m *JoinRoomR) XXX_DiscardUnknown() {
+	xxx_messageInfo_JoinRoomR.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_JoinRoomR proto.InternalMessageInfo
+
+func (m *JoinRoomR) GetCurDealers() *UserInfo {
+	if m != nil {
+		return m.CurDealers
+	}
+	return nil
+}
+
+func (m *JoinRoomR) GetCurBetInfo() *BetInfoB {
+	if m != nil {
+		return m.CurBetInfo
+	}
+	return nil
+}
+
+func (m *JoinRoomR) GetPlayers() *UserInfo {
+	if m != nil {
+		return m.Players
+	}
+	return nil
+}
+
+// 离开房间
+type LeaveRoom struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *LeaveRoom) Reset()         { *m = LeaveRoom{} }
+func (m *LeaveRoom) String() string { return proto.CompactTextString(m) }
+func (*LeaveRoom) ProtoMessage()    {}
+func (*LeaveRoom) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{12}
+}
+
+func (m *LeaveRoom) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LeaveRoom.Unmarshal(m, b)
+}
+func (m *LeaveRoom) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LeaveRoom.Marshal(b, m, deterministic)
+}
+func (m *LeaveRoom) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LeaveRoom.Merge(m, src)
+}
+func (m *LeaveRoom) XXX_Size() int {
+	return xxx_messageInfo_LeaveRoom.Size(m)
+}
+func (m *LeaveRoom) XXX_DiscardUnknown() {
+	xxx_messageInfo_LeaveRoom.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LeaveRoom proto.InternalMessageInfo
+
+// 离开房间响应
+type LeaveRoomR struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *LeaveRoomR) Reset()         { *m = LeaveRoomR{} }
+func (m *LeaveRoomR) String() string { return proto.CompactTextString(m) }
+func (*LeaveRoomR) ProtoMessage()    {}
+func (*LeaveRoomR) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{13}
+}
+
+func (m *LeaveRoomR) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LeaveRoomR.Unmarshal(m, b)
+}
+func (m *LeaveRoomR) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LeaveRoomR.Marshal(b, m, deterministic)
+}
+func (m *LeaveRoomR) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LeaveRoomR.Merge(m, src)
+}
+func (m *LeaveRoomR) XXX_Size() int {
+	return xxx_messageInfo_LeaveRoomR.Size(m)
+}
+func (m *LeaveRoomR) XXX_DiscardUnknown() {
+	xxx_messageInfo_LeaveRoomR.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LeaveRoomR proto.InternalMessageInfo
+
+// 上庄请求
+type GrabDealer struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GrabDealer) Reset()         { *m = GrabDealer{} }
+func (m *GrabDealer) String() string { return proto.CompactTextString(m) }
+func (*GrabDealer) ProtoMessage()    {}
+func (*GrabDealer) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{14}
+}
+
+func (m *GrabDealer) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GrabDealer.Unmarshal(m, b)
+}
+func (m *GrabDealer) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GrabDealer.Marshal(b, m, deterministic)
+}
+func (m *GrabDealer) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GrabDealer.Merge(m, src)
+}
+func (m *GrabDealer) XXX_Size() int {
+	return xxx_messageInfo_GrabDealer.Size(m)
+}
+func (m *GrabDealer) XXX_DiscardUnknown() {
+	xxx_messageInfo_GrabDealer.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GrabDealer proto.InternalMessageInfo
+
+// 续投
+type AutoBet struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AutoBet) Reset()         { *m = AutoBet{} }
+func (m *AutoBet) String() string { return proto.CompactTextString(m) }
+func (*AutoBet) ProtoMessage()    {}
+func (*AutoBet) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{15}
+}
+
+func (m *AutoBet) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AutoBet.Unmarshal(m, b)
+}
+func (m *AutoBet) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AutoBet.Marshal(b, m, deterministic)
+}
+func (m *AutoBet) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AutoBet.Merge(m, src)
+}
+func (m *AutoBet) XXX_Size() int {
+	return xxx_messageInfo_AutoBet.Size(m)
+}
+func (m *AutoBet) XXX_DiscardUnknown() {
+	xxx_messageInfo_AutoBet.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AutoBet proto.InternalMessageInfo
+
+// 续投响应
+type AutoBetR struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AutoBetR) Reset()         { *m = AutoBetR{} }
+func (m *AutoBetR) String() string { return proto.CompactTextString(m) }
+func (*AutoBetR) ProtoMessage()    {}
+func (*AutoBetR) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{16}
+}
+
+func (m *AutoBetR) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AutoBetR.Unmarshal(m, b)
+}
+func (m *AutoBetR) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AutoBetR.Marshal(b, m, deterministic)
+}
+func (m *AutoBetR) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AutoBetR.Merge(m, src)
+}
+func (m *AutoBetR) XXX_Size() int {
+	return xxx_messageInfo_AutoBetR.Size(m)
+}
+func (m *AutoBetR) XXX_DiscardUnknown() {
+	xxx_messageInfo_AutoBetR.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AutoBetR proto.InternalMessageInfo
+
+// 错误
+type Error struct {
+	Code                 ErrorCode `protobuf:"varint,1,opt,name=Code,proto3,enum=msg.ErrorCode" json:"Code,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *Error) Reset()         { *m = Error{} }
+func (m *Error) String() string { return proto.CompactTextString(m) }
+func (*Error) ProtoMessage()    {}
+func (*Error) Descriptor() ([]byte, []int) {
+	return fileDescriptor_f920c4c0d180b49f, []int{17}
+}
+
+func (m *Error) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Error.Unmarshal(m, b)
+}
+func (m *Error) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Error.Marshal(b, m, deterministic)
+}
+func (m *Error) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Error.Merge(m, src)
+}
+func (m *Error) XXX_Size() int {
+	return xxx_messageInfo_Error.Size(m)
+}
+func (m *Error) XXX_DiscardUnknown() {
+	xxx_messageInfo_Error.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Error proto.InternalMessageInfo
+
+func (m *Error) GetCode() ErrorCode {
+	if m != nil {
+		return m.Code
+	}
+	return ErrorCode_SUCCESS
+}
+
 func init() {
+	proto.RegisterEnum("msg.MessageID", MessageID_name, MessageID_value)
+	proto.RegisterEnum("msg.AreaCode", AreaCode_name, AreaCode_value)
+	proto.RegisterEnum("msg.ErrorCode", ErrorCode_name, ErrorCode_value)
 	proto.RegisterType((*Ping)(nil), "msg.Ping")
 	proto.RegisterType((*Pong)(nil), "msg.Pong")
+	proto.RegisterType((*UserInfo)(nil), "msg.UserInfo")
+	proto.RegisterType((*BetInfoB)(nil), "msg.BetInfoB")
+	proto.RegisterType((*DealersB)(nil), "msg.DealersB")
+	proto.RegisterType((*PlayersB)(nil), "msg.PlayersB")
+	proto.RegisterType((*Login)(nil), "msg.Login")
+	proto.RegisterType((*LoginR)(nil), "msg.LoginR")
+	proto.RegisterType((*Logout)(nil), "msg.Logout")
+	proto.RegisterType((*LogoutR)(nil), "msg.LogoutR")
+	proto.RegisterType((*JoinRoom)(nil), "msg.JoinRoom")
+	proto.RegisterType((*JoinRoomR)(nil), "msg.JoinRoomR")
+	proto.RegisterType((*LeaveRoom)(nil), "msg.LeaveRoom")
+	proto.RegisterType((*LeaveRoomR)(nil), "msg.LeaveRoomR")
+	proto.RegisterType((*GrabDealer)(nil), "msg.GrabDealer")
+	proto.RegisterType((*AutoBet)(nil), "msg.AutoBet")
+	proto.RegisterType((*AutoBetR)(nil), "msg.AutoBetR")
+	proto.RegisterType((*Error)(nil), "msg.Error")
 }
 
 func init() { proto.RegisterFile("bcbm.proto", fileDescriptor_f920c4c0d180b49f) }
 
 var fileDescriptor_f920c4c0d180b49f = []byte{
-	// 58 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4a, 0x4a, 0x4e, 0xca,
-	0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0xce, 0x2d, 0x4e, 0x57, 0x62, 0xe3, 0x62, 0x09,
-	0xc8, 0xcc, 0x83, 0xd0, 0xf9, 0x79, 0xe9, 0x49, 0x6c, 0x60, 0x39, 0x63, 0x40, 0x00, 0x00, 0x00,
-	0xff, 0xff, 0x1f, 0x22, 0x8f, 0xd7, 0x29, 0x00, 0x00, 0x00,
+	// 642 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x54, 0xdd, 0x4e, 0x1b, 0x3d,
+	0x10, 0xc5, 0xd9, 0xec, 0xdf, 0x84, 0x04, 0x63, 0xf1, 0xa1, 0xd5, 0xa7, 0x4a, 0x4d, 0xad, 0xfe,
+	0x44, 0xa0, 0x22, 0x15, 0x9e, 0x20, 0x09, 0x08, 0x51, 0x11, 0x84, 0x8c, 0x28, 0x97, 0xd5, 0x06,
+	0xdc, 0x55, 0x54, 0xb2, 0xae, 0x76, 0x37, 0x48, 0xf4, 0x31, 0xfa, 0x00, 0xbd, 0xea, 0x3b, 0xf4,
+	0xa2, 0x2f, 0x57, 0x79, 0xd6, 0xf6, 0x6e, 0x69, 0x7a, 0xb5, 0x3e, 0x67, 0x8e, 0x67, 0xce, 0x8c,
+	0xed, 0x05, 0x98, 0xdf, 0xce, 0x97, 0x07, 0x5f, 0x0a, 0x55, 0x29, 0xe6, 0x2d, 0xcb, 0x8c, 0x07,
+	0xd0, 0xbd, 0x5c, 0xe4, 0xf5, 0x57, 0xe5, 0x19, 0xff, 0x41, 0x20, 0xba, 0x2e, 0x65, 0x71, 0x96,
+	0x7f, 0x52, 0x6c, 0x17, 0x02, 0x5c, 0x1f, 0x27, 0x64, 0x48, 0x46, 0x7d, 0x61, 0x10, 0xdb, 0x01,
+	0x7f, 0xa6, 0x72, 0xf9, 0x98, 0x74, 0x86, 0x64, 0x44, 0x44, 0x0d, 0xb4, 0x7a, 0xfc, 0x90, 0x56,
+	0x69, 0x91, 0x78, 0x43, 0x32, 0x8a, 0x85, 0x41, 0xec, 0x7f, 0x88, 0x2e, 0x16, 0xb7, 0x9f, 0x2f,
+	0xd2, 0xa5, 0x4c, 0xba, 0x18, 0x71, 0x58, 0xc7, 0x26, 0xb2, 0x9a, 0xaa, 0x55, 0x5e, 0x25, 0x3e,
+	0x26, 0x73, 0x58, 0xc7, 0x6e, 0x16, 0x79, 0x1d, 0x0b, 0xb0, 0xbe, 0xc3, 0xfc, 0x7b, 0x07, 0x37,
+	0x6a, 0x97, 0x13, 0x36, 0x82, 0x2d, 0x64, 0x27, 0x32, 0xff, 0x7a, 0xaa, 0xee, 0xef, 0x64, 0x8e,
+	0x7e, 0x89, 0x78, 0x4a, 0xb3, 0x67, 0x10, 0x3b, 0xca, 0x98, 0x6f, 0x08, 0xf6, 0x1a, 0x06, 0x35,
+	0x98, 0xdd, 0x98, 0x34, 0x1e, 0x4a, 0x9e, 0xb0, 0xda, 0x98, 0x65, 0xb0, 0x21, 0x22, 0x1c, 0x76,
+	0x5e, 0xc6, 0xab, 0xbb, 0x85, 0x49, 0xe2, 0xb7, 0xbc, 0x34, 0xb4, 0xf3, 0xa2, 0x29, 0xec, 0xcf,
+	0x7a, 0xd1, 0x04, 0x7b, 0x09, 0x7d, 0x04, 0x1f, 0xac, 0x95, 0x10, 0x15, 0x7f, 0x92, 0x2c, 0x81,
+	0xd0, 0x10, 0x49, 0x84, 0x71, 0x0b, 0xf9, 0x3b, 0x88, 0x8e, 0x65, 0x7a, 0x2f, 0x8b, 0x72, 0xc2,
+	0x5e, 0x41, 0x50, 0xaf, 0x13, 0x32, 0xf4, 0x46, 0xbd, 0xc3, 0xfe, 0xc1, 0xb2, 0xcc, 0x0e, 0xec,
+	0x29, 0x0b, 0x13, 0xe4, 0x47, 0x10, 0x5d, 0xde, 0xa7, 0x8f, 0xb8, 0xe5, 0x0d, 0x84, 0x66, 0xbd,
+	0x7e, 0x8f, 0x8d, 0xf2, 0xe7, 0xe0, 0x9f, 0xab, 0x6c, 0x91, 0xff, 0xeb, 0xae, 0xf0, 0x7d, 0x08,
+	0x50, 0x20, 0xd8, 0x0b, 0xe8, 0x6a, 0x0e, 0xe3, 0x7f, 0x25, 0xc4, 0x10, 0x8f, 0x50, 0xac, 0x56,
+	0x15, 0x8f, 0x21, 0xac, 0x57, 0x82, 0x73, 0x88, 0xde, 0xab, 0x45, 0x2e, 0x94, 0x5a, 0xea, 0x2a,
+	0xfa, 0xdb, 0x54, 0xa9, 0x11, 0xff, 0x46, 0x20, 0xb6, 0x22, 0xc1, 0xde, 0x02, 0x4c, 0x57, 0x85,
+	0xe9, 0x7f, 0x7d, 0xbd, 0x96, 0xc0, 0xc8, 0xcd, 0x75, 0xc2, 0x6b, 0x61, 0xe5, 0xf6, 0x8a, 0x89,
+	0x96, 0xa0, 0x3d, 0x1b, 0x6f, 0x5d, 0x6a, 0x37, 0x9b, 0x1e, 0xc4, 0xe7, 0x32, 0x7d, 0x90, 0xda,
+	0x14, 0xdf, 0x04, 0x70, 0x40, 0x68, 0x74, 0x5a, 0xa4, 0x73, 0x33, 0xf9, 0x18, 0xc2, 0xf1, 0xaa,
+	0x52, 0x13, 0x59, 0x71, 0x80, 0xc8, 0x2c, 0x05, 0xdf, 0x07, 0xff, 0xa4, 0x28, 0x54, 0xc1, 0x38,
+	0x74, 0xa7, 0xea, 0x4e, 0x62, 0x27, 0x83, 0xc3, 0x01, 0x96, 0xc3, 0x88, 0x66, 0x05, 0xc6, 0xf6,
+	0x7e, 0x12, 0x88, 0x67, 0xb2, 0x2c, 0xd3, 0x4c, 0x9e, 0x1d, 0xb3, 0x4d, 0x88, 0x66, 0x65, 0x86,
+	0x1a, 0xba, 0xc1, 0x7a, 0x10, 0xce, 0xca, 0x4c, 0xbf, 0x73, 0x4a, 0x2c, 0x50, 0x79, 0x46, 0x3b,
+	0x46, 0x87, 0x07, 0x44, 0x3d, 0xd6, 0x87, 0xd8, 0x22, 0x41, 0xbb, 0x0d, 0x54, 0xab, 0x8a, 0xfa,
+	0x6c, 0x00, 0xe0, 0xa0, 0xa0, 0x01, 0xdb, 0x82, 0xde, 0xac, 0xcc, 0xec, 0xd4, 0x69, 0xc8, 0x28,
+	0x6c, 0xb6, 0x08, 0x41, 0x23, 0xc3, 0xb8, 0xbe, 0x69, 0xcc, 0xb6, 0xa1, 0xdf, 0x66, 0x04, 0x85,
+	0xbd, 0x5f, 0x04, 0xa2, 0x71, 0x21, 0x53, 0xdd, 0x86, 0xae, 0xf9, 0xd1, 0x02, 0xba, 0xc1, 0x76,
+	0x81, 0x59, 0xd4, 0x3c, 0x63, 0x4a, 0x74, 0xe2, 0x36, 0x4f, 0x3b, 0xec, 0x3f, 0xd8, 0x76, 0x8c,
+	0x7d, 0xa9, 0xd4, 0xd3, 0x26, 0x5b, 0x34, 0xed, 0xb6, 0x33, 0x36, 0x8f, 0x91, 0xfa, 0xed, 0x8c,
+	0x9a, 0xa7, 0x01, 0xdb, 0x01, 0x6a, 0x19, 0xfb, 0xe0, 0x68, 0xa8, 0xa7, 0xd0, 0xb0, 0x34, 0xda,
+	0x4b, 0x20, 0x76, 0x47, 0xa1, 0x67, 0x7b, 0x75, 0x3d, 0x9d, 0x9e, 0x5c, 0x5d, 0xd1, 0x8d, 0x79,
+	0x80, 0xbf, 0xd9, 0xa3, 0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x03, 0x29, 0xff, 0xb6, 0x74, 0x05,
+	0x00, 0x00,
 }

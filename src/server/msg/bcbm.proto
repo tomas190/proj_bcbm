@@ -3,3 +3,145 @@ package msg;
 
 message Ping{}
 message Pong{}
+
+/********************************************
+
+    消息ID
+
+********************************************/
+
+// 消息ID 
+// Ping 为客户端发送的心跳, Pong 服务器心跳响应
+// 其余规则 B为广播消息 R为单点推送 无B也无R为客户端请求消息
+enum MessageID {
+    MsgError = 0 ;
+    MsgPing = 1 ;
+    MsgPong = 2 ;
+    MsgLogin = 3 ;
+    MsgLoginR = 4 ;
+    MsgLogout = 5 ;
+    MsgLogoutR = 6 ;
+    MsgJoinRoom = 7 ;
+    MsgJoinRoomR = 8 ;
+    MsgLeaveRoom = 9 ;
+    MsgLeaveRoomR = 10 ;
+}
+
+// 8个投注区域
+enum AreaCode {
+    _AreaCode = 0;
+    AreaCodeBenzGolden = 1; // *40
+    AreaCodeBenz = 2;       // *5
+    AreaCodeBMWGolden = 3;  // *30
+    AreaCodeBMW = 4;        // *5
+    AreaCodeAudiGolden = 5; // *20
+    AreaCodeAudi = 6;       // *5
+    AreaCodeVWGolden = 7;   // *10
+    AreaCodeVW = 8;         // *5
+}
+
+// 用户信息
+message UserInfo {
+    uint32 UserID = 1;
+    double Money = 2;
+    string Avatar = 3;
+    string NickName = 4;
+    double BetCount = 5; // 下注数
+    uint32 WinCount = 6; // 近20局获胜局数
+}
+
+/***********************************************
+
+    房间内特定情况触发的广播消息
+
+************************************************/
+
+// 当前每个区域的投注信息，每秒广播一次
+message BetInfoB {
+    double CountBenzGolden = 1;
+    double CountBenz = 2;
+    double CountBMWGolden = 3;
+    double CountBMW = 4;
+    double CountAudiGolden = 5;
+    double CountAudi = 6;
+    double CountVWGolden = 7;
+    double CountVW = 8;
+}
+
+// 庄家信息，每次有人上庄或者下庄都要广播
+message DealersB {
+    repeated UserInfo Dealer = 1; // 庄家列表，0为当前庄家，其余为上庄列表
+}
+
+// 玩家列表/排行榜，每次有玩家加入或者离开都要广播
+message PlayersB {
+    repeated UserInfo Players = 1;
+}
+
+/******************************************
+
+    登入登出
+
+******************************************/
+
+// 登入游戏
+message Login {
+    uint32 UserID = 1;
+}
+
+// 登入响应
+message LoginR {
+    UserInfo User = 1;
+}
+
+// 登出游戏
+message Logout {}
+
+// 登出响应
+message LogoutR {
+
+}
+
+// 加入房间
+message JoinRoom {
+    uint32 RoomID = 1;
+}
+
+// 加入房间响应
+message JoinRoomR {
+    UserInfo CurDealers = 1; // 当前房间庄家信息
+    BetInfoB CurBetInfo = 2; // 当前房间下注信息
+    UserInfo Players = 3;    // 当前房间的玩家信息
+}
+
+// 离开房间
+message LeaveRoom {}
+
+// 离开房间响应
+message LeaveRoomR {
+
+}
+
+// 上庄请求
+message GrabDealer {
+
+}
+
+// 续投
+message AutoBet {
+
+}
+
+// 续投响应
+message AutoBetR {
+    
+}
+
+// 错误码枚举
+enum ErrorCode {
+    SUCCESS = 0;
+}
+// 错误
+message Error {
+    ErrorCode Code = 1;
+}
