@@ -12,38 +12,25 @@ message Pong{}
 
 // 消息ID 
 // Ping 为客户端发送的心跳, Pong 服务器心跳响应
-// 其余规则 B为广播消息 R为单点推送 无B也无R为客户端请求消息
+// HB为大厅广播 B为房间广播 R为单点推送 无B也无R为客户端请求消息
 enum MessageID {
-    MsgError = 0 ;
-    MsgPing = 1 ;
-    MsgPong = 2 ;
-    MsgLogin = 3 ;
-    MsgLoginR = 4 ;
-    MsgLogout = 5 ;
-    MsgLogoutR = 6 ;
-    MsgJoinRoom = 7 ;
-    MsgJoinRoomR = 8 ;
-    MsgLeaveRoom = 9 ;
-    MsgLeaveRoomR = 10 ;
-    MsgGrabDealer = 11 ;
-    MsgAutoBet = 12 ;
-    MsgAutoBetR = 13 ;
-    MsgBetInfoB = 14 ;
-    MsgDealersB = 15 ;
-    MsgPlayersB = 16 ;
-}
-
-// 8个投注区域
-enum AreaCode {
-    _AreaCode = 0;
-    AreaCodeBenzGolden = 1; // *40
-    AreaCodeBenz = 2;       // *5
-    AreaCodeBMWGolden = 3;  // *30
-    AreaCodeBMW = 4;        // *5
-    AreaCodeAudiGolden = 5; // *20
-    AreaCodeAudi = 6;       // *5
-    AreaCodeVWGolden = 7;   // *10
-    AreaCodeVW = 8;         // *5
+	MsgError      = 0;
+	MsgPing       = 1;
+	MsgPong       = 2;
+	MsgLogin      = 3;
+	MsgLoginR     = 4;
+	MsgLogout     = 5;
+	MsgLogoutR    = 6;
+	MsgJoinRoom   = 7;
+	MsgJoinRoomR  = 8;
+	MsgLeaveRoom  = 9;
+	MsgLeaveRoomR = 10;
+	MsgGrabDealer = 11;
+	MsgAutoBet    = 12;
+	MsgAutoBetR   = 13;
+	MsgBetInfoB   = 14;
+	MsgDealersB   = 15;
+	MsgPlayersB   = 16;
 }
 
 // 用户信息
@@ -56,9 +43,36 @@ message UserInfo {
     uint32 WinCount = 6; // 近20局获胜局数
 }
 
+// 房间信息
+message RoomInfo {
+    uint32 RoomID = 1;
+    uint32 MinBet = 2;    // 限红 下限
+    uint32 MaxBet = 3;    // 限红 上限
+    uint32 MinLimit = 4;  // 能玩的最低金币
+    uint32 Status = 5;
+    uint32 EndTime = 6;
+    repeated uint32 History = 7;
+    repeated uint32 HisCount = 8;
+}
+
+/**********************************************
+
+    大厅广播-给所有玩家推送
+
+***********************************************/
+
+// 某个房间状态的改变
+message RoomChangeHB {
+    uint32 RoomID = 1;
+    uint32 Status = 2;      // 改变之后的状态
+    uint32 EndTime = 3;     // 倒计时结束时间
+    uint32 Result = 4;      // 开奖结果
+    uint32 ServerTime = 5;  // 服务器时间
+}
+
 /***********************************************
 
-    房间内特定情况触发的广播消息
+    房间广播-给房间内玩家推送
 
 ************************************************/
 
@@ -93,20 +107,25 @@ message PlayersB {
 // 登入游戏
 message Login {
     uint32 UserID = 1;
+    string Password = 2;
+}
+
+message LoginTest {
+    uint32 UserID = 1;
 }
 
 // 登入响应
 message LoginR {
     UserInfo User = 1;
+    uint32 RoomID = 2;
+    repeated RoomInfo Rooms = 3;
 }
 
 // 登出游戏
 message Logout {}
 
 // 登出响应
-message LogoutR {
-
-}
+message LogoutR {}
 
 // 加入房间
 message JoinRoom {
@@ -117,36 +136,43 @@ message JoinRoom {
 message JoinRoomR {
     UserInfo CurDealers = 1; // 当前房间庄家信息
     BetInfoB CurBetInfo = 2; // 当前房间下注信息
-    UserInfo Players = 3;    // 当前房间的玩家信息
+    repeated UserInfo Players = 3;    // 当前房间的玩家信息
 }
 
 // 离开房间
 message LeaveRoom {}
 
 // 离开房间响应
-message LeaveRoomR {
+message LeaveRoomR {}
+
+// 上庄请求
+message GrabDealer {}
+
+// 下注
+message Bet {
 
 }
 
-// 上庄请求
-message GrabDealer {
+// 下注响应
+message BetR {
 
 }
 
 // 续投
-message AutoBet {
-
-}
+message AutoBet {}
 
 // 续投响应
-message AutoBetR {
-    
-}
+message AutoBetR {}
 
 // 错误码枚举
 enum ErrorCode {
     Success = 0;
-    GrabDealerInsuffcientBalance = 1; // 上庄钱不够
+    InsufficientBalanceGrabDealer = 101; // 上庄钱不够
+    InsufficientBalanceBet = 102; // 下注钱不够
+    ServerClosed = 201;
+
+    UserRepeatLogin = 202;
+    UserRemoteLogin = 203;
 }
 // 错误
 message Error {

@@ -10,7 +10,7 @@ import (
 var Processor = protobuf.NewProcessor()
 
 func init() {
-	// 消息
+	// 基本消息
 	Processor.Register(&Error{})
 	Processor.Register(&Ping{})
 	Processor.Register(&Pong{})
@@ -30,10 +30,14 @@ func init() {
 	Processor.Register(&AutoBet{})
 	Processor.Register(&AutoBetR{})
 
+	// 下注
+	Processor.Register(&Bet{})
+	Processor.Register(&BetR{})
+
 	// 特定情况触发的广播消息
-	Processor.Register(&BetInfoB{})
-	Processor.Register(&DealersB{})
-	Processor.Register(&PlayersB{})
+	Processor.Register(&BetInfoB{}) // 每秒广播一次
+	Processor.Register(&DealersB{}) // 有人上庄或下庄广播一次
+	Processor.Register(&PlayersB{}) // 有人进入或离开广播一次
 
 	// print ID
 	Processor.Range(printMsgID)
@@ -44,5 +48,5 @@ func printMsgID(id uint16, t reflect.Type)  {
 	tStr = strings.Replace(tStr, "*", "", 1)
 	tStr = strings.Replace(tStr, ".", "", 1)
 	tStr = strings.Title(tStr)
-	fmt.Println("\t", tStr, "=", id, ";")
+	fmt.Printf("\t%-13v = %d;\n", tStr, id)
 }

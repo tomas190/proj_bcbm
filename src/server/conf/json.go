@@ -16,10 +16,21 @@ var Server struct {
 	MaxConnNum  int
 	ConsolePort int
 	ProfilePath string
+
+	TokenServer      string
+	CenterServer     string
+	CenterServerPort string
+	DevKey           string
+	DevName          string
+	GameID           string
+	MongoDB          string
 }
 
 func init() {
-	data, err := ioutil.ReadFile("conf/server.json")
+	// 配置文件
+	fileName := "conf/server.json"
+	log.Debug("读取配置文件 %v...", fileName)
+	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		log.Fatal("%v", err)
 	}

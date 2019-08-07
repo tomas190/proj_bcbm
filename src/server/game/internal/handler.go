@@ -61,3 +61,17 @@ func handleGrabDealer(args []interface{})  {
 func handleAutoBet(args []interface{})  {
 
 }
+
+
+// 8个投注区域
+//enum AreaCode {
+//_AreaCode = 0;
+//AreaCodeBenzGolden = 1; // *40
+//AreaCodeBenz = 2;       // *5
+//AreaCodeBMWGolden = 3;  // *30
+//AreaCodeBMW = 4;        // *5
+//AreaCodeAudiGolden = 5; // *20
+//AreaCodeAudi = 6;       // *5
+//AreaCodeVWGolden = 7;   // *10
+//AreaCodeVW = 8;         // *5
+//}
