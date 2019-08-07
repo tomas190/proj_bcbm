@@ -14,10 +14,8 @@ func init() {
 	Processor.Register(&Error{})
 	Processor.Register(&Ping{})
 	Processor.Register(&Pong{})
+	Processor.Register(&LoginTest{})
 
-	// 登录登出 进房离房 上庄下庄
-	// 上庄10把自动下庄-可配置
-	// 庄家金额 < 50000 自动下庄-可配置
 	Processor.Register(&Login{})
 	Processor.Register(&LoginR{})
 	Processor.Register(&Logout{})
@@ -40,13 +38,25 @@ func init() {
 	Processor.Register(&PlayersB{}) // 有人进入或离开广播一次
 
 	// print ID
+	Processor.Range(printMsgIDPB)
 	Processor.Range(printMsgID)
+	Processor.Range(printMsg)
 }
 
-func printMsgID(id uint16, t reflect.Type)  {
+func printMsgIDPB(id uint16, t reflect.Type)  {
 	tStr := fmt.Sprintf("%v", t)
 	tStr = strings.Replace(tStr, "*", "", 1)
 	tStr = strings.Replace(tStr, ".", "", 1)
 	tStr = strings.Title(tStr)
 	fmt.Printf("\t%-13v = %d;\n", tStr, id)
+}
+
+func printMsgID(id uint16, t reflect.Type)  {
+	fmt.Printf("\t\"%v\" : %d,\n", t, id)
+}
+
+func printMsg(id uint16, t reflect.Type)  {
+	tStr := fmt.Sprintf("%v", t)
+	tStr = strings.Replace(tStr, "*", "", 1)
+	fmt.Printf("case %d: resp = %v{}\n", id, tStr)
 }

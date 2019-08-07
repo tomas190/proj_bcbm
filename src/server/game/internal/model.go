@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
+	"math/rand"
 	"server/msg"
 	"time"
 )
@@ -42,17 +43,12 @@ type User struct {
 type Dealer struct {
 	*Room
 	status      int          // 房间状态
-	multi       uint32       // 当前倍数
 	clock       *time.Ticker // 计时器
 	counter     uint32       // 已经过去多少秒
 }
 
 type Room struct {
 	RoomID    uint32 // 房间基本信息
-	IsPrivate bool   // 是否私有房
-	RoomPWD   string // 房间密码
-
-	BasePoint float64       // 底分
 	MinMoney  float64       // 最小进入限制
 }
 
@@ -99,6 +95,60 @@ func (h *Hall) AddUser(u *User) error {
 func (h *Hall) RemoveUser(userID uint32) error {
 	return nil
 }
+/*
 
+盈余池 = 玩家总输 - 玩家总赢 * 杀数 - （玩家数量 * 6）
 
+杀数暂定103%
+
+6元是赠送给玩家的钱
+玩家数量是 有玩过捕鱼的玩家总数（不计算重复的）
+
+盈余池 随机从10%到50%取一个值
+如果开奖结果
+
+(玩家赢 - 官方庄家和机器人赢)  小于或等于  从盈余池随机拿到的值，则定为本局开奖结果。
+
+如果是 (玩家赢 - 官方庄家和机器人赢) > 从盈余池随机拿到的值，则重新获取开奖结果，直到 小于或等于
+
+*/
+
+const (
+	_Area = 0
+	AreaBenzGolden = 1 // *40
+	AreaBenz = 2       // *5
+	AreaBMWGolden = 3  // *30
+	AreaBMW = 4        // *5
+	AreaAudiGolden = 5 // *20
+	AreaAudi = 6       // *5
+	AreaVWGolden = 7   // *10
+	AreaVW = 8         // *5
+)
+
+// 公平开奖
+func OpenAward() uint32 {
+	rand.Seed(time.Now().UnixNano())
+	prob := rand.Intn(120)
+	var area uint32
+
+	if prob >= 0 && prob <= 2 {
+		area = AreaBenzGolden
+	} else if prob <= 6 {
+		area = AreaBMWGolden
+	} else if prob <= 12 {
+		area = AreaAudiGolden
+	} else if prob <= 24 {
+		area = AreaVWGolden
+	} else if prob <= 48 {
+		area = AreaBenz
+	} else if prob <= 72 {
+		area = AreaBMW
+	} else if prob <= 96 {
+		area = AreaAudi
+	} else if prob <= 120 {
+		area = AreaVW
+	}
+
+	return area
+}
 
