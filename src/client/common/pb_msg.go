@@ -1,30 +1,33 @@
 package common
 
-import "server/msg"
+import (
+	"github.com/golang/protobuf/proto"
+	"server/msg"
+)
 
-func TransIDToMsg(id uint16) interface{} {
-	var resp interface{}
+func transIDToMsg(id uint16) proto.Message {
+	var resp proto.Message
 	switch id {
-	case 0: resp = msg.Error{}
-	case 1: resp = msg.Ping{}
-	case 2: resp = msg.Pong{}
-	case 3: resp = msg.LoginTest{}
-	case 4: resp = msg.Login{}
-	case 5: resp = msg.LoginR{}
-	case 6: resp = msg.Logout{}
-	case 7: resp = msg.LogoutR{}
-	case 8: resp = msg.JoinRoom{}
-	case 9: resp = msg.JoinRoomR{}
-	case 10: resp = msg.LeaveRoom{}
-	case 11: resp = msg.LeaveRoomR{}
-	case 12: resp = msg.GrabDealer{}
-	case 13: resp = msg.AutoBet{}
-	case 14: resp = msg.AutoBetR{}
-	case 15: resp = msg.Bet{}
-	case 16: resp = msg.BetR{}
-	case 17: resp = msg.BetInfoB{}
-	case 18: resp = msg.DealersB{}
-	case 19: resp = msg.PlayersB{}
+	case 0: resp = &msg.Error{}
+	case 1: resp = &msg.Ping{}
+	case 2: resp = &msg.Pong{}
+	case 3: resp = &msg.LoginTest{}
+	case 4: resp = &msg.Login{}
+	case 5: resp = &msg.LoginR{}
+	case 6: resp = &msg.Logout{}
+	case 7: resp = &msg.LogoutR{}
+	case 8: resp = &msg.JoinRoom{}
+	case 9: resp = &msg.JoinRoomR{}
+	case 10: resp = &msg.LeaveRoom{}
+	case 11: resp = &msg.LeaveRoomR{}
+	case 12: resp = &msg.GrabDealer{}
+	case 13: resp = &msg.AutoBet{}
+	case 14: resp = &msg.AutoBetR{}
+	case 15: resp = &msg.Bet{}
+	case 16: resp = &msg.BetR{}
+	case 17: resp = &msg.BetInfoB{}
+	case 18: resp = &msg.DealersB{}
+	case 19: resp = &msg.PlayersB{}
 	}
 
 	return resp
@@ -54,7 +57,7 @@ var msgType2ID = map[string]uint16{
 }
 
 
-func TransMsgToID(t string) uint16 {
+func transMsgToID(t string) uint16 {
 	if id, ok := msgType2ID[t]; ok {
 		return id
 	}
