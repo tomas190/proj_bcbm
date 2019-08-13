@@ -1,14 +1,5 @@
 package internal
 
-const (
-	msgServerLogin   string = "/GameServer/Login/login"
-	msgUserLogin     string = "/GameServer/GameUser/login"
-	msgUserLogout    string = "/GameServer/GameUser/loginout"
-	msgUserWinScore  string = "/GameServer/GameUser/winSettlement"
-	msgUserLoseScore string = "/GameServer/GameUser/loseSettlement"
-
-	centerStatusSuccess int = 200
-)
 
 // 游戏服务器<--->中心服 消息基本格式
 type Server2CenterMsg struct {
@@ -86,10 +77,11 @@ type UserLogMsg struct {
 }
 
 type GameUser struct {
-	UserID   uint32 `json:"id"`
-	UUID     string `json:"uuid"`
-	GameNick string `json:"game_nick"`
-	GameIMG  string `json:"game_img"`
+	UserID       uint32 `json:"id"`
+	UUID         string `json:"uuid"`
+	GameNick     string `json:"game_nick"`
+	GameIMG      string `json:"game_img"`
+	GameUserType uint32 `json:"game_user_type"`
 }
 
 type GameAccount struct {

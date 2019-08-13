@@ -24,7 +24,7 @@ func init() {
 	Processor.Register(&JoinRoomR{})
 	Processor.Register(&LeaveRoom{})
 	Processor.Register(&LeaveRoomR{})
-	Processor.Register(&GrabDealer{})
+	Processor.Register(&GrabBanker{})
 	Processor.Register(&AutoBet{})
 	Processor.Register(&AutoBetR{})
 
@@ -34,10 +34,10 @@ func init() {
 
 	// 特定情况触发的广播消息
 	Processor.Register(&BetInfoB{}) // 每秒广播一次
-	Processor.Register(&DealersB{}) // 有人上庄或下庄广播一次
+	Processor.Register(&BankersB{}) // 有人上庄或下庄广播一次
 	Processor.Register(&PlayersB{}) // 有人进入或离开广播一次
 
-	// print ID
+	// print ID 打印出想要的任意格式
 	//Processor.Range(printMsgIDPB)
 	//Processor.Range(printMsgID)
 	//Processor.Range(printMsg)

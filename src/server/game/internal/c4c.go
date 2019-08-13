@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"server/conf"
+	"server/constant"
 	"strings"
 	"time"
 )
@@ -117,15 +118,15 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 				log.Error("Json Unmarshal error", err.Error())
 			}
 			switch msg.Event {
-			case msgServerLogin:
+			case constant.CEventServerLogin:
 				c4c.onServerLogin(message)
-			case msgUserLogin:
+			case constant.CEventUserLogin:
 				c4c.onUserLogin(message)
-			case msgUserLogout:
+			case constant.CEventUserLogout:
 				c4c.onUserLogout(message)
-			case msgUserLoseScore:
+			case constant.CEventUserLoseScore:
 				c4c.onUserLoseScore(message)
-			case msgUserWinScore:
+			case constant.CEventUserWinScore:
 				c4c.onUserWinScore(message)
 			default:
 				c4c.onErrorReq(message)
@@ -165,7 +166,7 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 	userData := loginResp.Data
 
 	code := userData.Code
-	if code == centerStatusSuccess {
+	if code == constant.CRespStatusSuccess {
 		gameUser := userData.Msg.GameUser
 		gameAccount := userData.Msg.GameAccount
 
@@ -194,7 +195,7 @@ func (c4c *Client4Center) onUserLogout(msg []byte) {
 	userData := logoutResp.Data
 
 	code := userData.Code
-	if code == centerStatusSuccess {
+	if code == constant.CRespStatusSuccess {
 		gameUser := userData.Msg.GameUser
 		gameAccount := userData.Msg.GameAccount
 
@@ -221,7 +222,7 @@ func (c4c *Client4Center) onUserWinScore(msg []byte) {
 	}
 
 	syncData := winResp.Data
-	if syncData.Code == centerStatusSuccess {
+	if syncData.Code == constant.CRespStatusSuccess {
 		if loginCallBack, ok := c4c.userWaitEvent[fmt.Sprintf("%+vwin", syncData.Msg.ID)]; ok {
 			loginCallBack(&User{})
 		} else {
@@ -240,7 +241,7 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 	}
 
 	syncData := loseResp.Data
-	if syncData.Code == centerStatusSuccess {
+	if syncData.Code == constant.CRespStatusSuccess {
 		if loginCallBack, ok := c4c.userWaitEvent[fmt.Sprintf("%+vwin", syncData.Msg.ID)]; ok {
 			loginCallBack(&User{})
 		} else {
@@ -264,7 +265,7 @@ func (c4c *Client4Center) onErrorReq(msg []byte) {
 // 服务器登录中心服
 func (c4c *Client4Center) ServerLoginCenter() {
 	serverLoginMsg := ServerLoginReq{
-		msgServerLogin,
+		constant.CEventServerLogin,
 		ServerLoginReqData{
 			Host:   conf.Server.CenterServer,
 			Port:   conf.Server.CenterServerPort,
@@ -294,13 +295,13 @@ func (c4c *Client4Center) UserLoginCenter(userID uint32, password string, callba
 	log.Debug("UserLoginCenter c4c.Token- %+v", c4c.token)
 
 	userLoginMsg := UserLoginReq{
-		msgUserLogin,
-		UserLoginReqData{
-			userID,
-			password,
-			c4c.token,
-			conf.Server.GameID,
-			conf.Server.DevKey,
+		Event: constant.CEventUserLogin,
+		Data: UserLoginReqData{
+			UserID:   userID,
+			Password: password,
+			Token:    c4c.token,
+			GameID:   conf.Server.GameID,
+			DevKey:   conf.Server.DevKey,
 		},
 	}
 
@@ -318,7 +319,7 @@ func (c4c *Client4Center) UserLogoutCenter(userID uint32, callback UserCallback)
 	log.Debug("UserLogoutCenter c4c.Token- %+v", c4c.token)
 
 	logoutResp := UserLogoutReq{
-		Event: msgUserLogout,
+		Event: constant.CEventUserLogout,
 		Data: UserLogoutReqData{
 			UserID: userID,
 			Token:  c4c.token,
@@ -340,7 +341,7 @@ func (c4c *Client4Center) UserWinScore(userID uint32, timeUnix uint32, timeStr, 
 	log.Debug("UserWinScore c4c.Token- %+v", c4c.token)
 
 	logoutResp := SyncScoreReq{
-		Event: msgUserWinScore,
+		Event: constant.CEventUserWinScore,
 		Data: SyncScoreReqData{
 			Auth: ServerAuth{
 				Token:  c4c.token,
@@ -374,7 +375,7 @@ func (c4c *Client4Center) UserLoseScore(userID uint32, timeUnix uint32, timeStr,
 	log.Debug("UserWinScore c4c.Token- %+v", c4c.token)
 
 	logoutResp := SyncScoreReq{
-		Event: msgUserLoseScore,
+		Event: constant.CEventUserLoseScore,
 		Data: SyncScoreReqData{
 			Auth: ServerAuth{
 				Token:  c4c.token,

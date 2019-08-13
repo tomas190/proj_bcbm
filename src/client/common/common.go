@@ -75,5 +75,5 @@ func WSWriteRead(bs []byte)  {
 		}
 	}()
 	a := <-respChan
-	fmt.Println(a)
+	fmt.Printf("recv: %+v content: %v\n", reflect.TypeOf(a), a)
 }

@@ -20,13 +20,13 @@ func transIDToMsg(id uint16) proto.Message {
 	case 9: resp = &msg.JoinRoomR{}
 	case 10: resp = &msg.LeaveRoom{}
 	case 11: resp = &msg.LeaveRoomR{}
-	case 12: resp = &msg.GrabDealer{}
+	case 12: resp = &msg.GrabBanker{}
 	case 13: resp = &msg.AutoBet{}
 	case 14: resp = &msg.AutoBetR{}
 	case 15: resp = &msg.Bet{}
 	case 16: resp = &msg.BetR{}
 	case 17: resp = &msg.BetInfoB{}
-	case 18: resp = &msg.DealersB{}
+	case 18: resp = &msg.BankersB{}
 	case 19: resp = &msg.PlayersB{}
 	}
 
@@ -46,16 +46,15 @@ var msgType2ID = map[string]uint16{
 	"*msg.JoinRoomR" : 9,
 	"*msg.LeaveRoom" : 10,
 	"*msg.LeaveRoomR" : 11,
-	"*msg.GrabDealer" : 12,
+	"*msg.GrabBanker" : 12,
 	"*msg.AutoBet" : 13,
 	"*msg.AutoBetR" : 14,
 	"*msg.Bet" : 15,
 	"*msg.BetR" : 16,
 	"*msg.BetInfoB" : 17,
-	"*msg.DealersB" : 18,
+	"*msg.BankersB" : 18,
 	"*msg.PlayersB" : 19,
 }
-
 
 func transMsgToID(t string) uint16 {
 	if id, ok := msgType2ID[t]; ok {
