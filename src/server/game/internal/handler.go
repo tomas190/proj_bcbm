@@ -3,8 +3,9 @@ package internal
 import (
 	"fmt"
 	"github.com/name5566/leaf/gate"
+	"github.com/name5566/leaf/log"
 	"reflect"
-	"server/msg"
+	"proj_bcbm/src/server/msg"
 )
 
 func init()  {
@@ -28,6 +29,7 @@ func handlerReg(m interface{}, h interface{}) {
 func handlePing(args []interface{}) {
 	// m := args[0].(*msg.Ping)
 	a := args[1].(gate.Agent)
+	log.Debug("recv Ping %+v", a.RemoteAddr())
 	a.WriteMsg(&msg.Pong{})
 }
 
@@ -35,18 +37,37 @@ func handleTestLogin(args []interface{}) {
 	m := args[0].(*msg.LoginTest)
 	a := args[1].(gate.Agent)
 
+	log.Debug("recv LoginTest %+v", a.RemoteAddr())
 	userID := m.GetUserID()
+	u := mockUserInfo(userID) // 模拟用户
 
-	a.WriteMsg(&msg.LoginR{
+	resp := &msg.LoginR{
+		User: &msg.UserInfo{
+			UserID:   u.UserID,
+			Avatar:   u.Avatar,
+			NickName: u.NickName,
+			Money:    u.Balance,
+		},
 		Rooms:getRoomsInfoResp(),
-	})
-	fmt.Println(userID)
+	}
+
+	// 重新绑定信息
+	u.ConnAgent = a
+	a.SetUserData(u)
+
+	a.WriteMsg(resp)
 }
 
 func handleLogin(args []interface{}) {
-	for i := 0; i < len(args); i++ {
-		fmt.Println(reflect.TypeOf(args[0]))
-	}
+	m := args[0].(*msg.Login)
+	a := args[1].(gate.Agent)
+
+	u := a.UserData().(*User)
+	log.Debug("recv Login %+v", a.RemoteAddr())
+	a.WriteMsg(&msg.LoginR{
+		Rooms:getRoomsInfoResp(),
+	})
+	fmt.Println(m.UserID, u.UserID)
 }
 
 func handleLogout(args []interface{}) {

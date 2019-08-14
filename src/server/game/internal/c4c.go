@@ -7,8 +7,8 @@ import (
 	"github.com/name5566/leaf/log"
 	"io/ioutil"
 	"net/http"
-	"server/conf"
-	"server/constant"
+	"proj_bcbm/src/server/conf"
+	"proj_bcbm/src/server/constant"
 	"strings"
 	"time"
 )

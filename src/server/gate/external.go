@@ -1,7 +1,7 @@
 package gate
 
 import (
-	"server/gate/internal"
+	"proj_bcbm/src/server/gate/internal"
 )
 
 var (

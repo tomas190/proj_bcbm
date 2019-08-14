@@ -2,9 +2,9 @@ package internal
 
 import (
 	"github.com/name5566/leaf/gate"
-	"server/conf"
-	"server/game"
-	"server/msg"
+	"proj_bcbm/src/server/conf"
+	"proj_bcbm/src/server/game"
+	"proj_bcbm/src/server/msg"
 )
 
 type Module struct {

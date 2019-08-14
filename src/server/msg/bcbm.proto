@@ -1,6 +1,29 @@
 syntax = "proto3";
 package msg;
 
+enum MessageID {
+	MsgError      = 0;
+	MsgPing       = 1;
+	MsgPong       = 2;
+	MsgLoginTest  = 3;
+	MsgLogin      = 4;
+	MsgLoginR     = 5;
+	MsgLogout     = 6;
+	MsgLogoutR    = 7;
+	MsgJoinRoom   = 8;
+	MsgJoinRoomR  = 9;
+	MsgLeaveRoom  = 10;
+	MsgLeaveRoomR = 11;
+	MsgGrabBanker = 12;
+	MsgAutoBet    = 13;
+	MsgAutoBetR   = 14;
+	MsgBet        = 15;
+	MsgBetR       = 16;
+	MsgBetInfoB   = 17;
+	MsgBankersB   = 18;
+	MsgPlayersB   = 19;
+}
+
 message Ping{}
 message Pong{}
 

@@ -1,7 +1,7 @@
 package login
 
 import (
-	"server/login/internal"
+	"proj_bcbm/src/server/login/internal"
 )
 
 var (

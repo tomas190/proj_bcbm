@@ -3,8 +3,8 @@ package internal
 import (
 	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/module"
-	"server/base"
-	"server/msg"
+	"proj_bcbm/src/server/base"
+	"proj_bcbm/src/server/msg"
 )
 
 

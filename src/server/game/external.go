@@ -1,7 +1,7 @@
 package game
 
 import (
-	"server/game/internal"
+	"proj_bcbm/src/server/game/internal"
 )
 
 var (

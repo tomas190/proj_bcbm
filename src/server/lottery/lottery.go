@@ -3,8 +3,8 @@ package lottery
 import (
 	"fmt"
 	"math/rand"
-	"server/constant"
-	"server/util"
+	"proj_bcbm/src/server/constant"
+	"proj_bcbm/src/server/util"
 	"time"
 )
 

@@ -1,8 +1,8 @@
 package test
 
 import (
-	"client/common"
-	"server/msg"
+	"proj_bcbm/src/client/common"
+	"proj_bcbm/src/server/msg"
 	"testing"
 )
 

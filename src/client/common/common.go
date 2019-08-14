@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	host = "127.0.0.1"
+	host = "0.0.0.0"
 	tcpPort = "10085"
 	wsPort = "10086"
 )

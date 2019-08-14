@@ -2,7 +2,7 @@ package common
 
 import (
 	"github.com/golang/protobuf/proto"
-	"server/msg"
+	"proj_bcbm/src/server/msg"
 )
 
 func transIDToMsg(id uint16) proto.Message {
