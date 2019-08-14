@@ -1,4 +1,4 @@
-package lottery
+package internal
 
 import (
 	"fmt"
@@ -6,13 +6,13 @@ import (
 )
 
 // 测试公平开奖
-func TestOpenAward(t *testing.T) {
+func TestRoom_fairLottery(t *testing.T) {
 	count := map[uint32]int{
 		1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,
 	}
-	l := &Lottery{}
+	r := &Room{}
 	for i := 0; i < 121000; i++ {
-		count[l.fairLottery()]++
+		count[r.fairLottery()]++
 	}
 
 	fmt.Println(count)
@@ -22,11 +22,12 @@ func TestLottery_ProfitPoolLottery(t *testing.T) {
 	count := map[uint32]int{
 		1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,
 	}
-	l := &Lottery{}
+	r := &Room{}
 	for i := 0; i < 20; i++ {
-		count[l.ProfitPoolLottery()]++
+		count[r.ProfitPoolLottery()]++
 	}
 
 	fmt.Println(count)
 }
+
 

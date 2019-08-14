@@ -32,7 +32,7 @@ message UserInfo {
     double Money = 2;
     string Avatar = 3;
     string NickName = 4;
-    double BetCount = 5; // 下注数
+    double BetAmount = 5; // 下注数
     uint32 WinCount = 6; // 近20局获胜局数
 }
 
@@ -44,7 +44,7 @@ message RoomInfo {
     uint32 Status = 5;
     uint32 EndTime = 6;
     repeated uint32 History = 7;
-    repeated uint32 HisCount = 8;
+    repeated uint32 HisStatistic = 8;
 }
 
 message RoomChangeHB {
@@ -56,14 +56,14 @@ message RoomChangeHB {
 }
 
 message BetInfoB {
-    double CountBenzGolden = 1;
-    double CountBenz = 2;
-    double CountBMWGolden = 3;
-    double CountBMW = 4;
-    double CountAudiGolden = 5;
-    double CountAudi = 6;
-    double CountVWGolden = 7;
-    double CountVW = 8;
+    double AmountBenzGolden = 1;
+    double AmountBenz = 2;
+    double AmountBMWGolden = 3;
+    double AmountBMW = 4;
+    double AmountAudiGolden = 5;
+    double AmountAudi = 6;
+    double AmountVWGolden = 7;
+    double AmountVW = 8;
     uint32 ServerTime = 9;  // 服务器时间
 }
 

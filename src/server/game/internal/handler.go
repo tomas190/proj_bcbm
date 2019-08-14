@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
-	"reflect"
 	"proj_bcbm/src/server/msg"
+	"reflect"
 )
 
 func init()  {
@@ -77,7 +77,18 @@ func handleLogout(args []interface{}) {
 }
 
 func handleJoinRoom(args []interface{}) {
+	m := args[0].(*msg.JoinRoom)
+	a := args[1].(gate.Agent)
 
+	log.Debug("加入房间 %+v", m.RoomID)
+	resp := &msg.JoinRoomR{
+		CurDealers:[]*msg.UserInfo{},
+		CurBetInfo:nil,
+		Players:nil,
+		ServerTime:nil,
+	}
+
+	a.WriteMsg(resp)
 }
 
 func handleLeaveRoom(args []interface{}) {

@@ -1,6 +1,5 @@
 package internal
 
-
 // 游戏服务器<--->中心服 消息基本格式
 type Server2CenterMsg struct {
 	Event string `json:"event"`
