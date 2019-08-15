@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 // 测试公平开奖
@@ -29,5 +30,34 @@ func TestLottery_ProfitPoolLottery(t *testing.T) {
 
 	fmt.Println(count)
 }
+
+func TestRoom_ProfitPoolLottery(t *testing.T) {
+	c1 := make(chan string)
+	c2 := make(chan string)
+
+	go func() {
+		time.Sleep(1 * time.Second)
+		c1 <- "one"
+	}()
+
+	go func() {
+		time.Sleep(2 * time.Second)
+		c2 <- "two"
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case msg1 := <-c1:
+			fmt.Println("received", msg1)
+		case msg2 := <-c2:
+			fmt.Println("received", msg2)
+		}
+	}
+}
+
+// 15-开始下注-0 停止下注  下注
+// 23 22 21 - 跑马灯 - 随便什么时候开奖 显示 4 3 2 1 0  开奖
+// 2 1 0 清空筹码
+
 
 

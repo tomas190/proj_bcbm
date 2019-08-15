@@ -8,7 +8,7 @@ import (
 	"reflect"
 )
 
-func init()  {
+func init() {
 	handlerReg(&msg.Ping{}, handlePing)
 	handlerReg(&msg.LoginTest{}, handleTestLogin)
 	handlerReg(&msg.Login{}, handleLogin)
@@ -17,7 +17,7 @@ func init()  {
 	handlerReg(&msg.LeaveRoom{}, handleLeaveRoom)
 
 	handlerReg(&msg.Bet{}, handleBet)
-	handlerReg(&msg.GrabBanker{}, handleGrabDealer)
+	handlerReg(&msg.GrabBanker{}, handleGrabBanker)
 	handlerReg(&msg.AutoBet{}, handleAutoBet)
 }
 
@@ -55,6 +55,7 @@ func handleTestLogin(args []interface{}) {
 	u.ConnAgent = a
 	a.SetUserData(u)
 
+	log.Debug("<---登陆响应 %+v--->", resp.User)
 	a.WriteMsg(resp)
 }
 
@@ -80,35 +81,67 @@ func handleJoinRoom(args []interface{}) {
 	m := args[0].(*msg.JoinRoom)
 	a := args[1].(gate.Agent)
 
-	log.Debug("加入房间 %+v", m.RoomID)
+	log.Debug("recv JoinRoom %+v", m.RoomID)
 	resp := &msg.JoinRoomR{
-		CurDealers:[]*msg.UserInfo{},
-		CurBetInfo:nil,
-		Players:nil,
-		ServerTime:nil,
+		CurDealers:getPlayerInfoResp(),
+		Amount:[]float64{21, 400, 325, 235, 109, 111, 345, 908},
+		Players:getPlayerInfoResp(),
 	}
 
+	log.Debug("<---加入房间响应 %+v--->", resp.Players)
+	a.WriteMsg(resp)
+}
+
+func handleBet(args []interface{}) {
+	m := args[0].(*msg.Bet)
+	a := args[1].(gate.Agent)
+	au := a.UserData().(*User)
+
+	log.Debug("recv Bet %+v", au.UserID, m.Amount)
+
+	fmt.Println(m.Amount, au.Balance)
+
+	resp := msg.BetR{}
+	a.WriteMsg(resp)
+}
+
+func handleGrabBanker(args []interface{})  {
+	m := args[0].(*msg.GrabBanker)
+	a := args[1].(gate.Agent)
+
+	au := a.UserData().(*User)
+
+	fmt.Println(m, au.Balance)
+
+	resp := &msg.BankersB{}
+	a.WriteMsg(resp)
+}
+
+func handleAutoBet(args []interface{}) {
+	m := args[0].(*msg.AutoBet)
+	a := args[1].(gate.Agent)
+
+	au := a.UserData().(*User)
+
+	fmt.Println(m, au.Balance)
+
+	resp := &msg.AutoBetR{}
 	a.WriteMsg(resp)
 }
 
 func handleLeaveRoom(args []interface{}) {
+	m := args[0].(*msg.LeaveRoom)
+	a := args[1].(gate.Agent)
 
-}
+	au := a.UserData().(*User)
 
-func handleBet(args []interface{}) {
+	fmt.Println(m, au.Balance)
 
-}
-
-func handleGrabDealer(args []interface{})  {
-
-}
-
-func handleAutoBet(args []interface{})  {
-
+	resp := &msg.LeaveRoomR{}
+	a.WriteMsg(resp)
 }
 
 func getRoomsInfoResp() []*msg.RoomInfo {
-
 	var testResp []*msg.RoomInfo
 	room1Info := &msg.RoomInfo{RoomID:908, MinBet:50, History:[]uint32{1, 2, 3, 4, 5, 6, 7}}
 	room2Info := &msg.RoomInfo{RoomID:909, MinBet:50, History:[]uint32{1, 2, 3, 4, 5, 6, 7}}
@@ -117,10 +150,24 @@ func getRoomsInfoResp() []*msg.RoomInfo {
 	return testResp
 }
 
+func getPlayerInfoResp() []*msg.UserInfo {
+	u1 := mockUserInfo(8976784)
+	u2 := mockUserInfo(7829401)
+
+	converter := DTOConverter{}
+	userInfo1 := converter.U2Msg(*u1)
+	userInfo2 := converter.U2Msg(*u2)
+
+	var testResp []*msg.UserInfo
+	testResp = append(testResp, &userInfo1, &userInfo2)
+
+	return testResp
+}
+
 func mockUserInfo(userID uint32) *User {
 	nickName := fmt.Sprintf("test%d", userID)
 	avatar := "https://image.flaticon.com/icons/png/128/145/145842.png"
-	u := &User{userID, nickName, avatar, 1000, 1, nil}
+	u := &User{userID, nickName, avatar, 1000, nil}
 
 	return u
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/name5566/leaf/gate"
 	"math/rand"
 	"proj_bcbm/src/server/constant"
-	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
 	"time"
 )
@@ -15,12 +14,43 @@ type User struct {
 	NickName  string     `bson:"nick_name" json:"nick_name"`   // 用户昵称
 	Avatar    string     `bson:"avatar" json:"avatar"`         // 用户头像
 	Balance   float64    `bson:"balance"json:"money"`          // 用户金额
-	UserType  uint32     `bson:"user_type" json:"user_type"`   // 用户类型
 	ConnAgent gate.Agent `bson:"conn_agent" json:"conn_agent"` // 网络连接代理
 }
 
+type Hall struct {
+	Statistic []uint32 // 历史记录统计
+	History []uint32 // 历史记录
+}
+
+// 开赌场 初始化的时候直接开6个房间然后跑在不同的goroutine上
+// 大厅和房间之间通过channel通信
+func (h *Hall) OpenCasino() {
+	for i := 0; i < constant.RoomCount; i++ {
+		go h.openRoom()
+	}
+}
+
+// 大厅开房
+func (h *Hall) openRoom() {
+
+}
+
+// 大厅广播
+func (h *Hall) BroadCast() {
+
+}
+
+// 大厅事件 进入房间
 type Room struct {
-	Bets msg.BetInfoB // 投注信息
+	RoomID uint32
+	MinBet float64
+	MaxBet float64
+	MinLimit float64
+	Status uint32
+	EndTime uint32 // fixme
+	History []uint32
+	HisStatistic []uint32
+
 	UserBets map[uint32][]float64// 用户投注信息，在8个区域分别投了多少
 }
 
@@ -32,7 +62,7 @@ type roomStatus struct {
 
 var roomStatusChan chan roomStatus
 
-// 有一个用于房间和大厅之间通信的接收通道，房间产生结果结算后发送给大厅，
+// 有一个用于房间和大厅之间通信的接收通道，房间产生结果后发送给大厅，
 // 大厅监听通道，如果有的话，然后大厅广播所有开奖结果
 
 // 大厅保存历史数据、做历史统计 当发送来房间的数据的时候
@@ -44,6 +74,9 @@ var roomStatusChan chan roomStatus
 // 发送状态改变
 
 // 结算
+func (r *Room) Settle() {
+	// 庄家赢数 = Sum(未中奖倍数*未中奖筹码数) - 中奖倍数*中奖筹码数
+}
 
 // 开奖
 
@@ -61,6 +94,7 @@ func (r *Room) ProfitPoolLottery() uint32 {
 	profitPoolRatePercent := randomUtil.RandInRange(constant.ProfitPoolMinPercent, constant.ProfitPoolMaxPercent)
 	profitPoolRate := float64(profitPoolRatePercent)/100.0
 	acceptableMaxLose := profitPool()*profitPoolRate
+
 	fmt.Println("最大可接受赔付", acceptableMaxLose)
 
 	var area uint32
@@ -87,6 +121,7 @@ func preUserWin(userBets map[uint32][]float64, preArea uint32) float64 {
 // 盈余池 = 玩家总输 - 玩家总赢 * 杀数 - (玩家数量 * 6)
 // todo 统计计算玩家总赢和玩家总输、玩家数量
 func profitPool() float64 {
+	// 需要数据库
 	// return pTotalLose - pTotalWin * constant.HouseEdgePercent - pCount*constant.GiftAmount
 	return 20.0
 }
@@ -121,5 +156,6 @@ func (r *Room) fairLottery() uint32 {
 
 // 大厅监测各房间发来的消息，如果变化发出房间状态变化广播
 
+// 房间
 
 
