@@ -83,7 +83,7 @@ func handleJoinRoom(args []interface{}) {
 
 	log.Debug("recv JoinRoom %+v", m.RoomID)
 	resp := &msg.JoinRoomR{
-		CurDealers:getPlayerInfoResp(),
+		CurBankers:getPlayerInfoResp(),
 		Amount:[]float64{21, 400, 325, 235, 109, 111, 345, 908},
 		Players:getPlayerInfoResp(),
 	}
