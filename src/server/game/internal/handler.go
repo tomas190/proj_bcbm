@@ -15,7 +15,6 @@ func init() {
 	handlerReg(&msg.Logout{}, handleLogout)
 	handlerReg(&msg.JoinRoom{}, handleJoinRoom)
 	handlerReg(&msg.LeaveRoom{}, handleLeaveRoom)
-
 	handlerReg(&msg.Bet{}, handleBet)
 	handlerReg(&msg.GrabBanker{}, handleGrabBanker)
 	handlerReg(&msg.AutoBet{}, handleAutoBet)
@@ -63,18 +62,24 @@ func handleLogin(args []interface{}) {
 	m := args[0].(*msg.Login)
 	a := args[1].(gate.Agent)
 
-	u := a.UserData().(*User)
-	log.Debug("recv Login %+v", a.RemoteAddr())
+	// u := a.UserData().(*User)
+	log.Debug("recv Login %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
+
 	a.WriteMsg(&msg.LoginR{
 		Rooms:getRoomsInfoResp(),
 	})
-	fmt.Println(m.UserID, u.UserID)
 }
 
 func handleLogout(args []interface{}) {
+	m := args[0].(*msg.Logout)
+	a := args[1].(gate.Agent)
+
+	log.Debug("recv Logout %+v", m)
 	for i := 0; i < len(args); i++ {
 		fmt.Println(reflect.TypeOf(args[0]))
 	}
+	resp := &msg.LogoutR{}
+	a.WriteMsg(resp)
 }
 
 func handleJoinRoom(args []interface{}) {
@@ -95,25 +100,30 @@ func handleJoinRoom(args []interface{}) {
 func handleBet(args []interface{}) {
 	m := args[0].(*msg.Bet)
 	a := args[1].(gate.Agent)
-	au := a.UserData().(*User)
+	// au := a.UserData().(*User)
 
-	log.Debug("recv Bet %+v", au.UserID, m.Amount)
+	log.Debug("recv Bet %+v", m.ChipSize)
 
-	fmt.Println(m.Amount, au.Balance)
+	fmt.Println(m.ChipSize)
 
-	resp := msg.BetR{}
+	resp := &msg.BetR{}
 	a.WriteMsg(resp)
 }
 
-func handleGrabBanker(args []interface{})  {
+func handleGrabBanker(args []interface{}) {
 	m := args[0].(*msg.GrabBanker)
 	a := args[1].(gate.Agent)
 
 	au := a.UserData().(*User)
 
+	log.Debug("recv GrabBanker %+v", au.UserID)
+
 	fmt.Println(m, au.Balance)
 
 	resp := &msg.BankersB{}
+
+	fmt.Println(resp)
+
 	a.WriteMsg(resp)
 }
 
@@ -122,6 +132,8 @@ func handleAutoBet(args []interface{}) {
 	a := args[1].(gate.Agent)
 
 	au := a.UserData().(*User)
+
+	log.Debug("recv AutoBet %+v", au.UserID)
 
 	fmt.Println(m, au.Balance)
 
@@ -134,6 +146,8 @@ func handleLeaveRoom(args []interface{}) {
 	a := args[1].(gate.Agent)
 
 	au := a.UserData().(*User)
+
+	log.Debug("recv LeaveRoom %+v", au.UserID)
 
 	fmt.Println(m, au.Balance)
 

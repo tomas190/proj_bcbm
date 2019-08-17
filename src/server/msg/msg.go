@@ -38,9 +38,9 @@ func init() {
 	Processor.Register(&PlayersB{}) // 有人进入或离开广播一次
 
 	// print ID 打印出想要的任意格式
-	Processor.Range(printMsgIDPB)
-	//Processor.Range(printMsgID)
-	//Processor.Range(printMsg)
+	// Processor.Range(printMsgIDPB)
+	// Processor.Range(printMsgID)
+	// Processor.Range(printMsg)
 }
 
 func printMsgIDPB(id uint16, t reflect.Type)  {

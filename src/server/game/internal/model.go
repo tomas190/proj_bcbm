@@ -19,7 +19,7 @@ type User struct {
 
 type Hall struct {
 	Statistic []uint32 // 历史记录统计
-	History []uint32 // 历史记录
+	History   []uint32 // 历史记录
 }
 
 // 开赌场 初始化的时候直接开6个房间然后跑在不同的goroutine上
@@ -42,22 +42,22 @@ func (h *Hall) BroadCast() {
 
 // 大厅事件 进入房间
 type Room struct {
-	RoomID uint32
-	MinBet float64
-	MaxBet float64
-	MinLimit float64
-	Status uint32
-	EndTime uint32 // fixme
-	History []uint32
+	RoomID       uint32
+	MinBet       float64
+	MaxBet       float64
+	MinLimit     float64
+	Status       uint32
+	EndTime      uint32 // fixme
+	History      []uint32
 	HisStatistic []uint32
 
-	UserBets map[uint32][]float64// 用户投注信息，在8个区域分别投了多少
+	UserBets map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
 }
 
 type roomStatus struct {
-	Status uint32
+	Status  uint32
 	EndTime uint32
-	Result uint32
+	Result  uint32
 }
 
 var roomStatusChan chan roomStatus
@@ -80,7 +80,6 @@ func (r *Room) Settle() {
 
 // 开奖
 
-
 /*
 
 (玩家赢 - 官方庄家和机器人赢)  小于或等于  从盈余池随机拿到的值，则定为本局开奖结果。
@@ -92,8 +91,8 @@ func (r *Room) ProfitPoolLottery() uint32 {
 	// 盈余池 随机从10%到50%取一个值，算出一个预计赔付数
 	randomUtil := util.Random{}
 	profitPoolRatePercent := randomUtil.RandInRange(constant.ProfitPoolMinPercent, constant.ProfitPoolMaxPercent)
-	profitPoolRate := float64(profitPoolRatePercent)/100.0
-	acceptableMaxLose := profitPool()*profitPoolRate
+	profitPoolRate := float64(profitPoolRatePercent) / 100.0
+	acceptableMaxLose := profitPool() * profitPoolRate
 
 	fmt.Println("最大可接受赔付", acceptableMaxLose)
 
@@ -126,7 +125,6 @@ func profitPool() float64 {
 	return 20.0
 }
 
-
 // 公平开奖
 func (r *Room) fairLottery() uint32 {
 	rand.Seed(time.Now().UnixNano())
@@ -157,5 +155,3 @@ func (r *Room) fairLottery() uint32 {
 // 大厅监测各房间发来的消息，如果变化发出房间状态变化广播
 
 // 房间
-
-

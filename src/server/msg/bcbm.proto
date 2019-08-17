@@ -126,7 +126,7 @@ message GrabBanker {}
 // 下注
 message Bet {
     uint32 Area = 1;
-    double Amount = 2;
+    double ChipSize = 2;
 }
 
 message BetR {}
