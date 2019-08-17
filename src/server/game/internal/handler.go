@@ -100,11 +100,9 @@ func handleJoinRoom(args []interface{}) {
 func handleBet(args []interface{}) {
 	m := args[0].(*msg.Bet)
 	a := args[1].(gate.Agent)
-	// au := a.UserData().(*User)
+	au := a.UserData().(*User)
 
-	log.Debug("recv Bet %+v", m.ChipSize)
-
-	fmt.Println(m.ChipSize)
+	log.Debug("recv Bet: User:%+v, Area:%+v, ChipSize:%+v", au.UserID, m.Area, m.ChipSize)
 
 	resp := &msg.BetR{}
 	a.WriteMsg(resp)
