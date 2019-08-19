@@ -20,10 +20,12 @@ func init() {
 	Processor.Register(&LoginR{})
 	Processor.Register(&Logout{})
 	Processor.Register(&LogoutR{})
+
 	Processor.Register(&JoinRoom{})
 	Processor.Register(&JoinRoomR{})
 	Processor.Register(&LeaveRoom{})
 	Processor.Register(&LeaveRoomR{})
+
 	Processor.Register(&GrabBanker{})
 	Processor.Register(&AutoBet{})
 	Processor.Register(&AutoBetR{})

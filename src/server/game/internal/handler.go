@@ -64,6 +64,7 @@ func handleLogin(args []interface{}) {
 
 	// u := a.UserData().(*User)
 	log.Debug("recv Login %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
+	log.Debug("userID %+v, password %+v", m.UserID, m.Password)
 
 	a.WriteMsg(&msg.LoginR{
 		Rooms:getRoomsInfoResp(),

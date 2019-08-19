@@ -18,8 +18,9 @@ type User struct {
 }
 
 type Hall struct {
-	Statistic []uint32 // 历史记录统计
-	History   []uint32 // 历史记录
+	UserRecord map[uint32]User // 用户记录
+	Statistic  []uint32        // 历史记录统计
+	History    []uint32        // 历史记录
 }
 
 // 开赌场 初始化的时候直接开6个房间然后跑在不同的goroutine上
@@ -36,8 +37,10 @@ func (h *Hall) openRoom() {
 }
 
 // 大厅广播
-func (h *Hall) BroadCast() {
-
+func (h *Hall) BroadCast(bMsg interface{}) {
+	for _, u := range h.UserRecord {
+		u.ConnAgent.WriteMsg(bMsg)
+	}
 }
 
 // 大厅事件 进入房间
