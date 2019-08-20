@@ -30,6 +30,18 @@ func (c *DTOConverter) R2Msg(dl Dealer) msg.RoomInfo {
 	return rMsg
 }
 
+func (c *DTOConverter) RChangeHB(m HRMsg) msg.RoomChangeHB {
+	bMsg := msg.RoomChangeHB{
+		RoomID:     m.RoomID,
+		Result:     m.LotteryResult,
+		EndTime:    m.EndTime,
+		ServerTime: 12345, // fixme
+		Status:     m.RoomStatus,
+	}
+
+	return bMsg
+}
+
 type DAOConverter struct{}
 
 func (c *DAOConverter) U2Bson() {

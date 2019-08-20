@@ -3,26 +3,27 @@ package msg;
 
 // 消息枚举
 enum MessageID {
-	MsgError      = 0;
-	MsgPing       = 1;
-	MsgPong       = 2;
-	MsgLoginTest  = 3;
-	MsgLogin      = 4;
-	MsgLoginR     = 5;
-	MsgLogout     = 6;
-	MsgLogoutR    = 7;
-	MsgJoinRoom   = 8;
-	MsgJoinRoomR  = 9;
-	MsgLeaveRoom  = 10;
-	MsgLeaveRoomR = 11;
-	MsgGrabBanker = 12;
-	MsgAutoBet    = 13;
-	MsgAutoBetR   = 14;
-	MsgBet        = 15;
-	MsgBetR       = 16;
-	MsgBetInfoB   = 17;
-	MsgBankersB   = 18;
-	MsgPlayersB   = 19;
+	MsgError             = 0;
+	MsgPing              = 1;
+	MsgPong              = 2;
+	MsgLoginTest         = 3;
+	MsgLogin             = 4;
+	MsgLoginR            = 5;
+	MsgLogout            = 6;
+	MsgLogoutR           = 7;
+	MsgRoomChangeHB      = 8;
+	MsgJoinRoom          = 9;
+	MsgJoinRoomR         = 10;
+	MsgLeaveRoom         = 11;
+	MsgLeaveRoomR        = 12;
+	MsgGrabBanker        = 13;
+	MsgAutoBet           = 14;
+	MsgAutoBetR          = 15;
+	MsgBet               = 16;
+	MsgBetR              = 17;
+	MsgBetInfoB          = 18;
+	MsgBankersB          = 19;
+	MsgPlayersB          = 20;
 }
 
 enum AreaID {

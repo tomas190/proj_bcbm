@@ -20,6 +20,7 @@ func init() {
 	Processor.Register(&LoginR{})
 	Processor.Register(&Logout{})
 	Processor.Register(&LogoutR{})
+	Processor.Register(&RoomChangeHB{})
 
 	Processor.Register(&JoinRoom{})
 	Processor.Register(&JoinRoomR{})
@@ -50,7 +51,7 @@ func printMsgIDPB(id uint16, t reflect.Type) {
 	tStr = strings.Replace(tStr, "*", "", 1)
 	tStr = strings.Replace(tStr, ".", "", 1)
 	tStr = strings.Title(tStr)
-	fmt.Printf("\t%-13v = %d;\n", tStr, id)
+	fmt.Printf("\t%-20v = %d;\n", tStr, id)
 }
 
 func printMsgID(id uint16, t reflect.Type) {

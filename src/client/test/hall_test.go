@@ -3,12 +3,13 @@ package test
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/golang/protobuf/proto"
-	"github.com/gorilla/websocket"
 	"proj_bcbm/src/client/common"
 	"proj_bcbm/src/server/msg"
 	"reflect"
 	"testing"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/gorilla/websocket"
 )
 
 // 进入大厅之后接收广播并打印

@@ -58,7 +58,8 @@ func TestRoom_ProfitPoolLottery(t *testing.T) {
 }
 
 func TestDealer_TimeMachine(t *testing.T) {
-	dl := NewDealer()
+	hr := make(chan HRMsg)
+	dl := NewDealer(123, hr)
 	dl.StartGame()
 	time.Sleep(20 * time.Second)
 }
