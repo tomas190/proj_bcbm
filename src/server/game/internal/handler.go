@@ -6,6 +6,7 @@ import (
 	"github.com/name5566/leaf/log"
 	"proj_bcbm/src/server/msg"
 	"reflect"
+	"time"
 )
 
 func init() {
@@ -47,14 +48,15 @@ func handleTestLogin(args []interface{}) {
 			NickName: u.NickName,
 			Money:    u.Balance,
 		},
-		Rooms: Mgr.GetRoomsInfoResp(),
+		Rooms:      Mgr.GetRoomsInfoResp(),
+		ServerTime: uint32(time.Now().Unix()),
 	}
 
 	// 重新绑定信息
 	u.ConnAgent = a
 	a.SetUserData(u)
 
-	Mgr.UserRecord[u.UserID] = *u
+	Mgr.UserRecord[u.UserID] = u
 	log.Debug("<---测试登入响应 %+v--->", resp.User)
 	a.WriteMsg(resp)
 }

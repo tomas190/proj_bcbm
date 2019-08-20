@@ -2,16 +2,16 @@ package constant
 
 // 房间状态
 const (
-	_ = iota
-	RSBetting
-	RSLottery
-	RSClear
+	_         = iota
+	RSBetting // 下注
+	RSSettle  // 结算
+	RSClear   // 清理筹码
 )
 
 const (
-	BetTime     = 5
-	LotteryTime = 6
-	ClearTime   = 3
+	BetTime    = 3 //15
+	SettleTime = 3 //23
+	ClearTime  = 3
 )
 
 const (

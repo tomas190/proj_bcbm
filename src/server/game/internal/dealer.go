@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"github.com/name5566/leaf/log"
 	"math/rand"
 	"proj_bcbm/src/server/constant"
@@ -14,15 +13,11 @@ import (
 
 type Dealer struct {
 	*Room
-
 	clock   *time.Ticker
 	counter uint32
 
-	Status uint32
-
-	History      []uint32
-	HisStatistic []uint32
-
+	Status   uint32
+	History  []uint32
 	UserBets map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
 	HRChan   chan HRMsg           // 房间大厅通信
 }
@@ -57,15 +52,44 @@ func (dl *Dealer) ClockReset(duration uint32, next func()) {
 }
 
 func (dl *Dealer) StartGame() {
-	// 广播开始下注
 	dl.Status = constant.RSBetting
-	dl.ClockReset(constant.BetTime, dl.Lottery)
+	dl.ClockReset(constant.BetTime, dl.Bet)
 }
 
-func (dl *Dealer) Lottery() {
-	dl.HRChan <- HRMsg{RoomID: dl.RoomID, EndTime: 9090909}
-	dl.ClockReset(constant.LotteryTime, dl.Settle)
-	fmt.Printf("#################房间%+v 开奖结果 %+v \n", dl.RoomID, dl.profitPoolLottery())
+// 下注
+func (dl *Dealer) Bet() {
+	dl.Status = constant.RSBetting
+	dl.HRChan <- HRMsg{
+		RoomID:     dl.RoomID,
+		RoomStatus: dl.Status,
+		EndTime:    uint32(time.Now().Unix() + constant.BetTime),
+	}
+	log.Debug("bet... %+v", dl.RoomID)
+	dl.ClockReset(constant.BetTime, dl.Settle)
+}
+
+// 结算
+func (dl *Dealer) Settle() {
+	// 开奖
+	res := dl.profitPoolLottery()
+	dl.Status = constant.RSSettle
+	dl.HRChan <- HRMsg{
+		RoomID:        dl.RoomID,
+		RoomStatus:    dl.Status,
+		LotteryResult: res,
+	}
+	// 结算
+	// 庄家赢数 = Sum(未中奖倍数*未中奖筹码数) - 中奖倍数*中奖筹码数
+
+	log.Debug("settle... %+v", dl.RoomID)
+	dl.ClockReset(constant.SettleTime, dl.ClearChip)
+}
+
+// 清理筹码
+func (dl *Dealer) ClearChip() {
+	dl.Status = constant.RSClear
+	log.Debug("clear chip... %+v", dl.RoomID)
+	dl.ClockReset(constant.ClearTime, dl.Bet)
 }
 
 // 根据盈余池开奖
@@ -133,11 +157,4 @@ func profitPool() float64 {
 	// 需要数据库
 	// return pTotalLose - pTotalWin * constant.HouseEdgePercent - pCount*constant.GiftAmount
 	return 20.0
-}
-
-// 结算
-func (dl *Dealer) Settle() {
-	// 庄家赢数 = Sum(未中奖倍数*未中奖筹码数) - 中奖倍数*中奖筹码数
-	log.Debug("结束开奖，结算 %+v", dl.RoomID)
-	dl.ClockReset(constant.ClearTime, dl.Lottery)
 }
