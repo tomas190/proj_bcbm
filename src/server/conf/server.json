@@ -1,8 +1,8 @@
 {
 	"LogLevel": "debug",
 	"LogPath": "",
-	"TCPAddr": "0.0.0.0:10085",
-	"WSAddr": "0.0.0.0:10086",
+	"TCPAddr": "0.0.0.0:10088",
+	"WSAddr": "0.0.0.0:10087",
 	"MaxConnNum": 20000,
 
 	"TokenServer":"http://swoole.0717996.com/Token/getToken",

@@ -9,13 +9,13 @@ const (
 )
 
 const (
-	BetTime = 5
+	BetTime     = 5
 	LotteryTime = 6
-	ClearTime = 3
+	ClearTime   = 3
 )
 
 const (
-	RL1MinBet = 1
-	RL1MaxBet = 10000
+	RL1MinBet   = 1
+	RL1MaxBet   = 10000
 	RL1MinLimit = 50
 )

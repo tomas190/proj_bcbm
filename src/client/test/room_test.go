@@ -13,14 +13,14 @@ import (
 
 // 进入房间之后监听广播并打印
 
-func TestRoom(t *testing.T)  {
+func TestRoom(t *testing.T) {
 	conn, _, err := websocket.DefaultDialer.Dial("ws://"+"0.0.0.0"+":"+"10086", nil)
 	if err != nil {
 		fmt.Println("[TestRoom]连接错误", err)
 	}
 
 	// loginMsg := &msg.Login{UserID:955509280, Password:"123456"}
-	loginMsg := &msg.LoginTest{UserID:955509280}
+	loginMsg := &msg.LoginTest{UserID: 955509280}
 	loginBS := common.ByteMsg(loginMsg)
 	err = conn.WriteMessage(websocket.TextMessage, loginBS)
 	if err != nil {

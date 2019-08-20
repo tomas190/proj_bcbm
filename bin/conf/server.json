@@ -1,7 +1,15 @@
 {
 	"LogLevel": "debug",
 	"LogPath": "",
-	"TCPAddr": "0.0.0.0:10085",
-	"WSAddr": "0.0.0.0:10086",
-	"MaxConnNum": 20000
+	"TCPAddr": "0.0.0.0:10088",
+	"WSAddr": "0.0.0.0:10087",
+	"MaxConnNum": 20000,
+
+	"TokenServer":"http://swoole.0717996.com/Token/getToken",
+	"CenterServer": "http://swoole.0717996.com",
+	"CenterServerPort": "9502",
+	"DevKey": "new_game_17",
+	"DevName": "新游戏开发",
+	"GameID": "5b1f3a3cb76a591e7f251716",
+	"MongoDB": "mongodb://10.63.60.119:27917"
 }

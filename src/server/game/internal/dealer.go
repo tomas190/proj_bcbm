@@ -18,18 +18,20 @@ type Dealer struct {
 	clock   *time.Ticker
 	counter uint32
 
-	Status       uint32
+	Status uint32
 
 	History      []uint32
 	HisStatistic []uint32
 
 	UserBets map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
+	HRChan   chan HRMsg           // 房间大厅通信
 }
 
-func NewDealer(rID uint32) *Dealer {
+func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 	return &Dealer{
-		Room: NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
-		clock:time.NewTicker(time.Second),
+		Room:   NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
+		clock:  time.NewTicker(time.Second),
+		HRChan: hr,
 	}
 }
 
@@ -38,12 +40,12 @@ func NewDealer(rID uint32) *Dealer {
 // 2 1 0 清空筹码
 // 重置表
 func (dl *Dealer) ClockReset(duration uint32, next func()) {
-	defer func() {dl.counter = 0}()
+	defer func() { dl.counter = 0 }()
 
 	log.Debug("Deadline: %v, Event: %v, RoomID: %+v", duration, util.Function{}.GetFunctionName(next), dl.RoomID)
 	go func() {
 		for t := range dl.clock.C {
-			// log.Debug("时间滴答：%v", t)
+			// log.Debug("ticker：%v", t)
 			_ = t
 			dl.counter++
 			if duration == dl.counter {
@@ -60,8 +62,8 @@ func (dl *Dealer) StartGame() {
 	dl.ClockReset(constant.BetTime, dl.Lottery)
 }
 
-
 func (dl *Dealer) Lottery() {
+	dl.HRChan <- HRMsg{RoomID: dl.RoomID, EndTime: 9090909}
 	dl.ClockReset(constant.LotteryTime, dl.Settle)
 	fmt.Printf("#################房间%+v 开奖结果 %+v \n", dl.RoomID, dl.profitPoolLottery())
 }
@@ -94,7 +96,7 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 func (dl *Dealer) fairLottery() uint32 {
 	rand.Seed(time.Now().UnixNano())
 	x := time.Duration(rand.Intn(5))
-	time.Sleep(x*time.Nanosecond)
+	time.Sleep(x * time.Nanosecond)
 	prob := rand.Intn(121) // [0, 121)
 	var area uint32
 
@@ -133,23 +135,9 @@ func profitPool() float64 {
 	return 20.0
 }
 
-// 开奖
-
-// 有一个用于房间和大厅之间通信的接收通道，房间产生结果后发送给大厅，
-// 大厅监听通道，如果有的话，然后大厅广播所有开奖结果
-
-// 大厅保存历史数据、做历史统计 当发送来房间的数据的时候
-// 当新用户来的时候把大厅数据给新用户
-// 当新状态改变的时候广播消息给所有用户
-
-// 房间怎么在goroutine上运行
-
-// 发送状态改变
-
 // 结算
 func (dl *Dealer) Settle() {
 	// 庄家赢数 = Sum(未中奖倍数*未中奖筹码数) - 中奖倍数*中奖筹码数
 	log.Debug("结束开奖，结算 %+v", dl.RoomID)
 	dl.ClockReset(constant.ClearTime, dl.Lottery)
 }
-
