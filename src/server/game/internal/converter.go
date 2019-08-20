@@ -15,16 +15,16 @@ func (c *DTOConverter) U2Msg(u User) msg.UserInfo {
 	return uMsg
 }
 
-func (c *DTOConverter) R2Msg(r Room) msg.RoomInfo {
+func (c *DTOConverter) R2Msg(dl Dealer) msg.RoomInfo {
 	rMsg := msg.RoomInfo{
-		RoomID:r.RoomID,
-		MinBet:r.MinBet,
-		MaxBet:r.MaxBet,
-		MinLimit:r.MinLimit,
-		Status: r.Status,
-		EndTime:r.EndTime,
-		History:r.History,
-		HisStatistic:r.HisStatistic,
+		RoomID:dl.RoomID,
+		MinBet:dl.MinBet,
+		MaxBet:dl.MaxBet,
+		MinLimit:dl.MinLimit,
+		Status: dl.Status,
+		EndTime:0,
+		History:dl.History,
+		HisStatistic:dl.HisStatistic,
 	}
 
 	return rMsg

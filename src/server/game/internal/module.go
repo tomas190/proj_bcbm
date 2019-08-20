@@ -13,6 +13,7 @@ var (
 	ChanRPC  = skeleton.ChanRPCServer
 
 	c4c      *Client4Center // 连接中心服的客户端
+	Mgr =    NewHall()
 )
 
 type Module struct {
@@ -26,6 +27,7 @@ func (m *Module) OnInit() {
 	//c4c = center.NewClient4Center()
 	//c4c.ReqToken()
 	//c4c.HeartBeatAndListen()
+	Mgr.OpenCasino()
 }
 
 // 模块销毁

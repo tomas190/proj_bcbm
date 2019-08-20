@@ -36,7 +36,7 @@ func handleTestLogin(args []interface{}) {
 	m := args[0].(*msg.LoginTest)
 	a := args[1].(gate.Agent)
 
-	log.Debug("recv LoginTest %+v", a.RemoteAddr())
+	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
 	userID := m.GetUserID()
 	u := mockUserInfo(userID) // 模拟用户
 
@@ -47,14 +47,14 @@ func handleTestLogin(args []interface{}) {
 			NickName: u.NickName,
 			Money:    u.Balance,
 		},
-		Rooms:getRoomsInfoResp(),
+		Rooms:Mgr.GetRoomsInfoResp(),
 	}
 
 	// 重新绑定信息
 	u.ConnAgent = a
 	a.SetUserData(u)
 
-	log.Debug("<---登陆响应 %+v--->", resp.User)
+	log.Debug("<---测试登入响应 %+v--->", resp.User)
 	a.WriteMsg(resp)
 }
 
@@ -63,11 +63,10 @@ func handleLogin(args []interface{}) {
 	a := args[1].(gate.Agent)
 
 	// u := a.UserData().(*User)
-	log.Debug("recv Login %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
-	log.Debug("userID %+v, password %+v", m.UserID, m.Password)
+	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
 
 	a.WriteMsg(&msg.LoginR{
-		Rooms:getRoomsInfoResp(),
+		Rooms:Mgr.GetRoomsInfoResp(),
 	})
 }
 
@@ -75,9 +74,9 @@ func handleLogout(args []interface{}) {
 	m := args[0].(*msg.Logout)
 	a := args[1].(gate.Agent)
 
-	log.Debug("recv Logout %+v", m)
+	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
 	for i := 0; i < len(args); i++ {
-		fmt.Println(reflect.TypeOf(args[0]))
+		fmt.Println(reflect.TypeOf(args[i]))
 	}
 	resp := &msg.LogoutR{}
 	a.WriteMsg(resp)
@@ -87,7 +86,7 @@ func handleJoinRoom(args []interface{}) {
 	m := args[0].(*msg.JoinRoom)
 	a := args[1].(gate.Agent)
 
-	log.Debug("recv JoinRoom %+v", m.RoomID)
+	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
 	resp := &msg.JoinRoomR{
 		CurBankers:getPlayerInfoResp(),
 		Amount:[]float64{21, 400, 325, 235, 109, 111, 345, 908},
@@ -103,7 +102,7 @@ func handleBet(args []interface{}) {
 	a := args[1].(gate.Agent)
 	au := a.UserData().(*User)
 
-	log.Debug("recv Bet: User:%+v, Area:%+v, ChipSize:%+v", au.UserID, m.Area, m.ChipSize)
+	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
 	resp := &msg.BetR{}
 	a.WriteMsg(resp)
@@ -115,14 +114,11 @@ func handleGrabBanker(args []interface{}) {
 
 	au := a.UserData().(*User)
 
-	log.Debug("recv GrabBanker %+v", au.UserID)
+	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
-	fmt.Println(m, au.Balance)
+	fmt.Println("上庄", m, au.Balance)
 
 	resp := &msg.BankersB{}
-
-	fmt.Println(resp)
-
 	a.WriteMsg(resp)
 }
 
@@ -132,9 +128,9 @@ func handleAutoBet(args []interface{}) {
 
 	au := a.UserData().(*User)
 
-	log.Debug("recv AutoBet %+v", au.UserID)
+	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
-	fmt.Println(m, au.Balance)
+	fmt.Println("续投", m, au.Balance)
 
 	resp := &msg.AutoBetR{}
 	a.WriteMsg(resp)
@@ -146,21 +142,12 @@ func handleLeaveRoom(args []interface{}) {
 
 	au := a.UserData().(*User)
 
-	log.Debug("recv LeaveRoom %+v", au.UserID)
+	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
-	fmt.Println(m, au.Balance)
+	fmt.Println("离房", m, au.Balance)
 
 	resp := &msg.LeaveRoomR{}
 	a.WriteMsg(resp)
-}
-
-func getRoomsInfoResp() []*msg.RoomInfo {
-	var testResp []*msg.RoomInfo
-	room1Info := &msg.RoomInfo{RoomID:908, MinBet:50, History:[]uint32{1, 2, 3, 4, 5, 6, 7}}
-	room2Info := &msg.RoomInfo{RoomID:909, MinBet:50, History:[]uint32{1, 2, 3, 4, 5, 6, 7}}
-
-	testResp = append(testResp, room1Info, room2Info)
-	return testResp
 }
 
 func getPlayerInfoResp() []*msg.UserInfo {

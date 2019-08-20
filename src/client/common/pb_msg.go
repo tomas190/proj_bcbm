@@ -5,7 +5,7 @@ import (
 	"proj_bcbm/src/server/msg"
 )
 
-func transIDToMsg(id uint16) proto.Message {
+func TransIDToMsg(id uint16) proto.Message {
 	var resp proto.Message
 	switch id {
 	case 0: resp = &msg.Error{}

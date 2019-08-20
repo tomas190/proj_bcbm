@@ -66,7 +66,7 @@ func WSWriteRead(bs []byte)  {
 			}
 
 			id := binary.BigEndian.Uint16(message[:2])
-			resp := transIDToMsg(id)
+			resp := TransIDToMsg(id)
 			err = proto.Unmarshal(message[2:], resp)
 			if err != nil {
 				fmt.Println("[WSWriteRead]解析数据错误", err)

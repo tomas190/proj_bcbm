@@ -25,6 +25,34 @@ enum MessageID {
 	MsgPlayersB   = 19;
 }
 
+enum AreaID {
+    _AreaID = 0;
+    AreaID40x = 1;
+    AreaID30x = 2;
+    AreaID20x = 3;
+    AreaID10x = 4;
+    AreaID5x1 = 5;
+    AreaID5x2 = 6;
+    AreaID5x3 = 7;
+    AreaID5x4 = 8;
+}
+
+enum ChipID {
+    _ChipID = 0;
+    ChipID1x = 1;
+    ChipID10x = 2;
+    ChipID100x = 3;
+    ChipID500x = 4;
+    ChipID1kx = 5;
+}
+
+enum RoomStatus {
+    _RoomStatus = 0;
+    RSBetting = 1;
+    RSLottery = 2;
+    RSClear = 3;
+}
+
 // 心跳
 message Ping{}
 message Pong{}
@@ -51,34 +79,6 @@ message RoomInfo {
     repeated uint32 HisStatistic = 8;
 }
 
-// 房间变化大厅广播
-message RoomChangeHB {
-    uint32 RoomID = 1;
-    uint32 Status = 2;      // 改变之后的状态
-    uint32 EndTime = 3;     // 倒计时结束时间
-    uint32 Result = 4;      // 开奖结果
-    uint32 ServerTime = 5;  // 服务器时间
-}
-
-
-// 下注信息广播
-message BetInfoB {
-    repeated double Amount = 1; // 各区域筹码数量
-    uint32 ServerTime = 2;      // 服务器时间
-}
-
-// 庄家广播
-message BankersB {
-    repeated UserInfo Banker = 1; // 庄家列表，0为当前庄家，其余为上庄列表
-    uint32 ServerTime = 2;        // 服务器时间
-}
-
-// 玩家广播
-message PlayersB {
-    repeated UserInfo Players = 1; // 玩家列表/历史
-    uint32 ServerTime = 2;         // 服务器时间
-}
-
 // 登录游戏
 message Login {
     uint32 UserID = 1;
@@ -95,6 +95,15 @@ message LoginR {
     uint32 RoomID = 2;
     repeated RoomInfo Rooms = 3;
     uint32 ServerTime = 4;  // 服务器时间
+}
+
+// 房间变化大厅广播
+message RoomChangeHB {
+    uint32 RoomID = 1;
+    uint32 Status = 2;      // 改变之后的状态
+    uint32 EndTime = 3;     // 倒计时结束时间
+    uint32 Result = 4;      // 开奖结果
+    uint32 ServerTime = 5;  // 服务器时间
 }
 
 // 登出游戏
@@ -135,6 +144,32 @@ message BetR {}
 message AutoBet {}
 
 message AutoBetR {}
+
+// 下注信息广播，每秒广播一次统计信息
+message BetInfoB {
+     // 1 10 100 500 1k
+    repeated uint32 ChipCount40x = 1;
+    repeated uint32 ChipCount30x = 2;
+    repeated uint32 ChipCount20x = 3;
+    repeated uint32 ChipCount10x = 4;
+    repeated uint32 ChipCount5x1 = 5;
+    repeated uint32 ChipCount5x2 = 6;
+    repeated uint32 ChipCount5x3 = 7;
+    repeated uint32 ChipCount5x4 = 8;
+    uint32 ServerTime = 9;      // 服务器时间
+}
+
+// 庄家广播
+message BankersB {
+    repeated UserInfo Banker = 1; // 庄家列表，0为当前庄家，其余为上庄列表
+    uint32 ServerTime = 2;        // 服务器时间
+}
+
+// 玩家广播
+message PlayersB {
+    repeated UserInfo Players = 1; // 玩家列表/历史
+    uint32 ServerTime = 2;         // 服务器时间
+}
 
 // 错误码
 enum ErrorCode {
