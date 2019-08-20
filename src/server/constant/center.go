@@ -9,4 +9,3 @@ const (
 
 	CRespStatusSuccess int = 200
 )
-

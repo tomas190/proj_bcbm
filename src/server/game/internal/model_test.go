@@ -11,7 +11,7 @@ import (
 // 测试公平开奖
 func TestRoom_fairLottery(t *testing.T) {
 	count := map[uint32]int{
-		1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,
+		1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0,
 	}
 	dl := &Dealer{}
 	for i := 0; i < 121000; i++ {
@@ -23,7 +23,7 @@ func TestRoom_fairLottery(t *testing.T) {
 
 func TestLottery_ProfitPoolLottery(t *testing.T) {
 	count := map[uint32]int{
-		1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,
+		1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0,
 	}
 	dl := &Dealer{}
 	for i := 0; i < 20; i++ {
@@ -60,9 +60,8 @@ func TestRoom_ProfitPoolLottery(t *testing.T) {
 func TestDealer_TimeMachine(t *testing.T) {
 	dl := NewDealer()
 	dl.StartGame()
-	time.Sleep(20*time.Second)
+	time.Sleep(20 * time.Second)
 }
-
 
 var interval = time.Second
 
@@ -105,7 +104,7 @@ func TestNewDealer(t *testing.T) {
 	time.Sleep(20 * time.Second)
 }
 
-func printNotToday(num uint32)  {
+func printNotToday(num uint32) {
 	fmt.Println("Not Today!", num)
 }
 

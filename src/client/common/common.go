@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	host = "0.0.0.0"
+	host    = "0.0.0.0"
 	tcpPort = "10085"
-	wsPort = "10086"
+	wsPort  = "10086"
 )
 
 func ByteMsg(msg interface{}) []byte {
@@ -46,7 +46,7 @@ func ByteMsg(msg interface{}) []byte {
 	return m
 }
 
-func WSWriteRead(bs []byte)  {
+func WSWriteRead(bs []byte) {
 	conn, _, err := websocket.DefaultDialer.Dial("ws://"+host+":"+wsPort, nil)
 	if err != nil {
 		fmt.Println("[WSWriteRead]连接错误", err)

@@ -47,7 +47,7 @@ func handleTestLogin(args []interface{}) {
 			NickName: u.NickName,
 			Money:    u.Balance,
 		},
-		Rooms:Mgr.GetRoomsInfoResp(),
+		Rooms: Mgr.GetRoomsInfoResp(),
 	}
 
 	// 重新绑定信息
@@ -66,7 +66,7 @@ func handleLogin(args []interface{}) {
 	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
 
 	a.WriteMsg(&msg.LoginR{
-		Rooms:Mgr.GetRoomsInfoResp(),
+		Rooms: Mgr.GetRoomsInfoResp(),
 	})
 }
 
@@ -88,9 +88,9 @@ func handleJoinRoom(args []interface{}) {
 
 	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
 	resp := &msg.JoinRoomR{
-		CurBankers:getPlayerInfoResp(),
-		Amount:[]float64{21, 400, 325, 235, 109, 111, 345, 908},
-		Players:getPlayerInfoResp(),
+		CurBankers: getPlayerInfoResp(),
+		Amount:     []float64{21, 400, 325, 235, 109, 111, 345, 908},
+		Players:    getPlayerInfoResp(),
 	}
 
 	log.Debug("<---加入房间响应 %+v--->", resp.Players)

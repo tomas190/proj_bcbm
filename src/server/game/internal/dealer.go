@@ -18,7 +18,7 @@ type Dealer struct {
 	clock   *time.Ticker
 	counter uint32
 
-	Status       uint32
+	Status uint32
 
 	History      []uint32
 	HisStatistic []uint32
@@ -28,8 +28,8 @@ type Dealer struct {
 
 func NewDealer(rID uint32) *Dealer {
 	return &Dealer{
-		Room: NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
-		clock:time.NewTicker(time.Second),
+		Room:  NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
+		clock: time.NewTicker(time.Second),
 	}
 }
 
@@ -38,7 +38,7 @@ func NewDealer(rID uint32) *Dealer {
 // 2 1 0 清空筹码
 // 重置表
 func (dl *Dealer) ClockReset(duration uint32, next func()) {
-	defer func() {dl.counter = 0}()
+	defer func() { dl.counter = 0 }()
 
 	log.Debug("Deadline: %v, Event: %v, RoomID: %+v", duration, util.Function{}.GetFunctionName(next), dl.RoomID)
 	go func() {
@@ -59,7 +59,6 @@ func (dl *Dealer) StartGame() {
 	dl.Status = constant.RSBetting
 	dl.ClockReset(constant.BetTime, dl.Lottery)
 }
-
 
 func (dl *Dealer) Lottery() {
 	dl.ClockReset(constant.LotteryTime, dl.Settle)
@@ -94,7 +93,7 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 func (dl *Dealer) fairLottery() uint32 {
 	rand.Seed(time.Now().UnixNano())
 	x := time.Duration(rand.Intn(5))
-	time.Sleep(x*time.Nanosecond)
+	time.Sleep(x * time.Nanosecond)
 	prob := rand.Intn(121) // [0, 121)
 	var area uint32
 
@@ -152,4 +151,3 @@ func (dl *Dealer) Settle() {
 	log.Debug("结束开奖，结算 %+v", dl.RoomID)
 	dl.ClockReset(constant.ClearTime, dl.Lottery)
 }
-

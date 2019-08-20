@@ -12,4 +12,3 @@ const (
 	AreaVWGolden   = 7 // *10
 	AreaVW         = 8 // *5
 )
-

@@ -15,16 +15,14 @@ type User struct {
 }
 
 type Hall struct {
-	UserRecord map[uint32]User        // 用户记录
-	RoomRecord map[uint32]Dealer        // 房间记录
-	Statistic  map[uint32][]uint32    // 各房间历史记录统计
-	History    map[uint32][]uint32    // 各房间历史记录
+	UserRecord map[uint32]User     // 用户记录
+	RoomRecord map[uint32]Dealer   // 房间记录
+	Statistic  map[uint32][]uint32 // 各房间历史记录统计
+	History    map[uint32][]uint32 // 各房间历史记录
 }
 
 func NewHall() *Hall {
-	return &Hall{
-
-	}
+	return &Hall{}
 }
 
 // 开赌场 初始化的时候直接开6个房间然后跑在不同的goroutine上
@@ -68,18 +66,18 @@ func (h *Hall) GetRoomsInfoResp() []*msg.RoomInfo {
 }
 
 type Room struct {
-	RoomID       uint32
-	MinBet       float64
-	MaxBet       float64
-	MinLimit     float64
+	RoomID   uint32
+	MinBet   float64
+	MaxBet   float64
+	MinLimit float64
 }
 
-func NewRoom(rID uint32, minB, maxB, minL float64) *Room  {
+func NewRoom(rID uint32, minB, maxB, minL float64) *Room {
 	return &Room{
-		RoomID:rID,
-		MinBet:minB,
-		MaxBet:maxB,
-		MinLimit:minL,
+		RoomID:   rID,
+		MinBet:   minB,
+		MaxBet:   maxB,
+		MinLimit: minL,
 	}
 }
 

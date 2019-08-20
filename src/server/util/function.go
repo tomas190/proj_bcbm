@@ -5,7 +5,7 @@ import (
 	"runtime"
 )
 
-type Function struct {}
+type Function struct{}
 
 func (f Function) GetFunctionName(i interface{}) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()

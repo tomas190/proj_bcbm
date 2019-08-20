@@ -45,7 +45,7 @@ func init() {
 	// Processor.Range(printMsg)
 }
 
-func printMsgIDPB(id uint16, t reflect.Type)  {
+func printMsgIDPB(id uint16, t reflect.Type) {
 	tStr := fmt.Sprintf("%v", t)
 	tStr = strings.Replace(tStr, "*", "", 1)
 	tStr = strings.Replace(tStr, ".", "", 1)
@@ -53,11 +53,11 @@ func printMsgIDPB(id uint16, t reflect.Type)  {
 	fmt.Printf("\t%-13v = %d;\n", tStr, id)
 }
 
-func printMsgID(id uint16, t reflect.Type)  {
+func printMsgID(id uint16, t reflect.Type) {
 	fmt.Printf("\t\"%v\" : %d,\n", t, id)
 }
 
-func printMsg(id uint16, t reflect.Type)  {
+func printMsg(id uint16, t reflect.Type) {
 	tStr := fmt.Sprintf("%v", t)
 	tStr = strings.Replace(tStr, "*", "", 1)
 	fmt.Printf("case %d: resp = %v{}\n", id, tStr)

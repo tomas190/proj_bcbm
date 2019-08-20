@@ -7,13 +7,12 @@ import (
 	"proj_bcbm/src/server/msg"
 )
 
-
 var (
 	skeleton = base.NewSkeleton()
 	ChanRPC  = skeleton.ChanRPCServer
 
-	c4c      *Client4Center // 连接中心服的客户端
-	Mgr =    NewHall()
+	c4c *Client4Center // 连接中心服的客户端
+	Mgr = NewHall()
 )
 
 type Module struct {
@@ -38,4 +37,3 @@ func (m *Module) OnDestroy() {
 	}
 	log.Debug("踢出所有客户端 %+v...", data)
 }
-
