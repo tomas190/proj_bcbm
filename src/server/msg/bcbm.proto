@@ -104,11 +104,12 @@ message LoginR {
 // Status = 1 表示 下注中 此状态时要显示进度条 - 用EndTime - ServerTime 可计算出进度条时长
 message RoomChangeHB {
     uint32 RoomID = 1;
-    uint32 Status = 2;      // 改变之后的状态
-    uint32 Counter = 3;
-    uint32 EndTime = 4;     // 倒计时结束时间
-    uint32 Result = 5;      // 开奖结果
-    uint32 ServerTime = 6;  // 服务器时间
+    uint32 Status = 2;                 // 改变之后的状态
+    uint32 Counter = 3;                // 倒计时条
+    uint32 EndTime = 4;                // 倒计时结束时间
+    uint32 Result = 5;                 // 开奖结果
+    repeated uint32 Statistics = 6；   // 统计
+    uint32 ServerTime = 7;             // 服务器时间
 }
 
 // 登出游戏
