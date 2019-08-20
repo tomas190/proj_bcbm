@@ -54,6 +54,7 @@ func handleTestLogin(args []interface{}) {
 	u.ConnAgent = a
 	a.SetUserData(u)
 
+	Mgr.UserRecord[u.UserID] = *u
 	log.Debug("<---测试登入响应 %+v--->", resp.User)
 	a.WriteMsg(resp)
 }

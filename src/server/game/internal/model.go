@@ -43,18 +43,20 @@ func (h *Hall) OpenCasino() {
 	}
 
 	// 收到房间channel消息后发广播
-	for {
-		select {
-		case hrMsg := <-h.HRChan:
-			// 收到房间消息状态改变的消息后
-			// 修改大厅统计任务
-			// 发广播
-			fmt.Println("天了噜收到消息了！", hrMsg.RoomID)
-			h.ChangeRoomStatus(hrMsg)
-		default:
+	go func() {
+		for {
+			select {
+			case hrMsg := <-h.HRChan:
+				// 收到房间消息状态改变的消息后
+				// 修改大厅统计任务
+				// 发广播
+				fmt.Println("天了噜收到消息了！", hrMsg.RoomID)
+				h.ChangeRoomStatus(hrMsg)
+			default:
 
+			}
 		}
-	}
+	}()
 }
 
 // 大厅开房
