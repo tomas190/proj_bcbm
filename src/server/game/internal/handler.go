@@ -11,19 +11,27 @@ import (
 
 func init() {
 	handlerReg(&msg.Ping{}, handlePing)
+
 	handlerReg(&msg.LoginTest{}, handleTestLogin)
 	handlerReg(&msg.Login{}, handleLogin)
 	handlerReg(&msg.Logout{}, handleLogout)
-	handlerReg(&msg.JoinRoom{}, handleJoinRoom)
-	handlerReg(&msg.LeaveRoom{}, handleLeaveRoom)
-	handlerReg(&msg.Bet{}, handleBet)
-	handlerReg(&msg.GrabBanker{}, handleGrabBanker)
-	handlerReg(&msg.AutoBet{}, handleAutoBet)
+
+	// handlerReg(&msg.JoinRoom{}, handleJoinRoom)
+
+	handlerReg(&msg.LeaveRoom{}, roomEventHandler)
+	handlerReg(&msg.Bet{}, roomEventHandler)
+	handlerReg(&msg.GrabBanker{}, roomEventHandler)
+	handlerReg(&msg.AutoBet{}, roomEventHandler)
 }
 
 // 注册消息处理函数
 func handlerReg(m interface{}, h interface{}) {
 	skeleton.RegisterChanRPC(reflect.TypeOf(m), h)
+}
+
+// 房间消息
+func roomEventHandler(args []interface{}) {
+
 }
 
 func handlePing(args []interface{}) {

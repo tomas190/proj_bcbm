@@ -37,14 +37,19 @@ func (c *DTOConverter) R2Msg(dl Dealer) msg.RoomInfo {
 	return rMsg
 }
 
-func (c *DTOConverter) RChangeHB(m HRMsg, counter uint32) msg.RoomChangeHB {
+func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
+	stat := make([]uint32, 8)
+	for _, his := range dl.History {
+		stat[his-1]++
+	}
 	bMsg := msg.RoomChangeHB{
 		RoomID:     m.RoomID,
 		Result:     m.LotteryResult,
 		EndTime:    m.EndTime,
 		ServerTime: uint32(time.Now().Unix()),
 		Status:     m.RoomStatus,
-		Counter:    counter,
+		Counter:    dl.counter,
+		Statistics: stat,
 	}
 
 	return bMsg

@@ -68,9 +68,8 @@ func (dl *Dealer) Bet() {
 	dl.ClockReset(constant.BetTime, dl.Settle)
 }
 
-// 结算
+// 结算 开奖
 func (dl *Dealer) Settle() {
-	// 开奖
 	res := dl.profitPoolLottery()
 	dl.Status = constant.RSSettle
 	dl.HRChan <- HRMsg{
@@ -125,21 +124,21 @@ func (dl *Dealer) fairLottery() uint32 {
 	var area uint32
 
 	if prob >= 0 && prob <= 2 {
-		area = constant.AreaBenzGolden
+		area = constant.Area40x
 	} else if prob <= 6 {
-		area = constant.AreaBMWGolden
+		area = constant.Area30x
 	} else if prob <= 12 {
-		area = constant.AreaAudiGolden
+		area = constant.Area20x
 	} else if prob <= 24 {
-		area = constant.AreaVWGolden
+		area = constant.Area10x
 	} else if prob <= 48 {
-		area = constant.AreaBenz
+		area = constant.Area5x1
 	} else if prob <= 72 {
-		area = constant.AreaBMW
+		area = constant.Area5x2
 	} else if prob <= 96 {
-		area = constant.AreaAudi
+		area = constant.Area5x3
 	} else if prob <= 120 {
-		area = constant.AreaVW
+		area = constant.Area5x4
 	}
 
 	return area

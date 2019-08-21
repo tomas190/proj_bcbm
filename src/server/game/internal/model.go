@@ -67,15 +67,15 @@ func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 	log.Debug("roomStatus: %+v", hrMsg.RoomStatus)
 	if hrMsg.RoomStatus == constant.RSSettle {
 		h.History[rID] = append(h.History[rID], hrMsg.LotteryResult)
-		h.RoomRecord[rID].History = append(h.RoomRecord[rID].History, hrMsg.LotteryResult)
 		log.Debug("room: %+v, his: %+v", rID, h.History[rID])
 		if len(h.History[rID]) > constant.HisCount {
 			h.History[rID] = h.History[rID][1:]
 		}
+		h.RoomRecord[rID].History = h.History[rID]
 	}
 
 	converter := &DTOConverter{}
-	res := converter.RChangeHB(hrMsg, h.RoomRecord[rID].counter)
+	res := converter.RChangeHB(hrMsg, *h.RoomRecord[rID])
 	h.BroadCast(&res)
 }
 
