@@ -1,6 +1,9 @@
 package internal
 
-import "proj_bcbm/src/server/msg"
+import (
+	"proj_bcbm/src/server/msg"
+	"time"
+)
 
 type DTOConverter struct{}
 
@@ -16,27 +19,37 @@ func (c *DTOConverter) U2Msg(u User) msg.UserInfo {
 }
 
 func (c *DTOConverter) R2Msg(dl Dealer) msg.RoomInfo {
+	stat := make([]uint32, 8)
+	for _, his := range dl.History {
+		stat[his-1]++
+	}
 	rMsg := msg.RoomInfo{
-		RoomID:       dl.RoomID,
-		MinBet:       dl.MinBet,
-		MaxBet:       dl.MaxBet,
-		MinLimit:     dl.MinLimit,
-		Status:       dl.Status,
-		EndTime:      0,
-		History:      dl.History,
-		HisStatistic: dl.HisStatistic,
+		RoomID:     dl.RoomID,
+		MinBet:     dl.MinBet,
+		MaxBet:     dl.MaxBet,
+		MinLimit:   dl.MinLimit,
+		Counter:    dl.counter,
+		Status:     dl.Status,
+		History:    dl.History,
+		Statistics: stat,
 	}
 
 	return rMsg
 }
 
-func (c *DTOConverter) RChangeHB(m HRMsg) msg.RoomChangeHB {
+func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
+	stat := make([]uint32, 8)
+	for _, his := range dl.History {
+		stat[his-1]++
+	}
 	bMsg := msg.RoomChangeHB{
 		RoomID:     m.RoomID,
 		Result:     m.LotteryResult,
 		EndTime:    m.EndTime,
-		ServerTime: 12345, // fixme
+		ServerTime: uint32(time.Now().Unix()),
 		Status:     m.RoomStatus,
+		Counter:    dl.counter,
+		Statistics: stat,
 	}
 
 	return bMsg

@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 	"proj_bcbm/src/server/constant"
@@ -18,18 +17,16 @@ type HRMsg struct {
 }
 
 type Hall struct {
-	UserRecord map[uint32]User     // 用户记录
-	RoomRecord map[uint32]Dealer   // 房间记录
-	Statistic  map[uint32][]uint32 // 各房间历史记录统计
+	UserRecord map[uint32]*User    // 用户记录
+	RoomRecord map[uint32]*Dealer  // 房间记录
 	History    map[uint32][]uint32 // 各房间历史记录
 	HRChan     chan HRMsg          // 房间大厅通信
 }
 
 func NewHall() *Hall {
 	return &Hall{
-		UserRecord: make(map[uint32]User),
-		RoomRecord: make(map[uint32]Dealer),
-		Statistic:  make(map[uint32][]uint32),
+		UserRecord: make(map[uint32]*User),
+		RoomRecord: make(map[uint32]*Dealer),
 		History:    make(map[uint32][]uint32),
 		HRChan:     make(chan HRMsg, 6),
 	}
@@ -39,7 +36,7 @@ func NewHall() *Hall {
 // 大厅和房间之间通过channel通信
 func (h *Hall) OpenCasino() {
 	for i := 0; i < constant.RoomCount; i++ {
-		go h.openRoom(uint32(i))
+		go h.openRoom(uint32(i + 1))
 	}
 
 	// 收到房间channel消息后发广播
@@ -47,10 +44,6 @@ func (h *Hall) OpenCasino() {
 		for {
 			select {
 			case hrMsg := <-h.HRChan:
-				// 收到房间消息状态改变的消息后
-				// 修改大厅统计任务
-				// 发广播
-				fmt.Println("天了噜收到消息了！", hrMsg.RoomID)
 				h.ChangeRoomStatus(hrMsg)
 			default:
 
@@ -62,18 +55,27 @@ func (h *Hall) OpenCasino() {
 // 大厅开房
 func (h *Hall) openRoom(rID uint32) {
 	dl := NewDealer(rID, h.HRChan)
-	h.RoomRecord[rID] = *dl
+	h.RoomRecord[rID] = dl
 	dl.StartGame()
 }
 
+// 收到房间消息状态改变的消息后
+// 修改大厅统计任务
+// 发广播
 func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
-	if hrMsg.RoomStatus == constant.RSLottery {
-		h.History[hrMsg.RoomID] = append(h.History[hrMsg.RoomID], hrMsg.LotteryResult)
-		h.Statistic[hrMsg.RoomID][hrMsg.LotteryResult]++
+	rID := hrMsg.RoomID
+	log.Debug("roomStatus: %+v", hrMsg.RoomStatus)
+	if hrMsg.RoomStatus == constant.RSSettle {
+		h.History[rID] = append(h.History[rID], hrMsg.LotteryResult)
+		log.Debug("room: %+v, his: %+v", rID, h.History[rID])
+		if len(h.History[rID]) > constant.HisCount {
+			h.History[rID] = h.History[rID][1:]
+		}
+		h.RoomRecord[rID].History = h.History[rID]
 	}
 
 	converter := &DTOConverter{}
-	res := converter.RChangeHB(hrMsg)
+	res := converter.RChangeHB(hrMsg, *h.RoomRecord[rID])
 	h.BroadCast(&res)
 }
 
@@ -91,7 +93,7 @@ func (h *Hall) GetRoomsInfoResp() []*msg.RoomInfo {
 	converter := DTOConverter{}
 
 	for _, r := range h.RoomRecord {
-		rMsg := converter.R2Msg(r)
+		rMsg := converter.R2Msg(*r)
 		roomsInfoResp = append(roomsInfoResp, &rMsg)
 	}
 

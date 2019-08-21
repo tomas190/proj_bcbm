@@ -6,23 +6,32 @@ import (
 	"github.com/name5566/leaf/log"
 	"proj_bcbm/src/server/msg"
 	"reflect"
+	"time"
 )
 
 func init() {
 	handlerReg(&msg.Ping{}, handlePing)
+
 	handlerReg(&msg.LoginTest{}, handleTestLogin)
 	handlerReg(&msg.Login{}, handleLogin)
 	handlerReg(&msg.Logout{}, handleLogout)
-	handlerReg(&msg.JoinRoom{}, handleJoinRoom)
-	handlerReg(&msg.LeaveRoom{}, handleLeaveRoom)
-	handlerReg(&msg.Bet{}, handleBet)
-	handlerReg(&msg.GrabBanker{}, handleGrabBanker)
-	handlerReg(&msg.AutoBet{}, handleAutoBet)
+
+	// handlerReg(&msg.JoinRoom{}, handleJoinRoom)
+
+	handlerReg(&msg.LeaveRoom{}, roomEventHandler)
+	handlerReg(&msg.Bet{}, roomEventHandler)
+	handlerReg(&msg.GrabBanker{}, roomEventHandler)
+	handlerReg(&msg.AutoBet{}, roomEventHandler)
 }
 
 // 注册消息处理函数
 func handlerReg(m interface{}, h interface{}) {
 	skeleton.RegisterChanRPC(reflect.TypeOf(m), h)
+}
+
+// 房间消息
+func roomEventHandler(args []interface{}) {
+
 }
 
 func handlePing(args []interface{}) {
@@ -47,14 +56,15 @@ func handleTestLogin(args []interface{}) {
 			NickName: u.NickName,
 			Money:    u.Balance,
 		},
-		Rooms: Mgr.GetRoomsInfoResp(),
+		Rooms:      Mgr.GetRoomsInfoResp(),
+		ServerTime: uint32(time.Now().Unix()),
 	}
 
 	// 重新绑定信息
 	u.ConnAgent = a
 	a.SetUserData(u)
 
-	Mgr.UserRecord[u.UserID] = *u
+	Mgr.UserRecord[u.UserID] = u
 	log.Debug("<---测试登入响应 %+v--->", resp.User)
 	a.WriteMsg(resp)
 }

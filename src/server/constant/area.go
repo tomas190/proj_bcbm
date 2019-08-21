@@ -2,13 +2,13 @@ package constant
 
 // 下注区域
 const (
-	_Area          = 0
-	AreaBenzGolden = 1 // *40
-	AreaBenz       = 2 // *5
-	AreaBMWGolden  = 3 // *30
-	AreaBMW        = 4 // *5
-	AreaAudiGolden = 5 // *20
-	AreaAudi       = 6 // *5
-	AreaVWGolden   = 7 // *10
-	AreaVW         = 8 // *5
+	_       = iota
+	Area40x = 1 // *40
+	Area30x = 2 // *30
+	Area20x = 3 // *20
+	Area10x = 4 // *10
+	Area5x1 = 5 // *5
+	Area5x2 = 6 // *5
+	Area5x3 = 7 // *5
+	Area5x4 = 8 // *5
 )

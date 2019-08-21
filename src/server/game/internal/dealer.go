@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"github.com/name5566/leaf/log"
 	"math/rand"
 	"proj_bcbm/src/server/constant"
@@ -14,15 +13,11 @@ import (
 
 type Dealer struct {
 	*Room
-
 	clock   *time.Ticker
 	counter uint32
 
-	Status uint32
-
-	History      []uint32
-	HisStatistic []uint32
-
+	Status   uint32
+	History  []uint32
 	UserBets map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
 	HRChan   chan HRMsg           // 房间大厅通信
 }
@@ -57,15 +52,43 @@ func (dl *Dealer) ClockReset(duration uint32, next func()) {
 }
 
 func (dl *Dealer) StartGame() {
-	// 广播开始下注
 	dl.Status = constant.RSBetting
-	dl.ClockReset(constant.BetTime, dl.Lottery)
+	dl.ClockReset(constant.BetTime, dl.Bet)
 }
 
-func (dl *Dealer) Lottery() {
-	dl.HRChan <- HRMsg{RoomID: dl.RoomID, EndTime: 9090909}
-	dl.ClockReset(constant.LotteryTime, dl.Settle)
-	fmt.Printf("#################房间%+v 开奖结果 %+v \n", dl.RoomID, dl.profitPoolLottery())
+// 下注
+func (dl *Dealer) Bet() {
+	dl.Status = constant.RSBetting
+	dl.HRChan <- HRMsg{
+		RoomID:     dl.RoomID,
+		RoomStatus: dl.Status,
+		EndTime:    uint32(time.Now().Unix() + constant.BetTime),
+	}
+	log.Debug("bet... %+v", dl.RoomID)
+	dl.ClockReset(constant.BetTime, dl.Settle)
+}
+
+// 结算 开奖
+func (dl *Dealer) Settle() {
+	res := dl.profitPoolLottery()
+	dl.Status = constant.RSSettle
+	dl.HRChan <- HRMsg{
+		RoomID:        dl.RoomID,
+		RoomStatus:    dl.Status,
+		LotteryResult: res,
+	}
+	// 结算
+	// 庄家赢数 = Sum(未中奖倍数*未中奖筹码数) - 中奖倍数*中奖筹码数
+
+	log.Debug("settle... %+v", dl.RoomID)
+	dl.ClockReset(constant.SettleTime, dl.ClearChip)
+}
+
+// 清理筹码
+func (dl *Dealer) ClearChip() {
+	dl.Status = constant.RSClear
+	log.Debug("clear chip... %+v", dl.RoomID)
+	dl.ClockReset(constant.ClearTime, dl.Bet)
 }
 
 // 根据盈余池开奖
@@ -101,21 +124,21 @@ func (dl *Dealer) fairLottery() uint32 {
 	var area uint32
 
 	if prob >= 0 && prob <= 2 {
-		area = constant.AreaBenzGolden
+		area = constant.Area40x
 	} else if prob <= 6 {
-		area = constant.AreaBMWGolden
+		area = constant.Area30x
 	} else if prob <= 12 {
-		area = constant.AreaAudiGolden
+		area = constant.Area20x
 	} else if prob <= 24 {
-		area = constant.AreaVWGolden
+		area = constant.Area10x
 	} else if prob <= 48 {
-		area = constant.AreaBenz
+		area = constant.Area5x1
 	} else if prob <= 72 {
-		area = constant.AreaBMW
+		area = constant.Area5x2
 	} else if prob <= 96 {
-		area = constant.AreaAudi
+		area = constant.Area5x3
 	} else if prob <= 120 {
-		area = constant.AreaVW
+		area = constant.Area5x4
 	}
 
 	return area
@@ -133,11 +156,4 @@ func profitPool() float64 {
 	// 需要数据库
 	// return pTotalLose - pTotalWin * constant.HouseEdgePercent - pCount*constant.GiftAmount
 	return 20.0
-}
-
-// 结算
-func (dl *Dealer) Settle() {
-	// 庄家赢数 = Sum(未中奖倍数*未中奖筹码数) - 中奖倍数*中奖筹码数
-	log.Debug("结束开奖，结算 %+v", dl.RoomID)
-	dl.ClockReset(constant.ClearTime, dl.Lottery)
 }
