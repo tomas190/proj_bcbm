@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
+	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"reflect"
 	"time"
@@ -16,12 +17,12 @@ func init() {
 	handlerReg(&msg.Login{}, handleLogin)
 	handlerReg(&msg.Logout{}, handleLogout)
 
-	// handlerReg(&msg.JoinRoom{}, handleJoinRoom)
+	handlerReg(&msg.JoinRoom{}, handleJoinRoom)
 
-	handlerReg(&msg.LeaveRoom{}, roomEventHandler)
-	handlerReg(&msg.Bet{}, roomEventHandler)
-	handlerReg(&msg.GrabBanker{}, roomEventHandler)
-	handlerReg(&msg.AutoBet{}, roomEventHandler)
+	handlerReg(&msg.Bet{}, handleRoomEvent)
+	handlerReg(&msg.LeaveRoom{}, handleRoomEvent)
+	handlerReg(&msg.GrabBanker{}, handleRoomEvent)
+	handlerReg(&msg.AutoBet{}, handleRoomEvent)
 }
 
 // 注册消息处理函数
@@ -29,10 +30,11 @@ func handlerReg(m interface{}, h interface{}) {
 	skeleton.RegisterChanRPC(reflect.TypeOf(m), h)
 }
 
-// 房间消息
-func roomEventHandler(args []interface{}) {
+/*************************************
 
-}
+	普通事件
+
+ *************************************/
 
 func handlePing(args []interface{}) {
 	// m := args[0].(*msg.Ping)
@@ -93,86 +95,69 @@ func handleLogout(args []interface{}) {
 	a.WriteMsg(resp)
 }
 
+/*************************************
+
+	大厅事件-加入房间
+
+ *************************************/
+
 func handleJoinRoom(args []interface{}) {
 	m := args[0].(*msg.JoinRoom)
 	a := args[1].(gate.Agent)
 
 	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
-	resp := &msg.JoinRoomR{
-		CurBankers: getPlayerInfoResp(),
-		Amount:     []float64{21, 400, 325, 235, 109, 111, 345, 908},
-		Players:    getPlayerInfoResp(),
+
+	au := a.UserData().(*User)
+
+	// 找到当前房间的玩家 dealer.getPlayerInfoResp()
+	room, exist := Mgr.RoomRecord[m.RoomID]
+	if !exist {
+		errorResp(a, msg.ErrorCode_RoomNotExist, "")
+		return
 	}
 
-	log.Debug("<---加入房间响应 %+v--->", resp.Players)
-	a.WriteMsg(resp)
+	// fixme 最大人数
+	if len(room.UserBets) == constant.MaxPlayerCount {
+		errorResp(a, msg.ErrorCode_RoomFull, "")
+		return
+	}
+
+	Mgr.AllocateUser(au, Mgr.RoomRecord[m.RoomID])
 }
 
-func handleBet(args []interface{}) {
-	m := args[0].(*msg.Bet)
+/*************************************
+
+	房间事件-投注、续投、上庄、离开房间
+
+ *************************************/
+
+func handleRoomEvent(args []interface{}) {
 	a := args[1].(gate.Agent)
-	au := a.UserData().(*User)
+	u, ok := a.UserData().(*User)
+	_, logged := Mgr.UserRecord[u.UserID]
+	// _, inRoom := Mgr.userRoom[u.UserID]
+	inRoom := true
+	log.Debug("<----game 房间事件 %v %v ---->", u.UserID, reflect.TypeOf(args[0]))
 
-	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
-
-	resp := &msg.BetR{}
-	a.WriteMsg(resp)
-}
-
-func handleGrabBanker(args []interface{}) {
-	m := args[0].(*msg.GrabBanker)
-	a := args[1].(gate.Agent)
-
-	au := a.UserData().(*User)
-
-	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
-
-	fmt.Println("上庄", m, au.Balance)
-
-	resp := &msg.BankersB{}
-	a.WriteMsg(resp)
-}
-
-func handleAutoBet(args []interface{}) {
-	m := args[0].(*msg.AutoBet)
-	a := args[1].(gate.Agent)
-
-	au := a.UserData().(*User)
-
-	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
-
-	fmt.Println("续投", m, au.Balance)
-
-	resp := &msg.AutoBetR{}
-	a.WriteMsg(resp)
-}
-
-func handleLeaveRoom(args []interface{}) {
-	m := args[0].(*msg.LeaveRoom)
-	a := args[1].(gate.Agent)
-
-	au := a.UserData().(*User)
-
-	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
-
-	fmt.Println("离房", m, au.Balance)
-
-	resp := &msg.LeaveRoomR{}
-	a.WriteMsg(resp)
-}
-
-func getPlayerInfoResp() []*msg.UserInfo {
-	u1 := mockUserInfo(8976784)
-	u2 := mockUserInfo(7829401)
-
-	converter := DTOConverter{}
-	userInfo1 := converter.U2Msg(*u1)
-	userInfo2 := converter.U2Msg(*u2)
-
-	var testResp []*msg.UserInfo
-	testResp = append(testResp, &userInfo1, &userInfo2)
-
-	return testResp
+	if ok && logged && inRoom {
+		// 找到玩家房间
+		// roomID, ok := Mgr.userRoom[u.UserID]
+		ok = true
+		if ok {
+			// dealer := Mgr.RoomRecord[roomID]
+			//log.Debug("当前房间状态 %v", dealer.Status)
+			switch t := args[0].(type) {
+			//case *msg.Bet:
+			//	dealer.handleBet(u)
+			case *msg.GrabBanker:
+			case *msg.AutoBet:
+			default:
+				log.Error("房间事件无法识别", t)
+			}
+		}
+	} else {
+		errorResp(a, msg.ErrorCode_UserNotInRoom, "")
+	}
 }
 
 func mockUserInfo(userID uint32) *User {
@@ -181,4 +166,9 @@ func mockUserInfo(userID uint32) *User {
 	u := &User{userID, nickName, avatar, 1000, nil}
 
 	return u
+}
+
+func errorResp(a gate.Agent, err msg.ErrorCode, detail string) {
+	log.Debug("<----game 错误resp---->", err)
+	a.WriteMsg(&msg.Error{Code: err, Detail: detail})
 }

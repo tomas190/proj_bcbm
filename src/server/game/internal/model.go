@@ -6,6 +6,7 @@ import (
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"reflect"
+	"time"
 )
 
 // 房间状态改变时通知大厅
@@ -19,6 +20,7 @@ type HRMsg struct {
 type Hall struct {
 	UserRecord map[uint32]*User    // 用户记录
 	RoomRecord map[uint32]*Dealer  // 房间记录
+	UserRoom   map[uint32]uint32   // 用户房间
 	History    map[uint32][]uint32 // 各房间历史记录
 	HRChan     chan HRMsg          // 房间大厅通信
 }
@@ -46,7 +48,6 @@ func (h *Hall) OpenCasino() {
 			case hrMsg := <-h.HRChan:
 				h.ChangeRoomStatus(hrMsg)
 			default:
-
 			}
 		}
 	}()
@@ -57,6 +58,21 @@ func (h *Hall) openRoom(rID uint32) {
 	dl := NewDealer(rID, h.HRChan)
 	h.RoomRecord[rID] = dl
 	dl.StartGame()
+}
+
+func (h *Hall) AllocateUser(u *User, dl *Dealer) {
+	resp := &msg.JoinRoomR{
+		CurBankers: dl.getPlayerInfoResp(),
+		Amount:     []float64{21, 400, 325, 235, 109, 111, 345, 908},
+		PAmount:    []float64{1, 10, 1, 0, 0, 0, 100, 500},
+		Players:    dl.getPlayerInfoResp(),
+		Counter:    dl.counter,
+		ServerTime: uint32(time.Now().Unix()),
+		EndTime:    dl.deadline,
+	}
+
+	log.Debug("<---加入房间响应 %+v--->", resp.Players)
+	u.ConnAgent.WriteMsg(resp)
 }
 
 // 收到房间消息状态改变的消息后

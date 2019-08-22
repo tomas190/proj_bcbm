@@ -13,13 +13,18 @@ import (
 
 type Dealer struct {
 	*Room
-	clock   *time.Ticker
-	counter uint32
+	clock    *time.Ticker
+	counter  uint32
+	deadline uint32
 
-	Status   uint32
-	History  []uint32
+	Status  uint32
+	History []uint32
+	HRChan  chan HRMsg    // 房间大厅通信
+	BBChan  chan struct{} // 下注广播信号
+
+	Bankers  []User               // 上庄玩家榜单 todo 玩家榜单
 	UserBets map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
-	HRChan   chan HRMsg           // 房间大厅通信
+	AreaBets map[uint32][]float64 // 每个区域玩家投注总数
 }
 
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
@@ -36,7 +41,7 @@ func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 // 重置表
 func (dl *Dealer) ClockReset(duration uint32, next func()) {
 	defer func() { dl.counter = 0 }()
-
+	dl.deadline = uint32(time.Now().Unix()) + duration
 	log.Debug("Deadline: %v, Event: %v, RoomID: %+v", duration, util.Function{}.GetFunctionName(next), dl.RoomID)
 	go func() {
 		for t := range dl.clock.C {
@@ -53,7 +58,7 @@ func (dl *Dealer) ClockReset(duration uint32, next func()) {
 
 func (dl *Dealer) StartGame() {
 	dl.Status = constant.RSBetting
-	dl.ClockReset(constant.BetTime, dl.Bet)
+	dl.ClockReset(0, dl.Bet)
 }
 
 // 下注
@@ -65,6 +70,7 @@ func (dl *Dealer) Bet() {
 		EndTime:    uint32(time.Now().Unix() + constant.BetTime),
 	}
 	log.Debug("bet... %+v", dl.RoomID)
+
 	dl.ClockReset(constant.BetTime, dl.Settle)
 }
 
