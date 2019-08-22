@@ -13,7 +13,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 	a := args[1].(gate.Agent)
 	au := a.UserData().(*User)
 
-	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
+	log.Debug("筹码信息 %+v", m)
 
 	resp := &msg.BetInfoB{
 		Area:        m.Area,
@@ -23,7 +23,8 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		PlayerID:    au.UserID,
 		Money:       999.6,
 	}
-	a.WriteMsg(resp)
+
+	dl.Broadcast(resp)
 }
 
 func (dl *Dealer) handleGrabBanker(args []interface{}) {

@@ -29,6 +29,7 @@ func NewHall() *Hall {
 	return &Hall{
 		UserRecord: make(map[uint32]*User),
 		RoomRecord: make(map[uint32]*Dealer),
+		UserRoom:   make(map[uint32]uint32),
 		History:    make(map[uint32][]uint32),
 		HRChan:     make(chan HRMsg, 6),
 	}
@@ -61,6 +62,9 @@ func (h *Hall) openRoom(rID uint32) {
 }
 
 func (h *Hall) AllocateUser(u *User, dl *Dealer) {
+	h.UserRoom[u.UserID] = dl.RoomID
+	dl.Users[u.UserID] = *u
+
 	resp := &msg.JoinRoomR{
 		CurBankers: dl.getPlayerInfoResp(),
 		Amount:     []float64{21, 400, 325, 235, 109, 111, 345, 908},
@@ -68,16 +72,14 @@ func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 		Players:    dl.getPlayerInfoResp(),
 		Counter:    dl.counter,
 		ServerTime: uint32(time.Now().Unix()),
-		EndTime:    dl.deadline,
+		// EndTime:    dl.ddl,
 	}
 
 	log.Debug("<---加入房间响应 %+v--->", resp.Players)
 	u.ConnAgent.WriteMsg(resp)
 }
 
-// 收到房间消息状态改变的消息后
-// 修改大厅统计任务
-// 发广播
+// 收到房间消息状态改变的消息后 修改大厅统计任务 发广播
 func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 	rID := hrMsg.RoomID
 	log.Debug("roomStatus: %+v", hrMsg.RoomStatus)
@@ -131,18 +133,6 @@ func NewRoom(rID uint32, minB, maxB, minL float64) *Room {
 		MinLimit: minL,
 	}
 }
-
-type roomStatus struct {
-	Status  uint32
-	EndTime uint32
-	Result  uint32
-}
-
-var roomStatusChan chan roomStatus
-
-// 大厅监测各房间发来的消息，如果变化发出房间状态变化广播
-
-// 房间
 
 type User struct {
 	UserID    uint32     `bson:"user_id" json:"user_id"`       // 用户id

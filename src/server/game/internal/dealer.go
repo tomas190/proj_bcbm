@@ -6,6 +6,7 @@ import (
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/util"
+	"reflect"
 	"time"
 )
 
@@ -13,15 +14,16 @@ import (
 
 type Dealer struct {
 	*Room
-	clock    *time.Ticker
-	counter  uint32
-	deadline uint32
+	clock   *time.Ticker
+	counter uint32
+	ddl     uint32
 
 	Status  uint32
 	History []uint32
 	HRChan  chan HRMsg    // 房间大厅通信
 	BBChan  chan struct{} // 下注广播信号
 
+	Users    map[uint32]User      // 房间用户
 	Bankers  []User               // 上庄玩家榜单 todo 玩家榜单
 	UserBets map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
 	AreaBets map[uint32][]float64 // 每个区域玩家投注总数
@@ -29,6 +31,7 @@ type Dealer struct {
 
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 	return &Dealer{
+		Users:  make(map[uint32]User),
 		Room:   NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
 		clock:  time.NewTicker(time.Second),
 		HRChan: hr,
@@ -41,7 +44,7 @@ func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 // 重置表
 func (dl *Dealer) ClockReset(duration uint32, next func()) {
 	defer func() { dl.counter = 0 }()
-	dl.deadline = uint32(time.Now().Unix()) + duration
+	dl.ddl = uint32(time.Now().Unix()) + duration
 	log.Debug("Deadline: %v, Event: %v, RoomID: %+v", duration, util.Function{}.GetFunctionName(next), dl.RoomID)
 	go func() {
 		for t := range dl.clock.C {
@@ -58,7 +61,7 @@ func (dl *Dealer) ClockReset(duration uint32, next func()) {
 
 func (dl *Dealer) StartGame() {
 	dl.Status = constant.RSBetting
-	dl.ClockReset(0, dl.Bet)
+	dl.ClockReset(con.ClearTime, dl.Bet)
 }
 
 // 下注
@@ -95,6 +98,13 @@ func (dl *Dealer) ClearChip() {
 	dl.Status = constant.RSClear
 	log.Debug("clear chip... %+v", dl.RoomID)
 	dl.ClockReset(constant.ClearTime, dl.Bet)
+}
+
+func (dl *Dealer) Broadcast(m interface{}) {
+	log.Debug("room brd %+v, content: %+v", reflect.TypeOf(m), m)
+	for _, u := range dl.Users {
+		u.ConnAgent.WriteMsg(m)
+	}
 }
 
 // 根据盈余池开奖

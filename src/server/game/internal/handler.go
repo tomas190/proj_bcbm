@@ -47,7 +47,7 @@ func handleTestLogin(args []interface{}) {
 	m := args[0].(*msg.LoginTest)
 	a := args[1].(gate.Agent)
 
-	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
+	log.Debug("recv %+v, addr %+v, 用户 %+v", reflect.TypeOf(m), a.RemoteAddr(), m.UserID)
 	userID := m.GetUserID()
 	u := mockUserInfo(userID) // 模拟用户
 
@@ -69,6 +69,7 @@ func handleTestLogin(args []interface{}) {
 	Mgr.UserRecord[u.UserID] = u
 	log.Debug("<---测试登入响应 %+v--->", resp.User)
 	a.WriteMsg(resp)
+
 }
 
 func handleLogin(args []interface{}) {
@@ -77,10 +78,22 @@ func handleLogin(args []interface{}) {
 
 	// u := a.UserData().(*User)
 	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
+	userID := m.GetUserID()
+	u := mockUserInfo(userID) // 模拟用户
 
-	a.WriteMsg(&msg.LoginR{
-		Rooms: Mgr.GetRoomsInfoResp(),
-	})
+	resp := &msg.LoginR{
+		User: &msg.UserInfo{
+			UserID:   u.UserID,
+			Avatar:   u.Avatar,
+			NickName: u.NickName,
+			Money:    u.Balance,
+		},
+		Rooms:      Mgr.GetRoomsInfoResp(),
+		ServerTime: uint32(time.Now().Unix()),
+	}
+
+	Mgr.UserRecord[u.UserID] = u
+	a.WriteMsg(resp)
 }
 
 func handleLogout(args []interface{}) {
@@ -135,20 +148,19 @@ func handleRoomEvent(args []interface{}) {
 	a := args[1].(gate.Agent)
 	u, ok := a.UserData().(*User)
 	_, logged := Mgr.UserRecord[u.UserID]
-	// _, inRoom := Mgr.userRoom[u.UserID]
-	inRoom := true
-	log.Debug("<----game 房间事件 %v %v ---->", u.UserID, reflect.TypeOf(args[0]))
+	_, inRoom := Mgr.UserRoom[u.UserID]
+	log.Debug("<----game 房间事件 %v %v %v---->", u.UserID, reflect.TypeOf(args[0]))
 
 	if ok && logged && inRoom {
 		// 找到玩家房间
-		// roomID, ok := Mgr.userRoom[u.UserID]
+		roomID, ok := Mgr.UserRoom[u.UserID]
 		ok = true
 		if ok {
-			// dealer := Mgr.RoomRecord[roomID]
-			//log.Debug("当前房间状态 %v", dealer.Status)
+			dealer := Mgr.RoomRecord[roomID]
+			log.Debug("当前房间状态 %v", dealer.Status)
 			switch t := args[0].(type) {
-			//case *msg.Bet:
-			//	dealer.handleBet(u)
+			case *msg.Bet:
+				dealer.handleBet(args)
 			case *msg.GrabBanker:
 			case *msg.AutoBet:
 			default:
