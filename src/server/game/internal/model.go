@@ -72,7 +72,7 @@ func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 		Players:    dl.getPlayerInfoResp(),
 		Counter:    dl.counter,
 		ServerTime: uint32(time.Now().Unix()),
-		// EndTime:    dl.ddl,
+		EndTime:    dl.ddl,
 	}
 
 	log.Debug("<---加入房间响应 %+v--->", resp.Players)

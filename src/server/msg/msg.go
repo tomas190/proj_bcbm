@@ -38,9 +38,10 @@ func init() {
 	Processor.Register(&BetInfoB{}) // 有人投注广播一次
 	Processor.Register(&BankersB{}) // 有人上庄或下庄广播一次
 	Processor.Register(&PlayersB{}) // 有人进入或离开广播一次
+	Processor.Register(&RoomStatusB{})
 
 	// print ID 打印出想要的任意格式
-	// Processor.Range(printMsgIDPB)
+	Processor.Range(printMsgIDPB)
 	// Processor.Range(printMsgID)
 	// Processor.Range(printMsg)
 }

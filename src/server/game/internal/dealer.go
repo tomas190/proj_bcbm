@@ -74,6 +74,10 @@ func (dl *Dealer) Bet() {
 	}
 	log.Debug("bet... %+v", dl.RoomID)
 
+	converter := DTOConverter{}
+	resp := converter.RSBMsg(0, 0, 0, *dl)
+	dl.Broadcast(&resp)
+
 	dl.ClockReset(constant.BetTime, dl.Settle)
 }
 
@@ -90,6 +94,11 @@ func (dl *Dealer) Settle() {
 	// 庄家赢数 = Sum(未中奖倍数*未中奖筹码数) - 中奖倍数*中奖筹码数
 
 	log.Debug("settle... %+v", dl.RoomID)
+
+	converter := DTOConverter{}
+	resp := converter.RSBMsg(res, 10, 210, *dl)
+	dl.Broadcast(&resp)
+
 	dl.ClockReset(constant.SettleTime, dl.ClearChip)
 }
 
@@ -97,6 +106,11 @@ func (dl *Dealer) Settle() {
 func (dl *Dealer) ClearChip() {
 	dl.Status = constant.RSClear
 	log.Debug("clear chip... %+v", dl.RoomID)
+
+	converter := DTOConverter{}
+	resp := converter.RSBMsg(0, 0, 0, *dl)
+	dl.Broadcast(&resp)
+
 	dl.ClockReset(constant.ClearTime, dl.Bet)
 }
 

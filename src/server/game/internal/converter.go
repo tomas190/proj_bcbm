@@ -55,6 +55,20 @@ func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
 	return bMsg
 }
 
+func (c *DTOConverter) RSBMsg(res uint32, win float64, money float64, dl Dealer) msg.RoomStatusB {
+	bMsg := msg.RoomStatusB{
+		Status:      dl.Status,
+		Counter:     dl.counter,
+		EndTime:     dl.ddl,
+		Result:      res,
+		WinMoney:    win,
+		PlayerMoney: money,
+		ServerTime:  uint32(time.Now().Unix()),
+	}
+
+	return bMsg
+}
+
 type DAOConverter struct{}
 
 func (c *DAOConverter) U2Bson() {

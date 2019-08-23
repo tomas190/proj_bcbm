@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
+	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"reflect"
 )
@@ -15,16 +16,21 @@ func (dl *Dealer) handleBet(args []interface{}) {
 
 	log.Debug("筹码信息 %+v", m)
 
-	resp := &msg.BetInfoB{
-		Area:        m.Area,
-		Chip:        m.Chip,
-		AreaTotal:   90,
-		PlayerTotal: 10.6,
-		PlayerID:    au.UserID,
-		Money:       999.6,
-	}
+	// fixme 计算
+	if dl.Status == constant.RSBetting {
+		resp := &msg.BetInfoB{
+			Area:        m.Area,
+			Chip:        m.Chip,
+			AreaTotal:   90,
+			PlayerTotal: 10.6,
+			PlayerID:    au.UserID,
+			Money:       999.6,
+		}
 
-	dl.Broadcast(resp)
+		dl.Broadcast(resp)
+	} else {
+		errorResp(au.ConnAgent, msg.ErrorCode_RoomNotExist, "当前不是下注状态")
+	}
 }
 
 func (dl *Dealer) handleGrabBanker(args []interface{}) {
