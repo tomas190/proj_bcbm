@@ -9,8 +9,8 @@ const (
 )
 
 const (
-	BetTime    = 15 //15
-	SettleTime = 23 //23
+	BetTime    = 16 //16
+	SettleTime = 24 //24
 	ClearTime  = 3
 )
 

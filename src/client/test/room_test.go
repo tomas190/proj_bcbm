@@ -34,7 +34,7 @@ func TestRoom(t *testing.T) {
 	}
 
 	rand.Seed(time.Now().Unix())
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10000; i++ {
 		time.Sleep(time.Millisecond * time.Duration(rand.Intn(100)))
 		betMsg := &msg.Bet{Area: uint32(rand.Intn(8) + 1), Chip: uint32(rand.Intn(5) + 1)}
 		betBS := common.ByteMsg(betMsg)

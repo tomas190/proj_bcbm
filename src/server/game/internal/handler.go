@@ -149,7 +149,7 @@ func handleRoomEvent(args []interface{}) {
 	u, ok := a.UserData().(*User)
 	_, logged := Mgr.UserRecord[u.UserID]
 	_, inRoom := Mgr.UserRoom[u.UserID]
-	log.Debug("<----game 房间事件 %v %v %v---->", u.UserID, reflect.TypeOf(args[0]))
+	log.Debug("<----game 房间事件 %v %v %v---->", u.UserID, reflect.TypeOf(args[0]), args[0])
 
 	if ok && logged && inRoom {
 		// 找到玩家房间
@@ -181,6 +181,6 @@ func mockUserInfo(userID uint32) *User {
 }
 
 func errorResp(a gate.Agent, err msg.ErrorCode, detail string) {
-	log.Debug("<----game 错误resp---->", err)
+	log.Debug("<----game 错误resp %+v---->", err)
 	a.WriteMsg(&msg.Error{Code: err, Detail: detail})
 }

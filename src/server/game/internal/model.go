@@ -65,14 +65,16 @@ func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 	h.UserRoom[u.UserID] = dl.RoomID
 	dl.Users[u.UserID] = *u
 
+	converter := DTOConverter{}
+	r := converter.R2Msg(*dl)
+
 	resp := &msg.JoinRoomR{
 		CurBankers: dl.getPlayerInfoResp(),
 		Amount:     []float64{21, 400, 325, 235, 109, 111, 345, 908},
 		PAmount:    []float64{1, 10, 1, 0, 0, 0, 100, 500},
 		Players:    dl.getPlayerInfoResp(),
-		Counter:    dl.counter,
+		Room:       &r,
 		ServerTime: uint32(time.Now().Unix()),
-		EndTime:    dl.ddl,
 	}
 
 	log.Debug("<---加入房间响应 %+v--->", resp.Players)

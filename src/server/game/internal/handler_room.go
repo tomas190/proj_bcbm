@@ -29,7 +29,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 
 		dl.Broadcast(resp)
 	} else {
-		errorResp(au.ConnAgent, msg.ErrorCode_RoomNotExist, "当前不是下注状态")
+		errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
 	}
 }
 

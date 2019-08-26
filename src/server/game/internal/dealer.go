@@ -18,8 +18,8 @@ type Dealer struct {
 	counter uint32
 	ddl     uint32
 
-	Status  uint32
-	History []uint32
+	Status  uint32        // 房间状态
+	History []uint32      // 房间开奖历史
 	HRChan  chan HRMsg    // 房间大厅通信
 	BBChan  chan struct{} // 下注广播信号
 
@@ -44,7 +44,6 @@ func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 // 重置表
 func (dl *Dealer) ClockReset(duration uint32, next func()) {
 	defer func() { dl.counter = 0 }()
-	dl.ddl = uint32(time.Now().Unix()) + duration
 	log.Debug("Deadline: %v, Event: %v, RoomID: %+v", duration, util.Function{}.GetFunctionName(next), dl.RoomID)
 	go func() {
 		for t := range dl.clock.C {
@@ -61,6 +60,7 @@ func (dl *Dealer) ClockReset(duration uint32, next func()) {
 
 func (dl *Dealer) StartGame() {
 	dl.Status = constant.RSBetting
+	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime
 	dl.ClockReset(con.ClearTime, dl.Bet)
 }
 
@@ -74,10 +74,10 @@ func (dl *Dealer) Bet() {
 	}
 	log.Debug("bet... %+v", dl.RoomID)
 
+	dl.ddl = uint32(time.Now().Unix()) + con.BetTime
 	converter := DTOConverter{}
 	resp := converter.RSBMsg(0, 0, 0, *dl)
 	dl.Broadcast(&resp)
-
 	dl.ClockReset(constant.BetTime, dl.Settle)
 }
 
@@ -95,6 +95,7 @@ func (dl *Dealer) Settle() {
 
 	log.Debug("settle... %+v", dl.RoomID)
 
+	dl.ddl = uint32(time.Now().Unix()) + con.SettleTime
 	converter := DTOConverter{}
 	resp := converter.RSBMsg(res, 10, 210, *dl)
 	dl.Broadcast(&resp)
@@ -106,6 +107,8 @@ func (dl *Dealer) Settle() {
 func (dl *Dealer) ClearChip() {
 	dl.Status = constant.RSClear
 	log.Debug("clear chip... %+v", dl.RoomID)
+
+	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime
 
 	converter := DTOConverter{}
 	resp := converter.RSBMsg(0, 0, 0, *dl)

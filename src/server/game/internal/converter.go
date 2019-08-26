@@ -30,6 +30,7 @@ func (c *DTOConverter) R2Msg(dl Dealer) msg.RoomInfo {
 		MinLimit:   dl.MinLimit,
 		Counter:    dl.counter,
 		Status:     dl.Status,
+		EndTime:    dl.ddl,
 		History:    dl.History,
 		Statistics: stat,
 	}
@@ -45,7 +46,7 @@ func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
 	bMsg := msg.RoomChangeHB{
 		RoomID:     m.RoomID,
 		Result:     m.LotteryResult,
-		EndTime:    m.EndTime,
+		EndTime:    dl.ddl,
 		ServerTime: uint32(time.Now().Unix()),
 		Status:     m.RoomStatus,
 		Counter:    dl.counter,
@@ -58,7 +59,7 @@ func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
 func (c *DTOConverter) RSBMsg(res uint32, win float64, money float64, dl Dealer) msg.RoomStatusB {
 	bMsg := msg.RoomStatusB{
 		Status:      dl.Status,
-		Counter:     dl.counter,
+		Counter:     0,
 		EndTime:     dl.ddl,
 		Result:      res,
 		WinMoney:    win,
