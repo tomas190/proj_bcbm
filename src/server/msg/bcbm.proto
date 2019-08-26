@@ -20,10 +20,10 @@ enum MessageID {
 	MsgAutoBet           = 14;
 	MsgAutoBetR          = 15;
 	MsgBet               = 16;
-	MsgBetR              = 17;
-	MsgBetInfoB          = 18;
-	MsgBankersB          = 19;
-	MsgPlayersB          = 20;
+	MsgBetInfoB          = 17;
+	MsgBankersB          = 18;
+	MsgPlayersB          = 19;
+	MsgRoomStatusB       = 20;
 }
 
 enum AreaID {
@@ -127,47 +127,41 @@ message JoinRoomR {
     repeated double Amount = 2;        // 当前房间下注信息
     repeated double PAmount = 3;       // 如果玩家是重新进入房间，需要玩家在该房间的下注信息
     repeated UserInfo Players = 4;     // 当前房间的玩家信息
-    uint32 Counter = 5;                // 当前已经过的时间
-    uint32 EndTime = 6;                // 进度条结束时间
+    RoomInfo Room = 5;                 // 当前房间状态
+    repeated uint32 History = 6;       // 历史记录
     uint32 ServerTime = 7;             // 服务器时间
 }
 
-// 离开房间
-message LeaveRoom {}
-
-message LeaveRoomR {}
-
-// 上庄
-message GrabBanker {}
-
 // 下注
 message Bet {
-    uint32 Area = 1;
-    double ChipSize = 2;
+    uint32 Area = 1;      // 投注区域
+    uint32 Chip = 2;      // 筹码
 }
 
-message BetR {}
+// 进入房间后房间状态广播，比大厅广播更细粒度
+// 包含了清理筹码倒计时，以及结算结果
+// 状态枚举在 enum RoomStatus
+message RoomStatusB {
+    uint32 Status = 1;                 // 改变之后的状态
+    uint32 Counter = 2;                // 倒计时条已过的时间
+    uint32 EndTime = 3;                // 倒计时结束时间
+    uint32 Result = 4;                 // 开奖结果-如果是开奖状态的话
+    double WinMoney = 5;               // 玩家赢数
+    double PlayerMoney = 6;            // 玩家金币更新
+    uint32 ServerTime = 7;             // 服务器时间
+}
 
-// 自动下注
-message AutoBet {}
-
-message AutoBetR {}
-
-// 下注信息广播，每秒广播一次统计信息
+// 下注信息广播，收到投注请求即广播
 message BetInfoB {
-     // 1 10 100 500 1k
-    repeated uint32 ChipCount40x = 1;
-    repeated uint32 ChipCount30x = 2;
-    repeated uint32 ChipCount20x = 3;
-    repeated uint32 ChipCount10x = 4;
-    repeated uint32 ChipCount5x1 = 5;
-    repeated uint32 ChipCount5x2 = 6;
-    repeated uint32 ChipCount5x3 = 7;
-    repeated uint32 ChipCount5x4 = 8;
-    uint32 ServerTime = 9;      // 服务器时间
+     uint32 Area = 1;        // 下注区域
+     uint32 Chip = 2;        // 下注筹码
+     double AreaTotal = 3;   // 当前区域投注总数
+     double PlayerTotal = 4; // 当前玩家在此区域投注总数
+     uint32 PlayerID = 5;    // 谁下的注
+     double Money = 6;       // 该玩家投注后剩余金币
 }
 
-// 庄家广播
+// 庄家广播，数组第一个为当前庄家，若变化，则为庄家轮换
 message BankersB {
     repeated UserInfo Banker = 1; // 庄家列表，0为当前庄家，其余为上庄列表
     uint32 ServerTime = 2;        // 服务器时间
@@ -179,6 +173,19 @@ message PlayersB {
     uint32 ServerTime = 2;         // 服务器时间
 }
 
+// 上庄
+message GrabBanker {}
+
+// 自动下注
+message AutoBet {}
+
+message AutoBetR {}
+
+// 离开房间
+message LeaveRoom {}
+
+message LeaveRoomR {}
+
 // 错误码
 enum ErrorCode {
     Success = 0;
@@ -189,8 +196,16 @@ enum ErrorCode {
     ServerClosed = 201;
     UserRepeatLogin = 202;
     UserRemoteLogin = 203;
+
+    UserNotInRoom = 301;       // 玩家不在房间里
+    UserAlreadyInRoom = 302;   // 玩家已经在房间里了
+    RoomNotExist = 303;        // 房间不存在
+    RoomFull = 304;            // 房间已经满了
+
+    NotInBetting = 401;        // 当前不是下注状态
 }
 
 message Error {
     ErrorCode Code = 1;
+    string Detail = 2;
 }

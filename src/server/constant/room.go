@@ -9,10 +9,12 @@ const (
 )
 
 const (
-	BetTime    = 1 //15
-	SettleTime = 1 //23
-	ClearTime  = 1
+	BetTime    = 16 //16
+	SettleTime = 24 //24
+	ClearTime  = 3
 )
+
+const MaxPlayerCount = 100
 
 const (
 	RL1MinBet   = 1

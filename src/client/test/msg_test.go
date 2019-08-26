@@ -37,7 +37,7 @@ func TestJoinRoom(t *testing.T) {
 }
 
 func TestBet(t *testing.T) {
-	m := msg.Bet{Area: 1, ChipSize: 10}
+	m := msg.Bet{Area: 1, Chip: 1}
 	bs := common.ByteMsg(&m)
 	common.WSWriteRead(bs)
 }

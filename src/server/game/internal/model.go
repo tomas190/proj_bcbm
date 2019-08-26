@@ -6,6 +6,7 @@ import (
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"reflect"
+	"time"
 )
 
 // 房间状态改变时通知大厅
@@ -19,6 +20,7 @@ type HRMsg struct {
 type Hall struct {
 	UserRecord map[uint32]*User    // 用户记录
 	RoomRecord map[uint32]*Dealer  // 房间记录
+	UserRoom   map[uint32]uint32   // 用户房间
 	History    map[uint32][]uint32 // 各房间历史记录
 	HRChan     chan HRMsg          // 房间大厅通信
 }
@@ -27,6 +29,7 @@ func NewHall() *Hall {
 	return &Hall{
 		UserRecord: make(map[uint32]*User),
 		RoomRecord: make(map[uint32]*Dealer),
+		UserRoom:   make(map[uint32]uint32),
 		History:    make(map[uint32][]uint32),
 		HRChan:     make(chan HRMsg, 6),
 	}
@@ -46,7 +49,6 @@ func (h *Hall) OpenCasino() {
 			case hrMsg := <-h.HRChan:
 				h.ChangeRoomStatus(hrMsg)
 			default:
-
 			}
 		}
 	}()
@@ -59,9 +61,27 @@ func (h *Hall) openRoom(rID uint32) {
 	dl.StartGame()
 }
 
-// 收到房间消息状态改变的消息后
-// 修改大厅统计任务
-// 发广播
+func (h *Hall) AllocateUser(u *User, dl *Dealer) {
+	h.UserRoom[u.UserID] = dl.RoomID
+	dl.Users[u.UserID] = *u
+
+	converter := DTOConverter{}
+	r := converter.R2Msg(*dl)
+
+	resp := &msg.JoinRoomR{
+		CurBankers: dl.getPlayerInfoResp(),
+		Amount:     []float64{21, 400, 325, 235, 109, 111, 345, 908},
+		PAmount:    []float64{1, 10, 1, 0, 0, 0, 100, 500},
+		Players:    dl.getPlayerInfoResp(),
+		Room:       &r,
+		ServerTime: uint32(time.Now().Unix()),
+	}
+
+	log.Debug("<---加入房间响应 %+v--->", resp.Players)
+	u.ConnAgent.WriteMsg(resp)
+}
+
+// 收到房间消息状态改变的消息后 修改大厅统计任务 发广播
 func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 	rID := hrMsg.RoomID
 	log.Debug("roomStatus: %+v", hrMsg.RoomStatus)
@@ -115,18 +135,6 @@ func NewRoom(rID uint32, minB, maxB, minL float64) *Room {
 		MinLimit: minL,
 	}
 }
-
-type roomStatus struct {
-	Status  uint32
-	EndTime uint32
-	Result  uint32
-}
-
-var roomStatusChan chan roomStatus
-
-// 大厅监测各房间发来的消息，如果变化发出房间状态变化广播
-
-// 房间
 
 type User struct {
 	UserID    uint32     `bson:"user_id" json:"user_id"`       // 用户id

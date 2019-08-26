@@ -25,23 +25,23 @@ func TransIDToMsg(id uint16) proto.Message {
 	case 7:
 		resp = &msg.LogoutR{}
 	case 8:
-		resp = &msg.JoinRoom{}
+		resp = &msg.RoomChangeHB{}
 	case 9:
-		resp = &msg.JoinRoomR{}
+		resp = &msg.JoinRoom{}
 	case 10:
-		resp = &msg.LeaveRoom{}
+		resp = &msg.JoinRoomR{}
 	case 11:
-		resp = &msg.LeaveRoomR{}
+		resp = &msg.LeaveRoom{}
 	case 12:
-		resp = &msg.GrabBanker{}
+		resp = &msg.LeaveRoomR{}
 	case 13:
-		resp = &msg.AutoBet{}
+		resp = &msg.GrabBanker{}
 	case 14:
-		resp = &msg.AutoBetR{}
+		resp = &msg.AutoBet{}
 	case 15:
-		resp = &msg.Bet{}
+		resp = &msg.AutoBetR{}
 	case 16:
-		resp = &msg.BetR{}
+		resp = &msg.Bet{}
 	case 17:
 		resp = &msg.BetInfoB{}
 	case 18:
@@ -54,26 +54,26 @@ func TransIDToMsg(id uint16) proto.Message {
 }
 
 var msgType2ID = map[string]uint16{
-	"*msg.Error":      0,
-	"*msg.Ping":       1,
-	"*msg.Pong":       2,
-	"*msg.LoginTest":  3,
-	"*msg.Login":      4,
-	"*msg.LoginR":     5,
-	"*msg.Logout":     6,
-	"*msg.LogoutR":    7,
-	"*msg.JoinRoom":   8,
-	"*msg.JoinRoomR":  9,
-	"*msg.LeaveRoom":  10,
-	"*msg.LeaveRoomR": 11,
-	"*msg.GrabBanker": 12,
-	"*msg.AutoBet":    13,
-	"*msg.AutoBetR":   14,
-	"*msg.Bet":        15,
-	"*msg.BetR":       16,
-	"*msg.BetInfoB":   17,
-	"*msg.BankersB":   18,
-	"*msg.PlayersB":   19,
+	"*msg.Error":        0,
+	"*msg.Ping":         1,
+	"*msg.Pong":         2,
+	"*msg.LoginTest":    3,
+	"*msg.Login":        4,
+	"*msg.LoginR":       5,
+	"*msg.Logout":       6,
+	"*msg.LogoutR":      7,
+	"*msg.RoomChangeHB": 8,
+	"*msg.JoinRoom":     9,
+	"*msg.JoinRoomR":    10,
+	"*msg.LeaveRoom":    11,
+	"*msg.LeaveRoomR":   12,
+	"*msg.GrabBanker":   13,
+	"*msg.AutoBet":      14,
+	"*msg.AutoBetR":     15,
+	"*msg.Bet":          16,
+	"*msg.BetInfoB":     17,
+	"*msg.BankersB":     18,
+	"*msg.PlayersB":     19,
 }
 
 func transMsgToID(t string) uint16 {
