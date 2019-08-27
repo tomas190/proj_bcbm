@@ -26,15 +26,17 @@ type Dealer struct {
 	Users    map[uint32]User      // 房间用户
 	Bankers  []User               // 上庄玩家榜单 todo 玩家榜单
 	UserBets map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
-	AreaBets map[uint32][]float64 // 每个区域玩家投注总数
+	AreaBets []float64            // 每个区域玩家投注总数
 }
 
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 	return &Dealer{
-		Users:  make(map[uint32]User),
-		Room:   NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
-		clock:  time.NewTicker(time.Second),
-		HRChan: hr,
+		Users:    make(map[uint32]User),
+		Room:     NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
+		clock:    time.NewTicker(time.Second),
+		HRChan:   hr,
+		UserBets: map[uint32][]float64{},
+		AreaBets: []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 	}
 }
 
@@ -107,6 +109,12 @@ func (dl *Dealer) Settle() {
 func (dl *Dealer) ClearChip() {
 	dl.Status = constant.RSClear
 	log.Debug("clear chip... %+v", dl.RoomID)
+
+	// 清理
+	dl.AreaBets = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+	for i := range dl.UserBets {
+		dl.UserBets[i] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+	}
 
 	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime
 

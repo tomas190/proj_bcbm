@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 	"proj_bcbm/src/server/constant"
@@ -64,20 +65,20 @@ func (h *Hall) openRoom(rID uint32) {
 func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 	h.UserRoom[u.UserID] = dl.RoomID
 	dl.Users[u.UserID] = *u
+	dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 	converter := DTOConverter{}
 	r := converter.R2Msg(*dl)
 
 	resp := &msg.JoinRoomR{
 		CurBankers: dl.getPlayerInfoResp(),
-		Amount:     []float64{21, 400, 325, 235, 109, 111, 345, 908},
-		PAmount:    []float64{1, 10, 1, 0, 0, 0, 100, 500},
-		Players:    dl.getPlayerInfoResp(),
+		Amount:     dl.AreaBets,
+		PAmount:    dl.UserBets[u.UserID],
 		Room:       &r,
 		ServerTime: uint32(time.Now().Unix()),
 	}
 
-	log.Debug("<---加入房间响应 %+v--->", resp.Players)
+	log.Debug("<---加入房间响应 %+v--->", resp.CurBankers)
 	u.ConnAgent.WriteMsg(resp)
 }
 
@@ -118,6 +119,33 @@ func (h *Hall) GetRoomsInfoResp() []*msg.RoomInfo {
 	}
 
 	return roomsInfoResp
+}
+
+// 替换用户连接
+func (h *Hall) ReplaceUserAgent(userID uint32, agent gate.Agent) error {
+	log.Debug("用户重连或顶替，正在替换agent", userID)
+	// tip 这里会拷贝一份数据，需要替换的是记录中的，而非拷贝数据中的，还要注意替换连接之后要把数据绑定到新连接上
+	if _, ok := h.UserRecord[userID]; ok {
+		errorResp(agent, msg.ErrorCode_UserRemoteLogin, "异地登录")
+		h.UserRecord[userID].ConnAgent.Destroy()
+		h.UserRecord[userID].ConnAgent = agent
+		h.UserRecord[userID].ConnAgent.SetUserData(h.UserRecord[userID])
+		return nil
+	} else {
+		return errors.New("用户不在登记表中")
+	}
+}
+
+// agent 是否已经存在
+// 是否开销过大？后续可通过新增记录解决
+func (h *Hall) agentExist(a gate.Agent) bool {
+	for _, u := range h.UserRecord {
+		if u.ConnAgent == a {
+			return true
+		}
+	}
+
+	return false
 }
 
 type Room struct {

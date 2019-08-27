@@ -16,15 +16,23 @@ func (dl *Dealer) handleBet(args []interface{}) {
 
 	log.Debug("筹码信息 %+v", m)
 
-	// fixme 计算
+	cs := constant.ChipSize[m.Chip]
+	if au.Balance < cs {
+		errorResp(a, msg.ErrorCode_InsufficientBalanceBet, "没钱玩啥")
+	}
+
+	// 够 记录
+	// 在中心服务器减钱，拿返回的余额
+	dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
+	dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
 	if dl.Status == constant.RSBetting {
 		resp := &msg.BetInfoB{
 			Area:        m.Area,
 			Chip:        m.Chip,
-			AreaTotal:   90,
-			PlayerTotal: 10.6,
+			AreaTotal:   dl.AreaBets[m.Area],
+			PlayerTotal: dl.UserBets[au.UserID][m.Area],
 			PlayerID:    au.UserID,
-			Money:       999.6,
+			Money:       au.Balance - dl.UserBets[au.UserID][m.Area], // fixme
 		}
 
 		dl.Broadcast(resp)

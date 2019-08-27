@@ -69,12 +69,61 @@ func handleTestLogin(args []interface{}) {
 	Mgr.UserRecord[u.UserID] = u
 	log.Debug("<---测试登入响应 %+v--->", resp.User)
 	a.WriteMsg(resp)
-
 }
 
 func handleLogin(args []interface{}) {
 	m := args[0].(*msg.Login)
 	a := args[1].(gate.Agent)
+	userID := m.GetUserID()
+	log.Debug("处理用户登录请求 %+v", userID)
+	if u, ok := Mgr.UserRecord[userID]; ok && u.ConnAgent == a { // 用户和连接都相同
+		log.Debug("rpcUserLogin 同一用户相同连接重复登录")
+		errorResp(a, msg.ErrorCode_UserRepeatLogin, "重复登录")
+		return
+	} else if _, ok := Mgr.UserRecord[userID]; ok { // 用户存在，但连接不同
+		err := Mgr.ReplaceUserAgent(userID, a)
+		if err != nil {
+			log.Error("用户连接替换错误", err)
+		}
+
+		u := Mgr.UserRecord[userID]
+		resp := &msg.LoginR{
+			User: &msg.UserInfo{
+				UserID:   u.UserID,
+				Avatar:   u.Avatar,
+				Money:    u.Balance,
+				NickName: u.NickName,
+			},
+		}
+
+		if rID, ok := Mgr.UserRoom[userID]; ok {
+			resp.RoomID = rID // 如果用户之前在房间里后来退出，返回房间号
+		}
+		log.Debug("<----当前大厅人数---->%+v", len(Mgr.UserRecord))
+		log.Debug("<----login 登录 resp---->%+v %+v", resp.User.UserID)
+		a.WriteMsg(resp)
+	} else if !Mgr.agentExist(a) { // 正常大多数情况
+		c4c.UserLoginCenter(userID, m.Password, func(u *User) {
+			resp := &msg.LoginR{
+				User: &msg.UserInfo{
+					UserID:   u.UserID,
+					Avatar:   u.Avatar,
+					NickName: u.NickName,
+					Money:    u.Balance,
+				},
+			}
+			log.Debug("<----login 登录 resp---->%+v", resp)
+
+			// 重新绑定信息
+			u.ConnAgent = a
+			a.SetUserData(u)
+
+			Mgr.AllocateUser(u) // 添加用户进入大厅
+			log.Debug("<----当前大厅人数---->%+v", len(Mgr.UserRecord))
+			log.Debug("<----login 登录 resp---->%+v", resp.User.UserID)
+			a.WriteMsg(resp)
+		})
+	} // 同一连接上不同用户的情况对第二个用户的请求不做处理
 
 	// u := a.UserData().(*User)
 	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)

@@ -22,8 +22,9 @@ enum MessageID {
 	MsgBet               = 16;
 	MsgBetInfoB          = 17;
 	MsgBankersB          = 18;
-	MsgPlayersB          = 19;
-	MsgRoomStatusB       = 20;
+	MsgPlayers           = 19;
+	MsgPlayersR          = 20;
+	MsgRoomStatusB       = 21;
 }
 
 enum AreaID {
@@ -64,8 +65,8 @@ message UserInfo {
     double Money = 2;
     string Avatar = 3;
     string NickName = 4;
-    double BetAmount = 5; // 下注数
     uint32 WinCount = 6; // 近20局获胜局数
+    double BetAmount = 5; // 近20局下注金额
 }
 
 // 房间信息
@@ -126,10 +127,9 @@ message JoinRoomR {
     repeated UserInfo CurBankers = 1;  // 当前房间庄家信息
     repeated double Amount = 2;        // 当前房间下注信息
     repeated double PAmount = 3;       // 如果玩家是重新进入房间，需要玩家在该房间的下注信息
-    repeated UserInfo Players = 4;     // 当前房间的玩家信息
-    RoomInfo Room = 5;                 // 当前房间状态
-    repeated uint32 History = 6;       // 历史记录
-    uint32 ServerTime = 7;             // 服务器时间
+    RoomInfo Room = 4;                 // 当前房间状态
+    repeated uint32 History = 5;       // 历史记录
+    uint32 ServerTime = 6;             // 服务器时间
 }
 
 // 下注
@@ -167,8 +167,11 @@ message BankersB {
     uint32 ServerTime = 2;        // 服务器时间
 }
 
-// 玩家广播
-message PlayersB {
+// 玩家列表请求
+message Players {}
+
+// 玩家列表返回
+message PlayersR {
     repeated UserInfo Players = 1; // 玩家列表/历史
     uint32 ServerTime = 2;         // 服务器时间
 }

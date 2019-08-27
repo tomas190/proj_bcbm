@@ -21,3 +21,11 @@ const (
 	RL1MaxBet   = 10000
 	RL1MinLimit = 50
 )
+
+var ChipSize = map[uint32]float64{
+	1: 1,
+	2: 10,
+	3: 100,
+	4: 500,
+	5: 1000,
+}

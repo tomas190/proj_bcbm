@@ -37,7 +37,8 @@ func init() {
 	// 特定情况触发的广播消息
 	Processor.Register(&BetInfoB{}) // 有人投注广播一次
 	Processor.Register(&BankersB{}) // 有人上庄或下庄广播一次
-	Processor.Register(&PlayersB{}) // 有人进入或离开广播一次
+	Processor.Register(&Players{})  // 玩家列表请求
+	Processor.Register(&PlayersR{}) // 玩家列表响应
 	Processor.Register(&RoomStatusB{})
 
 	// print ID 打印出想要的任意格式
