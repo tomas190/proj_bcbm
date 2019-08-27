@@ -118,31 +118,12 @@ func handleLogin(args []interface{}) {
 			u.ConnAgent = a
 			a.SetUserData(u)
 
-			Mgr.AllocateUser(u) // 添加用户进入大厅
+			// Mgr.AllocateUser(u) // fixme 添加用户进入大厅
 			log.Debug("<----当前大厅人数---->%+v", len(Mgr.UserRecord))
 			log.Debug("<----login 登录 resp---->%+v", resp.User.UserID)
 			a.WriteMsg(resp)
 		})
 	} // 同一连接上不同用户的情况对第二个用户的请求不做处理
-
-	// u := a.UserData().(*User)
-	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
-	userID := m.GetUserID()
-	u := mockUserInfo(userID) // 模拟用户
-
-	resp := &msg.LoginR{
-		User: &msg.UserInfo{
-			UserID:   u.UserID,
-			Avatar:   u.Avatar,
-			NickName: u.NickName,
-			Money:    u.Balance,
-		},
-		Rooms:      Mgr.GetRoomsInfoResp(),
-		ServerTime: uint32(time.Now().Unix()),
-	}
-
-	Mgr.UserRecord[u.UserID] = u
-	a.WriteMsg(resp)
 }
 
 func handleLogout(args []interface{}) {
