@@ -21,7 +21,9 @@ func TestClient4Center_ServerLoginCenter(t *testing.T) {
 	// 在没有收到服务器登陆成功返回之前不应该执行后续操作
 	time.Sleep(1 * time.Second)
 
-	c.UserLoginCenter(955509280, "123456", func(data *User) {
+	userID := uint32(955509280)
+
+	c.UserLoginCenter(userID, "123456", func(data *User) {
 		log.Debug("<----用户登录回调---->%+v %+v %+v", data.Balance, data.NickName, data.Avatar)
 	})
 
@@ -29,26 +31,23 @@ func TestClient4Center_ServerLoginCenter(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 
-	//c.UserWinScore(955509280, uint32(time.Now().Unix()),
-	//	time.Now().Format("2006-01-02T15:04:05"), "test win score",
-	//	func(data *User) {
-	//		log.Debug("<----用户加钱回调---->%+v %+v %+v", data.Balance, data.NickName, data.Avatar)
-	//	})
-	//
-	//fmt.Println("#####", c.userWaitEvent)
+	c.UserWinScore(userID, 10,
+		func(data *User) {
+			log.Debug("<----用户加钱回调---->%+v %+v", data.UserID, data.Balance)
+		})
+
+	fmt.Println("#####", c.userWaitEvent)
 
 	time.Sleep(1 * time.Second)
 
-	c.UserLoseScore(955509280, uint32(time.Now().Unix()),
-		time.Now().Format("2006-01-02T15:04:05"), "test win score",
+	c.UserLoseScore(userID, -10,
 		func(data *User) {
 			log.Debug("<----用户减钱回调---->%+v %+v %+v", data.Balance, data.NickName, data.Avatar)
 		})
 
 	fmt.Println("#####", c.userWaitEvent)
 
-	c.UserLoseScore(955509280, uint32(time.Now().Unix()),
-		time.Now().Format("2006-01-02T15:04:05"), "test win score",
+	c.UserLoseScore(userID, -10,
 		func(data *User) {
 			log.Debug("<----用户减钱回调2---->%+v %+v %+v", data.Balance, data.NickName, data.Avatar)
 		})
@@ -57,7 +56,7 @@ func TestClient4Center_ServerLoginCenter(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 
-	c.UserLogoutCenter(955509280, func(data *User) {
+	c.UserLogoutCenter(userID, func(data *User) {
 		log.Debug("<----用户登出回调---->%+v", data.UserID)
 	})
 
@@ -84,9 +83,55 @@ func TestClient4Center_BetLoseMoney(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 
-	c.UserLoseScore(955509280, uint32(time.Now().Unix()), "", "aaa",
+	c.UserLoseScore(955509280, -5,
 		func(data *User) {
 			log.Debug("<----用户减钱回调---->%+v %+v %+v", data.Balance, data.NickName, data.Avatar)
+		})
+	time.Sleep(2 * time.Second)
+
+	fmt.Println(c.userWaitEvent)
+}
+
+func TestClient4Center_AddMoney(t *testing.T) {
+	userID := uint32(955509280)
+
+	c := NewClient4Center()
+	c.ReqToken()
+	c.HeartBeatAndListen()
+	time.Sleep(1 * time.Second)
+
+	c.UserLoginCenter(userID, "123456", func(data *User) {
+		log.Debug("<----用户登录回调---->%+v %+v", data.UserID, data.Balance)
+	})
+
+	time.Sleep(2 * time.Second)
+
+	c.UserLoseScore(userID, -1000,
+		func(data *User) {
+			log.Debug("<----用户减钱回调---->%+v %+v", data.UserID, data.Balance)
+		})
+	time.Sleep(2 * time.Second)
+
+	fmt.Println(c.userWaitEvent)
+}
+
+func TestClient4Center_MinusMoney(t *testing.T) {
+	userID := uint32(955509280)
+
+	c := NewClient4Center()
+	c.ReqToken()
+	c.HeartBeatAndListen()
+	time.Sleep(1 * time.Second)
+
+	c.UserLoginCenter(userID, "123456", func(data *User) {
+		log.Debug("<----用户登录回调---->%+v %+v", data.UserID, data.Balance)
+	})
+
+	time.Sleep(2 * time.Second)
+
+	c.UserWinScore(userID, 1000,
+		func(data *User) {
+			log.Debug("<----用户加钱回调---->%+v %+v", data.UserID, data.Balance)
 		})
 	time.Sleep(2 * time.Second)
 
