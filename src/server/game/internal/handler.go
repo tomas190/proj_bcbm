@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
+	"math/rand"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"reflect"
@@ -19,6 +20,7 @@ func init() {
 
 	handlerReg(&msg.JoinRoom{}, handleJoinRoom)
 
+	handlerReg(&msg.Players{}, handleRoomEvent)
 	handlerReg(&msg.Bet{}, handleRoomEvent)
 	handlerReg(&msg.LeaveRoom{}, handleRoomEvent)
 	handlerReg(&msg.GrabBanker{}, handleRoomEvent)
@@ -44,35 +46,69 @@ func handlePing(args []interface{}) {
 }
 
 func handleTestLogin(args []interface{}) {
-	m := args[0].(*msg.LoginTest)
+	// m := args[0].(*msg.Login)
+	m := mockLoginMsg()
 	a := args[1].(gate.Agent)
-
-	log.Debug("recv %+v, addr %+v, 用户 %+v", reflect.TypeOf(m), a.RemoteAddr(), m.UserID)
 	userID := m.GetUserID()
-	u := mockUserInfo(userID) // 模拟用户
+	log.Debug("处理用户登录请求 %+v", userID)
+	if u, ok := Mgr.UserRecord[userID]; ok && u.ConnAgent == a { // 用户和连接都相同
+		log.Debug("rpcUserLogin 同一用户相同连接重复登录")
+		errorResp(a, msg.ErrorCode_UserRepeatLogin, "重复登录")
+		return
+	} else if _, ok := Mgr.UserRecord[userID]; ok { // 用户存在，但连接不同
+		err := Mgr.ReplaceUserAgent(userID, a)
+		if err != nil {
+			log.Error("用户连接替换错误", err)
+		}
 
-	resp := &msg.LoginR{
-		User: &msg.UserInfo{
-			UserID:   u.UserID,
-			Avatar:   u.Avatar,
-			NickName: u.NickName,
-			Money:    u.Balance,
-		},
-		Rooms:      Mgr.GetRoomsInfoResp(),
-		ServerTime: uint32(time.Now().Unix()),
-	}
+		u := Mgr.UserRecord[userID]
+		resp := &msg.LoginR{
+			User: &msg.UserInfo{
+				UserID:   u.UserID,
+				Avatar:   u.Avatar,
+				Money:    u.Balance,
+				NickName: u.NickName,
+			},
+			Rooms:      Mgr.GetRoomsInfoResp(),
+			ServerTime: uint32(time.Now().Unix()),
+		}
 
-	// 重新绑定信息
-	u.ConnAgent = a
-	a.SetUserData(u)
+		if rID, ok := Mgr.UserRoom[userID]; ok {
+			resp.RoomID = rID // 如果用户之前在房间里后来退出，返回房间号
+		}
+		log.Debug("<----当前大厅人数---->%+v", len(Mgr.UserRecord))
+		log.Debug("<----login 登录 resp---->%+v %+v", resp.User.UserID)
+		a.WriteMsg(resp)
+	} else if !Mgr.agentExist(a) { // 正常大多数情况
+		c4c.UserLoginCenter(userID, m.Password, func(u *User) {
+			resp := &msg.LoginR{
+				User: &msg.UserInfo{
+					UserID:   u.UserID,
+					Avatar:   u.Avatar,
+					NickName: u.NickName,
+					Money:    u.Balance,
+				},
+				Rooms:      Mgr.GetRoomsInfoResp(),
+				ServerTime: uint32(time.Now().Unix()),
+			}
+			log.Debug("<----login 登录 resp---->%+v", resp)
 
-	Mgr.UserRecord[u.UserID] = u
-	log.Debug("<---测试登入响应 %+v--->", resp.User)
-	a.WriteMsg(resp)
+			// 重新绑定信息
+			u.ConnAgent = a
+			a.SetUserData(u)
+
+			// Mgr.AllocateUser(u) // fixme 添加用户进入大厅
+			Mgr.UserRecord[u.UserID] = u
+			log.Debug("<----当前大厅人数---->%+v", len(Mgr.UserRecord))
+			log.Debug("<----login 登录 resp---->%+v", resp.User.UserID)
+			a.WriteMsg(resp)
+		})
+	} // 同一连接上不同用户的情况对第二个用户的请求不做处理
 }
 
 func handleLogin(args []interface{}) {
-	m := args[0].(*msg.Login)
+	// m := args[0].(*msg.Login)
+	m := mockLoginMsg()
 	a := args[1].(gate.Agent)
 	userID := m.GetUserID()
 	log.Debug("处理用户登录请求 %+v", userID)
@@ -136,6 +172,7 @@ func handleLogout(args []interface{}) {
 	}
 	resp := &msg.LogoutR{}
 	a.WriteMsg(resp)
+	a.Close()
 }
 
 /*************************************
@@ -191,6 +228,8 @@ func handleRoomEvent(args []interface{}) {
 			switch t := args[0].(type) {
 			case *msg.Bet:
 				dealer.handleBet(args)
+			case *msg.Players:
+				dealer.handlePlayers(args)
 			case *msg.GrabBanker:
 			case *msg.AutoBet:
 			default:
@@ -208,6 +247,16 @@ func mockUserInfo(userID uint32) *User {
 	u := &User{userID, nickName, avatar, 1000, nil}
 
 	return u
+}
+
+func mockLoginMsg() *msg.Login {
+	rand.Seed(time.Now().Unix())
+	userIDs := []uint32{955509280, 409972380, 615426645, 651488813, 900948081, 263936609, 538509606, 704898825, 943979274, 613251393}
+	uID := userIDs[rand.Intn(9)]
+	return &msg.Login{
+		UserID:   uID,
+		Password: "123456",
+	}
 }
 
 func errorResp(a gate.Agent, err msg.ErrorCode, detail string) {

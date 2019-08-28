@@ -23,9 +23,9 @@ type Module struct {
 func (m *Module) OnInit() {
 	m.Skeleton = skeleton
 
-	//c4c = NewClient4Center()
-	//c4c.ReqToken()
-	//c4c.HeartBeatAndListen()
+	c4c = NewClient4Center()
+	c4c.ReqToken()
+	c4c.HeartBeatAndListen()
 	Mgr.OpenCasino()
 }
 

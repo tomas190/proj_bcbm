@@ -58,7 +58,7 @@ func (h *Hall) OpenCasino() {
 // 大厅开房
 func (h *Hall) openRoom(rID uint32) {
 	dl := NewDealer(rID, h.HRChan)
-	h.RoomRecord[rID] = dl
+	h.RoomRecord[rID] = dl // fixme 会导致 fatal error: concurrent map writes
 	dl.StartGame()
 }
 
@@ -71,7 +71,7 @@ func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 	r := converter.R2Msg(*dl)
 
 	resp := &msg.JoinRoomR{
-		CurBankers: dl.getPlayerInfoResp(),
+		CurBankers: dl.getPlayerInfoResp()[:3],
 		Amount:     dl.AreaBets,
 		PAmount:    dl.UserBets[u.UserID],
 		Room:       &r,
@@ -123,7 +123,7 @@ func (h *Hall) GetRoomsInfoResp() []*msg.RoomInfo {
 
 // 替换用户连接
 func (h *Hall) ReplaceUserAgent(userID uint32, agent gate.Agent) error {
-	log.Debug("用户重连或顶替，正在替换agent", userID)
+	log.Debug("用户重连或顶替，正在替换agent %+v", userID)
 	// tip 这里会拷贝一份数据，需要替换的是记录中的，而非拷贝数据中的，还要注意替换连接之后要把数据绑定到新连接上
 	if _, ok := h.UserRecord[userID]; ok {
 		errorResp(agent, msg.ErrorCode_UserRemoteLogin, "异地登录")

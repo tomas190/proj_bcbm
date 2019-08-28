@@ -15,6 +15,7 @@ func init() {
 	msg.Processor.SetRouter(&msg.JoinRoom{}, game.ChanRPC)
 	msg.Processor.SetRouter(&msg.LeaveRoom{}, game.ChanRPC)
 
+	msg.Processor.SetRouter(&msg.Players{}, game.ChanRPC)
 	msg.Processor.SetRouter(&msg.Bet{}, game.ChanRPC)
 	msg.Processor.SetRouter(&msg.GrabBanker{}, game.ChanRPC)
 	msg.Processor.SetRouter(&msg.AutoBet{}, game.ChanRPC)

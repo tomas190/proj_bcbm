@@ -7,6 +7,7 @@ import (
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"reflect"
+	"time"
 )
 
 func (dl *Dealer) handleBet(args []interface{}) {
@@ -25,6 +26,11 @@ func (dl *Dealer) handleBet(args []interface{}) {
 	// 在中心服务器减钱，拿返回的余额
 	dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
 	dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
+
+	//c4c.UserLoseScore(au.UserID, 1, func(data *User) {
+	//	fmt.Println("handleBet 减钱回调")
+	//})
+
 	if dl.Status == constant.RSBetting {
 		resp := &msg.BetInfoB{
 			Area:        m.Area,
@@ -39,6 +45,21 @@ func (dl *Dealer) handleBet(args []interface{}) {
 	} else {
 		errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
 	}
+}
+
+func (dl *Dealer) handlePlayers(args []interface{}) {
+	m := args[0].(*msg.Players)
+	a := args[1].(gate.Agent)
+	au := a.UserData().(*User)
+
+	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
+
+	resp := &msg.PlayersR{
+		Players:    dl.getPlayerInfoResp(),
+		ServerTime: uint32(time.Now().Unix()),
+	}
+
+	a.WriteMsg(resp)
 }
 
 func (dl *Dealer) handleGrabBanker(args []interface{}) {
@@ -87,13 +108,19 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 func (dl *Dealer) getPlayerInfoResp() []*msg.UserInfo {
 	u1 := mockUserInfo(8976784)
 	u2 := mockUserInfo(7829401)
+	u3 := mockUserInfo(7829981)
+	u4 := mockUserInfo(7825581)
+	u5 := mockUserInfo(9825581)
 
 	converter := DTOConverter{}
 	userInfo1 := converter.U2Msg(*u1)
 	userInfo2 := converter.U2Msg(*u2)
+	userInfo3 := converter.U2Msg(*u3)
+	userInfo4 := converter.U2Msg(*u4)
+	userInfo5 := converter.U2Msg(*u5)
 
 	var playerInfoResp []*msg.UserInfo
-	playerInfoResp = append(playerInfoResp, &userInfo1, &userInfo2)
+	playerInfoResp = append(playerInfoResp, &userInfo1, &userInfo2, &userInfo3, &userInfo4, &userInfo5, &userInfo1, &userInfo2, &userInfo3, &userInfo4, &userInfo5)
 
 	return playerInfoResp
 }

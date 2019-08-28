@@ -9,10 +9,12 @@ type DTOConverter struct{}
 
 func (c *DTOConverter) U2Msg(u User) msg.UserInfo {
 	uMsg := msg.UserInfo{
-		UserID:   u.UserID,
-		NickName: u.NickName,
-		Avatar:   u.Avatar,
-		Money:    u.Balance,
+		UserID:    u.UserID,
+		NickName:  u.NickName,
+		Avatar:    u.Avatar,
+		Money:     u.Balance,
+		WinCount:  10, // fixme
+		BetAmount: 100,
 	}
 
 	return uMsg
