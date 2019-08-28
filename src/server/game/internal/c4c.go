@@ -241,9 +241,10 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 	}
 
 	syncData := loseResp.Data
+
 	if syncData.Code == constant.CRespStatusSuccess {
-		if loginCallBack, ok := c4c.userWaitEvent[fmt.Sprintf("%+vwin", syncData.Msg.ID)]; ok {
-			loginCallBack(&User{})
+		if loginCallBack, ok := c4c.userWaitEvent[fmt.Sprintf("%+vlose", syncData.Msg.ID)]; ok {
+			loginCallBack(&User{Balance: syncData.Msg.FinalBalance})
 		} else {
 			log.Error("找不到用户回调")
 		}
@@ -372,7 +373,7 @@ func (c4c *Client4Center) UserLoseScore(userID uint32, timeUnix uint32, timeStr,
 		return
 	}
 
-	log.Debug("UserWinScore c4c.Token- %+v", c4c.token)
+	log.Debug("UserLoseScore c4c.Token- %+v", c4c.token)
 
 	logoutResp := SyncScoreReq{
 		Event: constant.CEventUserLoseScore,
