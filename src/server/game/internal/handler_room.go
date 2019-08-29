@@ -15,24 +15,24 @@ func (dl *Dealer) handleBet(args []interface{}) {
 	a := args[1].(gate.Agent)
 	au := a.UserData().(*User)
 
-	log.Debug("筹码信息 %+v", m)
+	if dl.Status == constant.RSBetting {
+		log.Debug("筹码信息 %+v", m)
 
-	cs := constant.ChipSize[m.Chip]
-	if au.Balance < cs {
-		errorResp(a, msg.ErrorCode_InsufficientBalanceBet, "没钱玩啥")
-	}
+		cs := constant.ChipSize[m.Chip]
+		if au.Balance < cs {
+			errorResp(a, msg.ErrorCode_InsufficientBalanceBet, "没钱玩啥")
+		}
 
-	dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
-	dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
+		dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
+		dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
 
-	c4c.UserLoseScore(au.UserID, -cs, func(data *User) {
-		log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
-		au.Balance = data.Balance
+		c4c.UserLoseScore(au.UserID, -cs, func(data *User) {
+			log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
+			fmt.Println("#########区域总和", au.NickName, dl.AreaBets)
+			fmt.Println("@@@@@@@@@玩家各区域投注", au.NickName, dl.UserBets[au.UserID])
 
-		fmt.Println("#########区域总和", au.NickName, dl.AreaBets)
-		fmt.Println("@@@@@@@@@玩家各区域投注", au.NickName, dl.UserBets[au.UserID])
+			au.Balance = data.Balance
 
-		if dl.Status == constant.RSBetting {
 			resp := &msg.BetInfoB{
 				Area:        m.Area,
 				Chip:        m.Chip,
@@ -41,12 +41,11 @@ func (dl *Dealer) handleBet(args []interface{}) {
 				PlayerID:    au.UserID,
 				Money:       au.Balance,
 			}
-
 			dl.Broadcast(resp)
-		} else {
-			errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
-		}
-	})
+		})
+	} else {
+		errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
+	}
 }
 
 func (dl *Dealer) handlePlayers(args []interface{}) {

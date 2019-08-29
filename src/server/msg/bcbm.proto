@@ -146,9 +146,10 @@ message RoomStatusB {
     uint32 Counter = 2;                // 倒计时条已过的时间
     uint32 EndTime = 3;                // 倒计时结束时间
     uint32 Result = 4;                 // 开奖结果-如果是开奖状态的话
-    double WinMoney = 5;               // 玩家赢数
-    double PlayerMoney = 6;            // 玩家金币更新
-    uint32 ServerTime = 7;             // 服务器时间
+    double BankerWin = 5;              // 庄家赢数
+    double WinMoney = 6;               // 玩家赢数
+    double PlayerMoney = 7;            // 玩家金币更新
+    uint32 ServerTime = 8;             // 服务器时间
 }
 
 // 下注信息广播，收到投注请求即广播

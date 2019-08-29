@@ -20,8 +20,8 @@ func init() {
 
 	handlerReg(&msg.JoinRoom{}, handleJoinRoom)
 
-	handlerReg(&msg.Players{}, handleRoomEvent)
 	handlerReg(&msg.Bet{}, handleRoomEvent)
+	handlerReg(&msg.Players{}, handleRoomEvent)
 	handlerReg(&msg.LeaveRoom{}, handleRoomEvent)
 	handlerReg(&msg.GrabBanker{}, handleRoomEvent)
 	handlerReg(&msg.AutoBet{}, handleRoomEvent)
@@ -41,7 +41,7 @@ func handlerReg(m interface{}, h interface{}) {
 func handlePing(args []interface{}) {
 	// m := args[0].(*msg.Ping)
 	a := args[1].(gate.Agent)
-	log.Debug("recv Ping %+v", a.RemoteAddr())
+	// log.Debug("recv Ping %+v", a.RemoteAddr())
 	a.WriteMsg(&msg.Pong{})
 }
 
@@ -252,7 +252,7 @@ func mockUserInfo(userID uint32) *User {
 func mockLoginMsg() *msg.Login {
 	rand.Seed(time.Now().Unix())
 	userIDs := []uint32{955509280, 409972380, 615426645, 651488813, 900948081, 263936609, 538509606, 704898825, 943979274, 613251393}
-	uID := userIDs[rand.Intn(9)]
+	uID := userIDs[rand.Intn(1)]
 	return &msg.Login{
 		UserID:   uID,
 		Password: "123456",

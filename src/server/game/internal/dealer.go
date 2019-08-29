@@ -18,12 +18,14 @@ type Dealer struct {
 	counter uint32
 	ddl     uint32
 
-	Status  uint32        // 房间状态
-	History []uint32      // 房间开奖历史
-	HRChan  chan HRMsg    // 房间大厅通信
-	BBChan  chan struct{} // 下注广播信号
+	Status    uint32        // 房间状态
+	res       uint32        // 最新开奖结果
+	bankerWin float64       // 庄家输赢
+	History   []uint32      // 房间开奖历史
+	HRChan    chan HRMsg    // 房间大厅通信
+	BBChan    chan struct{} // 下注广播信号
 
-	Users    map[uint32]User      // 房间用户
+	Users    map[uint32]*User     // 房间用户
 	Bankers  []User               // 上庄玩家榜单 todo 玩家榜单
 	UserBets map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
 	AreaBets []float64            // 每个区域玩家投注总数
@@ -31,7 +33,7 @@ type Dealer struct {
 
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 	return &Dealer{
-		Users:    make(map[uint32]User),
+		Users:    make(map[uint32]*User),
 		Room:     NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
 		clock:    time.NewTicker(time.Second),
 		HRChan:   hr,
@@ -78,7 +80,7 @@ func (dl *Dealer) Bet() {
 
 	dl.ddl = uint32(time.Now().Unix()) + con.BetTime
 	converter := DTOConverter{}
-	resp := converter.RSBMsg(0, 0, 0, *dl)
+	resp := converter.RSBMsg(0, 0, *dl)
 	dl.Broadcast(&resp)
 	dl.ClockReset(constant.BetTime, dl.Settle)
 }
@@ -86,6 +88,7 @@ func (dl *Dealer) Bet() {
 // 结算 开奖
 func (dl *Dealer) Settle() {
 	res := dl.profitPoolLottery()
+	dl.res = res
 	dl.Status = constant.RSSettle
 	dl.HRChan <- HRMsg{
 		RoomID:        dl.RoomID,
@@ -93,14 +96,28 @@ func (dl *Dealer) Settle() {
 		LotteryResult: res,
 	}
 	// 结算
-	// 庄家赢数 = Sum(未中奖倍数*未中奖筹码数) - 中奖倍数*中奖筹码数
+	// 庄家赢数 = Sum(所有筹码数) - 中奖倍数*中奖筹码数
+	// 玩家赢数 = 开奖区域投注金额*区域倍数-总投注金额
+
+	math := util.Math{}
+	dl.bankerWin = math.SumSliceFloat64(dl.AreaBets) - con.AreaX[dl.res]*dl.AreaBets[dl.res]
 
 	log.Debug("settle... %+v", dl.RoomID)
 
 	dl.ddl = uint32(time.Now().Unix()) + con.SettleTime
 	converter := DTOConverter{}
-	resp := converter.RSBMsg(res, 10, 210, *dl)
-	dl.Broadcast(&resp)
+	for _, u := range dl.Users {
+		uWin := dl.UserBets[u.UserID][dl.res]*con.AreaX[dl.res] - math.SumSliceFloat64(dl.UserBets[u.UserID])
+		if uWin > 0 {
+			c4c.UserWinScore(u.UserID, uWin, func(data *User) {
+				resp := converter.RSBMsg(uWin, data.Balance, *dl)
+				u.ConnAgent.WriteMsg(&resp)
+			})
+		} else {
+			resp := converter.RSBMsg(uWin, u.Balance, *dl)
+			u.ConnAgent.WriteMsg(&resp)
+		}
+	}
 
 	dl.ClockReset(constant.SettleTime, dl.ClearChip)
 }
@@ -115,11 +132,13 @@ func (dl *Dealer) ClearChip() {
 	for i := range dl.UserBets {
 		dl.UserBets[i] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	}
+	dl.res = 0
+	dl.bankerWin = 0
 
 	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime
 
 	converter := DTOConverter{}
-	resp := converter.RSBMsg(0, 0, 0, *dl)
+	resp := converter.RSBMsg(0, 0, *dl)
 	dl.Broadcast(&resp)
 
 	dl.ClockReset(constant.ClearTime, dl.Bet)
@@ -164,19 +183,37 @@ func (dl *Dealer) fairLottery() uint32 {
 	prob := rand.Intn(121) // [0, 121)
 	var area uint32
 
-	if prob >= 0 && prob <= 2 {
+	//if prob >= 0 && prob <= 2 {
+	//	area = constant.Area40x
+	//} else if prob <= 6 {
+	//	area = constant.Area30x
+	//} else if prob <= 12 {
+	//	area = constant.Area20x
+	//} else if prob <= 24 {
+	//	area = constant.Area10x
+	//} else if prob <= 48 {
+	//	area = constant.Area5x1
+	//} else if prob <= 72 {
+	//	area = constant.Area5x2
+	//} else if prob <= 96 {
+	//	area = constant.Area5x3
+	//} else if prob <= 120 {
+	//	area = constant.Area5x4
+	//}
+
+	if prob >= 0 && prob <= 20 {
 		area = constant.Area40x
-	} else if prob <= 6 {
+	} else if prob <= 40 {
 		area = constant.Area30x
-	} else if prob <= 12 {
+	} else if prob <= 60 {
 		area = constant.Area20x
-	} else if prob <= 24 {
+	} else if prob <= 80 {
 		area = constant.Area10x
-	} else if prob <= 48 {
+	} else if prob <= 100 {
 		area = constant.Area5x1
-	} else if prob <= 72 {
+	} else if prob <= 105 {
 		area = constant.Area5x2
-	} else if prob <= 96 {
+	} else if prob <= 110 {
 		area = constant.Area5x3
 	} else if prob <= 120 {
 		area = constant.Area5x4

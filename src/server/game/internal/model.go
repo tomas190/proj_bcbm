@@ -64,7 +64,7 @@ func (h *Hall) openRoom(rID uint32) {
 
 func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 	h.UserRoom[u.UserID] = dl.RoomID
-	dl.Users[u.UserID] = *u
+	dl.Users[u.UserID] = u
 	dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 	converter := DTOConverter{}
