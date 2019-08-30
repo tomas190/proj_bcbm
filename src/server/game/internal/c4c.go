@@ -10,6 +10,7 @@ import (
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/constant"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -17,6 +18,7 @@ type UserCallback func(data *User)
 
 type Client4Center struct {
 	token         string
+	tokenLock     sync.RWMutex
 	conn          *websocket.Conn
 	isServerLogin bool
 	userWaitEvent map[string]UserCallback
@@ -81,9 +83,21 @@ func (c4c *Client4Center) ReqToken() {
 		log.Fatal("Token响应码不是200", tokenResp.StatusCode)
 	}
 
+	c4c.tokenLock.Lock()
 	c4c.token = tokenResp.TokenMsg.Token
+	c4c.tokenLock.Unlock()
 
 	log.Debug("Token更新完成 %+v", c4c.token)
+}
+
+func (c4c *Client4Center) CronUpdateToken() {
+	ticker := time.NewTicker(time.Second * 7200)
+	go func() {
+		for {
+			<-ticker.C
+			c4c.ReqToken()
+		}
+	}()
 }
 
 /*****************************************

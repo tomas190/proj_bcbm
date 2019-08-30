@@ -252,7 +252,7 @@ func mockUserInfo(userID uint32) *User {
 func mockLoginMsg() *msg.Login {
 	rand.Seed(time.Now().Unix())
 	userIDs := []uint32{955509280, 409972380, 615426645, 651488813, 900948081, 263936609, 538509606, 704898825, 943979274, 613251393}
-	uID := userIDs[rand.Intn(1)]
+	uID := userIDs[rand.Intn(9)]
 	return &msg.Login{
 		UserID:   uID,
 		Password: "123456",
