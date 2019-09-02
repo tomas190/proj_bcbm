@@ -188,7 +188,12 @@ message AutoBetR {}
 // 离开房间
 message LeaveRoom {}
 
-message LeaveRoomR {}
+message LeaveRoomR {
+    UserInfo User = 1;
+    uint32 RoomID = 2;
+    repeated RoomInfo Rooms = 3;
+    uint32 ServerTime = 4;  // 服务器时间
+}
 
 // 错误码
 enum ErrorCode {

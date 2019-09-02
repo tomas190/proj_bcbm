@@ -7,14 +7,16 @@ import (
 
 type DTOConverter struct{}
 
-func (c *DTOConverter) U2Msg(u User) msg.UserInfo {
+func (c *DTOConverter) U2Msg(p Player) msg.UserInfo {
+	id, name, img, score := p.GetPlayerBasic()
+	win, bet := p.GetPlayerAccount()
 	uMsg := msg.UserInfo{
-		UserID:    u.UserID,
-		NickName:  u.NickName,
-		Avatar:    u.Avatar,
-		Money:     u.Balance,
-		WinCount:  10, // fixme
-		BetAmount: 100,
+		UserID:    id,
+		NickName:  name,
+		Avatar:    img,
+		Money:     score,
+		WinCount:  win,
+		BetAmount: bet,
 	}
 
 	return uMsg
@@ -71,6 +73,15 @@ func (c *DTOConverter) RSBMsg(userWin float64, money float64, dl Dealer) msg.Roo
 	}
 
 	return bMsg
+}
+
+func (c *DTOConverter) BBMsg(dealer Dealer) msg.BankersB {
+	bmsg := msg.BankersB{
+		Banker:     dealer.getBankerInfoResp(),
+		ServerTime: uint32(time.Now().Unix()),
+	}
+
+	return bmsg
 }
 
 type DAOConverter struct{}

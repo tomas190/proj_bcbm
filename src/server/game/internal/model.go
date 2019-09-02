@@ -58,6 +58,7 @@ func (h *Hall) OpenCasino() {
 // 大厅开房
 func (h *Hall) openRoom(rID uint32) {
 	dl := NewDealer(rID, h.HRChan)
+	dl.Bankers = append(dl.Bankers, dl.NextBotBanker())
 	h.RoomRecord[rID] = dl // fixme 会导致 fatal error: concurrent map writes
 	dl.StartGame()
 }
@@ -71,14 +72,14 @@ func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 	r := converter.R2Msg(*dl)
 
 	resp := &msg.JoinRoomR{
-		CurBankers: dl.getPlayerInfoResp()[:3],
+		CurBankers: dl.getBankerInfoResp(),
 		Amount:     dl.AreaBets,
 		PAmount:    dl.UserBets[u.UserID],
 		Room:       &r,
 		ServerTime: uint32(time.Now().Unix()),
 	}
 
-	log.Debug("<---加入房间响应 %+v--->", resp.CurBankers)
+	log.Debug("<---加入房间响应 %+v--->", resp.Room)
 	u.ConnAgent.WriteMsg(resp)
 }
 
@@ -104,7 +105,9 @@ func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 func (h *Hall) BroadCast(bMsg interface{}) {
 	log.Debug("brd msg %+v, content: %+v", reflect.TypeOf(bMsg), bMsg)
 	for _, u := range h.UserRecord {
-		u.ConnAgent.WriteMsg(bMsg)
+		if u.ConnAgent != nil {
+			u.ConnAgent.WriteMsg(bMsg)
+		}
 	}
 }
 
@@ -162,12 +165,4 @@ func NewRoom(rID uint32, minB, maxB, minL float64) *Room {
 		MaxBet:   maxB,
 		MinLimit: minL,
 	}
-}
-
-type User struct {
-	UserID    uint32     `bson:"user_id" json:"user_id"`       // 用户id
-	NickName  string     `bson:"nick_name" json:"nick_name"`   // 用户昵称
-	Avatar    string     `bson:"avatar" json:"avatar"`         // 用户头像
-	Balance   float64    `bson:"balance"json:"money"`          // 用户金额
-	ConnAgent gate.Agent `bson:"conn_agent" json:"conn_agent"` // 网络连接代理
 }

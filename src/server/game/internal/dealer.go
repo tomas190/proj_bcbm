@@ -11,22 +11,27 @@ import (
 )
 
 // Mgr <--> Dealer <--> C2C
+//            ^
+//            |
+//
+//           Bots
 
 type Dealer struct {
 	*Room
-	clock   *time.Ticker
-	counter uint32
-	ddl     uint32
+	clock       *time.Ticker
+	counter     uint32
+	ddl         uint32
+	bankerRound uint32 // 庄家做了多少轮
 
-	Status    uint32        // 房间状态
-	res       uint32        // 最新开奖结果
-	bankerWin float64       // 庄家输赢
-	History   []uint32      // 房间开奖历史
-	HRChan    chan HRMsg    // 房间大厅通信
-	BBChan    chan struct{} // 下注广播信号
+	Status    uint32     // 房间状态
+	res       uint32     // 最新开奖结果
+	bankerWin float64    // 庄家输赢
+	History   []uint32   // 房间开奖历史
+	HRChan    chan HRMsg // 房间大厅通信
 
-	Users    map[uint32]*User     // 房间用户
-	Bankers  []User               // 上庄玩家榜单 todo 玩家榜单
+	Users    map[uint32]*User     // 房间用户-包括机器人
+	Bots     []uint32             // 房间机器人
+	Bankers  []Player             // 上庄玩家榜单 todo 玩家榜单
 	UserBets map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
 	AreaBets []float64            // 每个区域玩家投注总数
 }
@@ -34,6 +39,7 @@ type Dealer struct {
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 	return &Dealer{
 		Users:    make(map[uint32]*User),
+		Bankers:  make([]Player, 2),
 		Room:     NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
 		clock:    time.NewTicker(time.Second),
 		HRChan:   hr,
@@ -134,10 +140,19 @@ func (dl *Dealer) ClearChip() {
 	}
 	dl.res = 0
 	dl.bankerWin = 0
+	dl.bankerRound += 1
+
+	converter := DTOConverter{}
+	if dl.bankerRound >= constant.BankerMaxTimes || dl.Bankers[0].(User).Balance < constant.BankerMinBar {
+		if len(dl.Bankers) > 1 {
+			dl.Bankers = dl.Bankers[1:]
+		}
+		bankerResp := converter.BBMsg(*dl)
+		dl.Broadcast(&bankerResp)
+	}
 
 	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime
 
-	converter := DTOConverter{}
 	resp := converter.RSBMsg(0, 0, *dl)
 	dl.Broadcast(&resp)
 
@@ -147,7 +162,9 @@ func (dl *Dealer) ClearChip() {
 func (dl *Dealer) Broadcast(m interface{}) {
 	log.Debug("room brd %+v, content: %+v", reflect.TypeOf(m), m)
 	for _, u := range dl.Users {
-		u.ConnAgent.WriteMsg(m)
+		if u.ConnAgent != nil {
+			u.ConnAgent.WriteMsg(m)
+		}
 	}
 }
 
@@ -183,37 +200,19 @@ func (dl *Dealer) fairLottery() uint32 {
 	prob := rand.Intn(121) // [0, 121)
 	var area uint32
 
-	//if prob >= 0 && prob <= 2 {
-	//	area = constant.Area40x
-	//} else if prob <= 6 {
-	//	area = constant.Area30x
-	//} else if prob <= 12 {
-	//	area = constant.Area20x
-	//} else if prob <= 24 {
-	//	area = constant.Area10x
-	//} else if prob <= 48 {
-	//	area = constant.Area5x1
-	//} else if prob <= 72 {
-	//	area = constant.Area5x2
-	//} else if prob <= 96 {
-	//	area = constant.Area5x3
-	//} else if prob <= 120 {
-	//	area = constant.Area5x4
-	//}
-
-	if prob >= 0 && prob <= 20 {
+	if prob >= 0 && prob <= 2 {
 		area = constant.Area40x
-	} else if prob <= 40 {
+	} else if prob <= 6 {
 		area = constant.Area30x
-	} else if prob <= 60 {
+	} else if prob <= 12 {
 		area = constant.Area20x
-	} else if prob <= 80 {
+	} else if prob <= 24 {
 		area = constant.Area10x
-	} else if prob <= 100 {
+	} else if prob <= 48 {
 		area = constant.Area5x1
-	} else if prob <= 105 {
+	} else if prob <= 72 {
 		area = constant.Area5x2
-	} else if prob <= 110 {
+	} else if prob <= 96 {
 		area = constant.Area5x3
 	} else if prob <= 120 {
 		area = constant.Area5x4

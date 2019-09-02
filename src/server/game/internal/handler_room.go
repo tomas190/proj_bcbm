@@ -99,29 +99,40 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
-	fmt.Println("离房", m, au.Balance)
+	resp := &msg.LeaveRoomR{
+		User: &msg.UserInfo{
+			UserID:   au.UserID,
+			Avatar:   au.Avatar,
+			NickName: au.NickName,
+			Money:    au.Balance,
+		},
+		Rooms:      Mgr.GetRoomsInfoResp(),
+		ServerTime: uint32(time.Now().Unix()),
+	}
 
-	resp := &msg.LeaveRoomR{}
 	a.WriteMsg(resp)
 }
 
 // 玩家列表
 func (dl *Dealer) getPlayerInfoResp() []*msg.UserInfo {
-	u1 := mockUserInfo(8976784)
-	u2 := mockUserInfo(7829401)
-	u3 := mockUserInfo(7829981)
-	u4 := mockUserInfo(7825581)
-	u5 := mockUserInfo(9825581)
-
-	converter := DTOConverter{}
-	userInfo1 := converter.U2Msg(*u1)
-	userInfo2 := converter.U2Msg(*u2)
-	userInfo3 := converter.U2Msg(*u3)
-	userInfo4 := converter.U2Msg(*u4)
-	userInfo5 := converter.U2Msg(*u5)
-
 	var playerInfoResp []*msg.UserInfo
-	playerInfoResp = append(playerInfoResp, &userInfo1, &userInfo2, &userInfo3, &userInfo4, &userInfo5, &userInfo1, &userInfo2, &userInfo3, &userInfo4, &userInfo5)
+	for _, u := range dl.Users {
+		converter := DTOConverter{}
+		uInfo := converter.U2Msg(*u)
+		playerInfoResp = append(playerInfoResp, &uInfo)
+
+	}
 
 	return playerInfoResp
+}
+
+func (dl *Dealer) getBankerInfoResp() []*msg.UserInfo {
+	var bankerInfoResp []*msg.UserInfo
+	for _, b := range dl.Bankers {
+		converter := DTOConverter{}
+		buInfo := converter.U2Msg(b)
+		bankerInfoResp = append(bankerInfoResp, &buInfo)
+	}
+
+	return bankerInfoResp
 }

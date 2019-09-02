@@ -231,7 +231,11 @@ func handleRoomEvent(args []interface{}) {
 			case *msg.Players:
 				dealer.handlePlayers(args)
 			case *msg.GrabBanker:
+				dealer.handleGrabBanker(args)
 			case *msg.AutoBet:
+				dealer.handleAutoBet(args)
+			case *msg.LeaveRoom:
+				dealer.handleLeaveRoom(args)
 			default:
 				log.Error("房间事件无法识别", t)
 			}
