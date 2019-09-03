@@ -96,3 +96,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+bin/bcbm_dev
+bin/nohup.out
