@@ -39,7 +39,7 @@ type Dealer struct {
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 	return &Dealer{
 		Users:    make(map[uint32]*User),
-		Bankers:  make([]Player, 2),
+		Bankers:  make([]Player, 0),
 		Room:     NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
 		clock:    time.NewTicker(time.Second),
 		HRChan:   hr,
@@ -143,7 +143,8 @@ func (dl *Dealer) ClearChip() {
 	dl.bankerRound += 1
 
 	converter := DTOConverter{}
-	if dl.bankerRound >= constant.BankerMaxTimes || dl.Bankers[0].(User).Balance < constant.BankerMinBar {
+	// fixme
+	if dl.bankerRound >= constant.BankerMaxTimes || dl.Bankers[0].(Bot).Balance < constant.BankerMinBar {
 		if len(dl.Bankers) > 1 {
 			dl.Bankers = dl.Bankers[1:]
 		}

@@ -1,6 +1,9 @@
 package internal
 
-import "proj_bcbm/src/server/util"
+import (
+	"fmt"
+	"proj_bcbm/src/server/util"
+)
 
 // 机器人随机投注
 // 若无真人玩家上庄随机一个机器人上
@@ -86,7 +89,7 @@ func (dl *Dealer) NextBotBanker() Bot {
 
 	nextBanker := Bot{
 		UserID:    UserID,
-		NickName:  "nextBanker",
+		NickName:  "nextBanker" + fmt.Sprintf("%+v", UserID)[:2],
 		Avatar:    Avatar,
 		Balance:   Balance,
 		WinCount:  WinCount,

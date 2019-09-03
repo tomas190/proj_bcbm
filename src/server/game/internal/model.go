@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 	"proj_bcbm/src/server/constant"
@@ -58,7 +59,11 @@ func (h *Hall) OpenCasino() {
 // 大厅开房
 func (h *Hall) openRoom(rID uint32) {
 	dl := NewDealer(rID, h.HRChan)
-	dl.Bankers = append(dl.Bankers, dl.NextBotBanker())
+	dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker(), dl.NextBotBanker(), dl.NextBotBanker(), dl.NextBotBanker())
+
+	fmt.Println("#####################################")
+	fmt.Println(dl.Bankers)
+
 	h.RoomRecord[rID] = dl // fixme 会导致 fatal error: concurrent map writes
 	dl.StartGame()
 }
