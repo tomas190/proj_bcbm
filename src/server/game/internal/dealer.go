@@ -29,8 +29,8 @@ type Dealer struct {
 	History   []uint32   // 房间开奖历史
 	HRChan    chan HRMsg // 房间大厅通信
 
-	Users       map[uint32]*User     // 房间用户-包括机器人
-	Bots        []uint32             // 房间机器人
+	Users       map[uint32]*User     // 房间用户-不包括机器人
+	Bots        []*Bot               // 房间机器人
 	Bankers     []Player             // 上庄玩家榜单 todo 玩家榜单
 	UserBets    map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
 	AreaBets    []float64            // 每个区域玩家投注总数
@@ -71,6 +71,7 @@ func (dl *Dealer) ClockReset(duration uint32, next func()) {
 }
 
 func (dl *Dealer) StartGame() {
+	dl.AddBots()
 	dl.Status = constant.RSBetting
 	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime
 	dl.ClockReset(con.ClearTime, dl.Bet)
@@ -142,6 +143,8 @@ func (dl *Dealer) ClearChip() {
 	for i := range dl.UserBets {
 		dl.UserBets[i] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	}
+	dl.AreaBotBets = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+
 	dl.res = 0
 	dl.bankerWin = 0
 	dl.bankerRound += 1
@@ -152,6 +155,9 @@ func (dl *Dealer) ClearChip() {
 		if len(dl.Bankers) > 1 {
 			dl.Bankers = dl.Bankers[1:]
 		}
+		dl.Bots = nil
+		dl.AddBots()
+
 		bankerResp := converter.BBMsg(*dl)
 		dl.Broadcast(&bankerResp)
 	}

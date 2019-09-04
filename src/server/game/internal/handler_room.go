@@ -7,6 +7,7 @@ import (
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"reflect"
+	"sort"
 	"time"
 )
 
@@ -24,15 +25,12 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		}
 
 		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
-		dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + dl.AreaBotBets[m.Area] + cs
+		dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
 		// 当前用户在该区域的历史投注+当前用户投注
 		dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
 
 		c4c.UserLoseScore(au.UserID, -cs, func(data *User) {
 			log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
-			fmt.Println("#########区域总和", au.NickName, dl.AreaBets)
-			fmt.Println("@@@@@@@@@玩家各区域投注", au.NickName, dl.UserBets[au.UserID])
-
 			au.Balance = data.Balance
 
 			resp := &msg.BetInfoB{
@@ -120,12 +118,34 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 // 玩家列表
 func (dl *Dealer) getPlayerInfoResp() []*msg.UserInfo {
 	var playerInfoResp []*msg.UserInfo
+	converter := DTOConverter{}
 	for _, u := range dl.Users {
-		converter := DTOConverter{}
 		uInfo := converter.U2Msg(*u)
 		playerInfoResp = append(playerInfoResp, &uInfo)
 
 	}
+
+	for _, b := range dl.Bots {
+		pInfo := converter.U2Msg(*b)
+		playerInfoResp = append(playerInfoResp, &pInfo)
+	}
+
+	// 先按照获胜局数排序
+	sort.Slice(playerInfoResp, func(i, j int) bool {
+		return playerInfoResp[i].WinCount > playerInfoResp[j].WinCount
+	})
+
+	// 拿到赌神
+	betGod := playerInfoResp[0]
+
+	// 再把其余人按照投注数排序
+	playerInfoResp = playerInfoResp[1:]
+	sort.Slice(playerInfoResp, func(i, j int) bool {
+		return playerInfoResp[i].BetAmount > playerInfoResp[j].BetAmount
+	})
+
+	// 组合在一起
+	playerInfoResp = append([]*msg.UserInfo{betGod}, playerInfoResp...)
 
 	return playerInfoResp
 }

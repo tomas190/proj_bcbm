@@ -63,7 +63,7 @@ func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
 func (c *DTOConverter) RSBMsg(userWin float64, money float64, dl Dealer) msg.RoomStatusB {
 	bMsg := msg.RoomStatusB{
 		Status:      dl.Status,
-		Counter:     0,
+		Counter:     0, // fixme
 		EndTime:     dl.ddl,
 		Result:      dl.res,
 		BankerWin:   dl.bankerWin,
@@ -76,12 +76,12 @@ func (c *DTOConverter) RSBMsg(userWin float64, money float64, dl Dealer) msg.Roo
 }
 
 func (c *DTOConverter) BBMsg(dealer Dealer) msg.BankersB {
-	bmsg := msg.BankersB{
+	bMsg := msg.BankersB{
 		Banker:     dealer.getBankerInfoResp(),
 		ServerTime: uint32(time.Now().Unix()),
 	}
 
-	return bmsg
+	return bMsg
 }
 
 type DAOConverter struct{}
