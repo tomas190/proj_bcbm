@@ -29,22 +29,24 @@ type Dealer struct {
 	History   []uint32   // 房间开奖历史
 	HRChan    chan HRMsg // 房间大厅通信
 
-	Users    map[uint32]*User     // 房间用户-包括机器人
-	Bots     []uint32             // 房间机器人
-	Bankers  []Player             // 上庄玩家榜单 todo 玩家榜单
-	UserBets map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
-	AreaBets []float64            // 每个区域玩家投注总数
+	Users       map[uint32]*User     // 房间用户-包括机器人
+	Bots        []uint32             // 房间机器人
+	Bankers     []Player             // 上庄玩家榜单 todo 玩家榜单
+	UserBets    map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
+	AreaBets    []float64            // 每个区域玩家投注总数
+	AreaBotBets []float64            // 每个区域机器人投注总数
 }
 
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 	return &Dealer{
-		Users:    make(map[uint32]*User),
-		Bankers:  make([]Player, 0),
-		Room:     NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
-		clock:    time.NewTicker(time.Second),
-		HRChan:   hr,
-		UserBets: map[uint32][]float64{},
-		AreaBets: []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
+		Users:       make(map[uint32]*User),
+		Bankers:     make([]Player, 0),
+		Room:        NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
+		clock:       time.NewTicker(time.Second),
+		HRChan:      hr,
+		UserBets:    map[uint32][]float64{},
+		AreaBets:    []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
+		AreaBotBets: []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 	}
 }
 
@@ -88,6 +90,9 @@ func (dl *Dealer) Bet() {
 	converter := DTOConverter{}
 	resp := converter.RSBMsg(0, 0, *dl)
 	dl.Broadcast(&resp)
+	// 开始下注广播完之后，机器人开始下注
+	go dl.BotsBet()
+
 	dl.ClockReset(constant.BetTime, dl.Settle)
 }
 
@@ -112,17 +117,16 @@ func (dl *Dealer) Settle() {
 
 	dl.ddl = uint32(time.Now().Unix()) + con.SettleTime
 	converter := DTOConverter{}
+	// fixme 结算广播有时候发不出去
 	for _, u := range dl.Users {
-		uWin := dl.UserBets[u.UserID][dl.res]*con.AreaX[dl.res] - math.SumSliceFloat64(dl.UserBets[u.UserID])
-		if uWin > 0 {
-			c4c.UserWinScore(u.UserID, uWin, func(data *User) {
-				resp := converter.RSBMsg(uWin, data.Balance, *dl)
-				u.ConnAgent.WriteMsg(&resp)
-			})
-		} else {
-			resp := converter.RSBMsg(uWin, u.Balance, *dl)
+		// 用户在开奖区域投注数*区域倍数-用户所有投注数
+		// 要么加投注赢得数，要么不加，和用户总数，是分开的
+		// uWin := dl.UserBets[u.UserID][dl.res]*constant.AreaX[dl.res] - math.SumSliceFloat64(dl.UserBets[u.UserID])
+		uWin := dl.UserBets[u.UserID][dl.res] * constant.AreaX[dl.res]
+		c4c.UserWinScore(u.UserID, uWin, func(data *User) {
+			resp := converter.RSBMsg(uWin, data.Balance, *dl)
 			u.ConnAgent.WriteMsg(&resp)
-		}
+		})
 	}
 
 	dl.ClockReset(constant.SettleTime, dl.ClearChip)

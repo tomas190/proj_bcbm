@@ -20,10 +20,12 @@ func (dl *Dealer) handleBet(args []interface{}) {
 
 		cs := constant.ChipSize[m.Chip]
 		if au.Balance < cs {
-			errorResp(a, msg.ErrorCode_InsufficientBalanceBet, "没钱玩啥")
+			errorResp(a, msg.ErrorCode_InsufficientBalanceBet, "余额不足")
 		}
 
-		dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
+		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
+		dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + dl.AreaBotBets[m.Area] + cs
+		// 当前用户在该区域的历史投注+当前用户投注
 		dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
 
 		c4c.UserLoseScore(au.UserID, -cs, func(data *User) {
@@ -98,6 +100,8 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 	au := a.UserData().(*User)
 
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
+
+	// fixme 把玩家从房间列表删除
 
 	resp := &msg.LeaveRoomR{
 		User: &msg.UserInfo{
