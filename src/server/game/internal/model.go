@@ -110,8 +110,9 @@ func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 func (h *Hall) BroadCast(bMsg interface{}) {
 	log.Debug("brd msg %+v, content: %+v", reflect.TypeOf(bMsg), bMsg)
 	for _, u := range h.UserRecord {
-		if u.ConnAgent != nil {
-			u.ConnAgent.WriteMsg(bMsg)
+		user := u
+		if user.ConnAgent != nil {
+			user.ConnAgent.WriteMsg(bMsg)
 		}
 	}
 }

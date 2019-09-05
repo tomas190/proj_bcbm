@@ -76,10 +76,23 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		return
 	}
 
-	// 当前庄家不变
-	dl.Bankers = dl.Bankers[1:]
-	// 将玩家排在最前面
-	dl.Bankers = append(dl.Bankers, au)
+	// 当前庄家不变，其他清空
+	curBanker := dl.Bankers[0]
+	dl.Bankers = []Player{}
+	dl.Bankers = append(dl.Bankers, curBanker)
+
+	// 如果玩家不在列表中，将玩家排在最前面
+	flag := false
+	for _, b := range dl.Bankers {
+		uID, _, _, _ := b.GetPlayerBasic()
+		if uID == au.UserID {
+			flag = true
+		}
+	}
+
+	if flag == false {
+		dl.Bankers = append(dl.Bankers, au)
+	}
 
 	resp := &msg.BankersB{
 		Banker:     dl.getBankerInfoResp(),
@@ -111,7 +124,8 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
-	// fixme 把玩家从房间列表删除
+	// fixme 可能会有并发问题
+	delete(dl.Users, au.UserID)
 
 	resp := &msg.LeaveRoomR{
 		User: &msg.UserInfo{

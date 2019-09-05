@@ -47,7 +47,7 @@ func handlePing(args []interface{}) {
 
 func handleTestLogin(args []interface{}) {
 	// m := args[0].(*msg.Login)
-	m := mockLoginMsg()
+	m := randomLoginMsg()
 	a := args[1].(gate.Agent)
 	userID := m.GetUserID()
 	log.Debug("处理用户登录请求 %+v", userID)
@@ -108,7 +108,7 @@ func handleTestLogin(args []interface{}) {
 
 func handleLogin(args []interface{}) {
 	// m := args[0].(*msg.Login)
-	m := mockLoginMsg()
+	m := randomLoginMsg()
 	a := args[1].(gate.Agent)
 	userID := m.GetUserID()
 	log.Debug("处理用户登录请求 %+v", userID)
@@ -166,10 +166,14 @@ func handleLogout(args []interface{}) {
 	m := args[0].(*msg.Logout)
 	a := args[1].(gate.Agent)
 
+	au := a.UserData().(*User)
+
 	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
 	for i := 0; i < len(args); i++ {
 		fmt.Println(reflect.TypeOf(args[i]))
 	}
+
+	delete(Mgr.UserRecord, au.UserID)
 	resp := &msg.LogoutR{}
 	a.WriteMsg(resp)
 	a.Close()
@@ -245,10 +249,10 @@ func handleRoomEvent(args []interface{}) {
 	}
 }
 
-func mockLoginMsg() *msg.Login {
+func randomLoginMsg() *msg.Login {
 	rand.Seed(time.Now().Unix())
 	userIDs := []uint32{955509280, 409972380, 615426645, 651488813, 900948081, 263936609, 538509606, 704898825, 943979274, 613251393}
-	uID := userIDs[rand.Intn(1)]
+	uID := userIDs[rand.Intn(9)]
 	return &msg.Login{
 		UserID:   uID,
 		Password: "123456",

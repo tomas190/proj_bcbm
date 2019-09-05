@@ -118,15 +118,21 @@ func (dl *Dealer) Settle() {
 
 	dl.ddl = uint32(time.Now().Unix()) + con.SettleTime
 	converter := DTOConverter{}
-	// fixme 结算广播有时候发不出去
-	for _, u := range dl.Users {
+	// fixme 结算广播有时候发不出去 原因可能出在回调机制上 X
+	// fixme 有时候会收到多条结算消息 X
+	// fixme go range 是副本，指针也是副本 https://juejin.im/post/5c5415f76fb9a04a0a5f9e62 √
+
+	// fixme 用户离开房间之后要删除掉
+
+	for uID := range dl.Users {
 		// 用户在开奖区域投注数*区域倍数-用户所有投注数
 		// 要么加投注赢得数，要么不加，和用户总数，是分开的
 		// uWin := dl.UserBets[u.UserID][dl.res]*constant.AreaX[dl.res] - math.SumSliceFloat64(dl.UserBets[u.UserID])
-		uWin := dl.UserBets[u.UserID][dl.res] * constant.AreaX[dl.res]
-		c4c.UserWinScore(u.UserID, uWin, func(data *User) {
+		user := dl.Users[uID]
+		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
+		c4c.UserWinScore(user.UserID, uWin, func(data *User) {
 			resp := converter.RSBMsg(uWin, data.Balance, *dl)
-			u.ConnAgent.WriteMsg(&resp)
+			user.ConnAgent.WriteMsg(&resp)
 		})
 	}
 
@@ -151,9 +157,12 @@ func (dl *Dealer) ClearChip() {
 
 	converter := DTOConverter{}
 	// fixme
+	// fixme 用户上庄
+	// fixme panic: interface conversion: internal.Player is *internal.User, not internal.Bot
+	// fixme 需要 type switch case一下
 	if dl.bankerRound >= constant.BankerMaxTimes || dl.Bankers[0].(Bot).Balance < constant.BankerMinBar {
 		if len(dl.Bankers) > 1 {
-			dl.Bankers = dl.Bankers[1:]
+			dl.Bankers = dl.Bankers[:1]
 		}
 		// 换一批机器人
 		dl.Bots = nil
@@ -180,8 +189,9 @@ func (dl *Dealer) ClearChip() {
 func (dl *Dealer) Broadcast(m interface{}) {
 	log.Debug("room brd %+v, content: %+v", reflect.TypeOf(m), m)
 	for _, u := range dl.Users {
-		if u.ConnAgent != nil {
-			u.ConnAgent.WriteMsg(m)
+		user := u
+		if user.ConnAgent != nil {
+			user.ConnAgent.WriteMsg(m)
 		}
 	}
 }

@@ -190,6 +190,7 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 				Avatar:   gameUser.GameIMG,
 				Balance:  gameAccount.Balance,
 			})
+			// fixme 回调成功之后要删除
 		} else {
 			log.Error("找不到用户回调")
 		}
@@ -223,6 +224,8 @@ func (c4c *Client4Center) onUserLogout(msg []byte) {
 				Avatar:   gameUser.GameIMG,
 				Balance:  gameAccount.Balance,
 			})
+
+			// fixme 回调成功之后要删除
 		} else {
 			log.Error("找不到用户回调")
 		}
@@ -242,6 +245,9 @@ func (c4c *Client4Center) onUserWinScore(msg []byte) {
 	if syncData.Code == constant.CRespStatusSuccess {
 		if loginCallBack, ok := c4c.userWaitEvent[fmt.Sprintf("%+vwin", syncData.Msg.ID)]; ok {
 			loginCallBack(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})
+			// 回调成功之后要删除
+			delete(c4c.userWaitEvent, fmt.Sprintf("%+vwin", syncData.Msg.ID))
+			log.Debug("用户回调已删除: %+v, 回调队列 %+v", fmt.Sprintf("%+vwin", syncData.Msg.ID), c4c.userWaitEvent)
 		} else {
 			log.Error("找不到用户回调")
 		}
@@ -261,6 +267,9 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 	if syncData.Code == constant.CRespStatusSuccess {
 		if loginCallBack, ok := c4c.userWaitEvent[fmt.Sprintf("%+vlose", syncData.Msg.ID)]; ok {
 			loginCallBack(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})
+			// fixme
+			delete(c4c.userWaitEvent, fmt.Sprintf("%+vlose", syncData.Msg.ID))
+			log.Debug("用户回调已删除: %+v 回调队列 %+v", fmt.Sprintf("%+vwin", syncData.Msg.ID), c4c.userWaitEvent)
 		} else {
 			log.Error("找不到用户回调")
 		}
@@ -343,7 +352,7 @@ func (c4c *Client4Center) UserLogoutCenter(userID uint32, callback UserCallback)
 
 	log.Debug("UserLogoutCenter c4c.Token- %+v", c4c.token)
 
-	logoutResp := UserLogoutReq{
+	logoutMsg := UserLogoutReq{
 		Event: constant.CEventUserLogout,
 		Data: UserLogoutReqData{
 			UserID: userID,
@@ -353,7 +362,7 @@ func (c4c *Client4Center) UserLogoutCenter(userID uint32, callback UserCallback)
 		},
 	}
 
-	c4c.sendMsg2Center(logoutResp)
+	c4c.sendMsg2Center(logoutMsg)
 	c4c.userWaitEvent[fmt.Sprintf("%+vlogout", userID)] = callback
 }
 
@@ -365,7 +374,7 @@ func (c4c *Client4Center) UserWinScore(userID uint32, money float64, callback Us
 
 	log.Debug("UserWinScore c4c.Token- %+v", c4c.token)
 
-	logoutResp := SyncScoreReq{
+	winSettleMsg := SyncScoreReq{
 		Event: constant.CEventUserWinScore,
 		Data: SyncScoreReqData{
 			Auth: ServerAuth{
@@ -385,7 +394,7 @@ func (c4c *Client4Center) UserWinScore(userID uint32, money float64, callback Us
 		},
 	}
 
-	c4c.sendMsg2Center(logoutResp)
+	c4c.sendMsg2Center(winSettleMsg)
 	c4c.userWaitEvent[fmt.Sprintf("%+vwin", userID)] = callback
 }
 
@@ -397,7 +406,7 @@ func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, callback U
 
 	log.Debug("UserLoseScore c4c.Token- %+v", c4c.token)
 
-	logoutResp := SyncScoreReq{
+	loseSettleMsg := SyncScoreReq{
 		Event: constant.CEventUserLoseScore,
 		Data: SyncScoreReqData{
 			Auth: ServerAuth{
@@ -417,7 +426,7 @@ func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, callback U
 		},
 	}
 
-	c4c.sendMsg2Center(logoutResp)
+	c4c.sendMsg2Center(loseSettleMsg)
 	c4c.userWaitEvent[fmt.Sprintf("%+vlose", userID)] = callback
 }
 
