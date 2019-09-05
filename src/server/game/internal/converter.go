@@ -53,7 +53,7 @@ func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
 		EndTime:    dl.ddl,
 		ServerTime: uint32(time.Now().Unix()),
 		Status:     m.RoomStatus,
-		Counter:    dl.counter,
+		Counter:    0, // fixme
 		Statistics: stat,
 	}
 

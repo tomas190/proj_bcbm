@@ -118,8 +118,6 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 
 	go func() {
 		for {
-			log.Debug("监听服务器返回数据")
-
 			_, message, err := c4c.conn.ReadMessage()
 			if err != nil {
 				log.Error("Read msg error", err.Error())
