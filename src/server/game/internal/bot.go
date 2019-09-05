@@ -76,6 +76,7 @@ func (dl *Dealer) BetGod() Bot {
 		Balance:   Balance,
 		WinCount:  WinCount,
 		BetAmount: BetAmount,
+		botType:   constant.BTBetGod,
 	}
 
 	return betGod
@@ -96,6 +97,7 @@ func (dl *Dealer) RichMan() Bot {
 		Balance:   Balance,
 		WinCount:  WinCount,
 		BetAmount: BetAmount,
+		botType:   constant.BTRichMan,
 	}
 
 	return richMan
@@ -116,6 +118,7 @@ func (dl *Dealer) NextBotBanker() Bot {
 		Balance:   Balance,
 		WinCount:  WinCount,
 		BetAmount: BetAmount,
+		botType:   constant.BTNextBanker,
 	}
 
 	return nextBanker

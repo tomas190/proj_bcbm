@@ -71,10 +71,22 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
-	fmt.Println("上庄", m, au.Balance)
+	if au.Balance < constant.BankerMinBar {
+		errorResp(a, msg.ErrorCode_InsufficientBalanceGrabBanker, "金币不足，无法上庄")
+		return
+	}
 
-	resp := &msg.BankersB{}
-	a.WriteMsg(resp)
+	// 当前庄家不变
+	dl.Bankers = dl.Bankers[1:]
+	// 将玩家排在最前面
+	dl.Bankers = append(dl.Bankers, au)
+
+	resp := &msg.BankersB{
+		Banker:     dl.getBankerInfoResp(),
+		ServerTime: uint32(time.Now().Unix()),
+	}
+
+	dl.Broadcast(resp)
 }
 
 func (dl *Dealer) handleAutoBet(args []interface{}) {

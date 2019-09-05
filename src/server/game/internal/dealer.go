@@ -155,8 +155,15 @@ func (dl *Dealer) ClearChip() {
 		if len(dl.Bankers) > 1 {
 			dl.Bankers = dl.Bankers[1:]
 		}
+		// 换一批机器人
 		dl.Bots = nil
 		dl.AddBots()
+
+		for _, b := range dl.Bots {
+			if b.botType == constant.BTNextBanker {
+				dl.Bankers = append(dl.Bankers, b)
+			}
+		}
 
 		bankerResp := converter.BBMsg(*dl)
 		dl.Broadcast(&bankerResp)

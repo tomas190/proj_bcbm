@@ -22,6 +22,7 @@ type Bot struct {
 	Balance   float64
 	WinCount  uint32
 	BetAmount float64
+	botType   uint32
 }
 
 func (u User) GetPlayerBasic() (uint32, string, string, float64) {
