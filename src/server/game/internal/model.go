@@ -7,6 +7,7 @@ import (
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"reflect"
+	"sync"
 	"time"
 )
 
@@ -20,7 +21,7 @@ type HRMsg struct {
 
 type Hall struct {
 	UserRecord map[uint32]*User    // 用户记录
-	RoomRecord map[uint32]*Dealer  // 房间记录
+	RoomRecord sync.Map            // 房间记录
 	UserRoom   map[uint32]uint32   // 用户房间
 	History    map[uint32][]uint32 // 各房间历史记录
 	HRChan     chan HRMsg          // 房间大厅通信
@@ -29,7 +30,7 @@ type Hall struct {
 func NewHall() *Hall {
 	return &Hall{
 		UserRecord: make(map[uint32]*User),
-		RoomRecord: make(map[uint32]*Dealer),
+		RoomRecord: sync.Map{},
 		UserRoom:   make(map[uint32]uint32),
 		History:    make(map[uint32][]uint32),
 		HRChan:     make(chan HRMsg, 6),
@@ -60,7 +61,7 @@ func (h *Hall) openRoom(rID uint32) {
 	dl := NewDealer(rID, h.HRChan)
 	dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker(), dl.NextBotBanker(), dl.NextBotBanker(), dl.NextBotBanker())
 
-	h.RoomRecord[rID] = dl // fixme 会导致 fatal error: concurrent map writes
+	h.RoomRecord.Store(rID, dl)
 	dl.StartGame()
 }
 
@@ -94,17 +95,19 @@ func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 		if len(h.History[rID]) > constant.HisCount {
 			h.History[rID] = h.History[rID][1:]
 		}
-		h.RoomRecord[rID].History = h.History[rID]
+		v, _ := h.RoomRecord.Load(rID)
+		v.(*Dealer).History = h.History[rID]
 	}
 
 	converter := &DTOConverter{}
-	res := converter.RChangeHB(hrMsg, *h.RoomRecord[rID])
+	v, _ := h.RoomRecord.Load(rID)
+	res := converter.RChangeHB(hrMsg, *(v.(*Dealer)))
 	h.BroadCast(&res)
 }
 
 // 大厅广播
 func (h *Hall) BroadCast(bMsg interface{}) {
-	log.Debug("brd msg %+v, content: %+v", reflect.TypeOf(bMsg), bMsg)
+	log.Debug("hall brd msg %+v, content: %+v", reflect.TypeOf(bMsg), bMsg)
 	for _, u := range h.UserRecord {
 		user := u
 		if user.ConnAgent != nil {
@@ -118,10 +121,11 @@ func (h *Hall) GetRoomsInfoResp() []*msg.RoomInfo {
 	var roomsInfoResp []*msg.RoomInfo
 	converter := DTOConverter{}
 
-	for _, r := range h.RoomRecord {
-		rMsg := converter.R2Msg(*r)
+	h.RoomRecord.Range(func(key, value interface{}) bool {
+		rMsg := converter.R2Msg(*value.(*Dealer))
 		roomsInfoResp = append(roomsInfoResp, &rMsg)
-	}
+		return true
+	})
 
 	return roomsInfoResp
 }

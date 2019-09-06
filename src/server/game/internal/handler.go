@@ -130,7 +130,8 @@ func handleJoinRoom(args []interface{}) {
 	au := a.UserData().(*User)
 
 	// 找到当前房间的玩家 dealer.getPlayerInfoResp()
-	room, exist := Mgr.RoomRecord[m.RoomID]
+	v, exist := Mgr.RoomRecord.Load(m.RoomID)
+	room := v.(*Dealer)
 	if !exist {
 		errorResp(a, msg.ErrorCode_RoomNotExist, "")
 		return
@@ -142,7 +143,7 @@ func handleJoinRoom(args []interface{}) {
 		return
 	}
 
-	Mgr.AllocateUser(au, Mgr.RoomRecord[m.RoomID])
+	Mgr.AllocateUser(au, room)
 }
 
 /*************************************
@@ -163,7 +164,8 @@ func handleRoomEvent(args []interface{}) {
 		roomID, ok := Mgr.UserRoom[u.UserID]
 		ok = true
 		if ok {
-			dealer := Mgr.RoomRecord[roomID]
+			v, _ := Mgr.RoomRecord.Load(roomID)
+			dealer := v.(*Dealer)
 			log.Debug("当前房间状态 %v", dealer.Status)
 			switch t := args[0].(type) {
 			case *msg.Bet:

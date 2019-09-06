@@ -92,7 +92,7 @@ func (c4c *Client4Center) ReqToken() {
 
 func (c4c *Client4Center) CronUpdateToken() {
 	// ticker := time.NewTicker(time.Second * 7200)
-	ticker := time.NewTicker(time.Second * 60)
+	ticker := time.NewTicker(time.Second * 600)
 	go func() {
 		for {
 			<-ticker.C

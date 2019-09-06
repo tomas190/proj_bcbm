@@ -189,7 +189,7 @@ func (dl *Dealer) ClearChip() {
 }
 
 func (dl *Dealer) Broadcast(m interface{}) {
-	log.Debug("room brd %+v, content: %+v", reflect.TypeOf(m), m)
+	log.Debug("room %+v brd %+v, content: %+v", dl.RoomID, reflect.TypeOf(m), m)
 	for _, u := range dl.Users {
 		user := u
 		if user.ConnAgent != nil {
