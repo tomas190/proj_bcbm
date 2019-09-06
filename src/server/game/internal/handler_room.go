@@ -181,8 +181,6 @@ func (dl *Dealer) getBankerInfoResp() []*msg.UserInfo {
 	for _, b := range dl.Bankers {
 		converter := DTOConverter{}
 		buInfo := converter.U2Msg(b)
-		fmt.Println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-		fmt.Println(buInfo)
 		bankerInfoResp = append(bankerInfoResp, &buInfo)
 	}
 

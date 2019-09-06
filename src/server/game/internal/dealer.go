@@ -118,9 +118,6 @@ func (dl *Dealer) Settle() {
 
 	dl.ddl = uint32(time.Now().Unix()) + con.SettleTime
 	converter := DTOConverter{}
-	// fixme 结算广播有时候发不出去 原因可能出在回调机制上 X
-	// fixme 有时候会收到多条结算消息 X
-	// fixme go range 是副本，指针也是副本 https://juejin.im/post/5c5415f76fb9a04a0a5f9e62 √
 
 	// fixme 用户离开房间之后要删除掉
 
@@ -161,7 +158,7 @@ func (dl *Dealer) ClearChip() {
 	dl.bankerRound += 1
 
 	converter := DTOConverter{}
-	// fixme
+
 	// fixme 用户上庄
 	// fixme panic: interface conversion: internal.Player is *internal.User, not internal.Bot
 	// fixme 需要 type switch case一下

@@ -195,9 +195,6 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 			log.Error("找不到用户回调")
 		}
 
-		fmt.Println("######## 登录 #######")
-		fmt.Println("gameAccount.Balance: ", gameAccount.Balance)
-		fmt.Println("#####################")
 	} else {
 		log.Error("中心服务器状态码", code)
 	}
@@ -274,10 +271,6 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 			log.Error("找不到用户回调")
 		}
 
-		fmt.Println("####### 减钱结束 ######")
-		fmt.Println("balance", syncData.Msg.Balance)
-		fmt.Println("final_balance", syncData.Msg.FinalBalance)
-		fmt.Println("######################")
 	} else {
 		log.Error("中心服务器状态码 %+v", syncData.Code)
 	}

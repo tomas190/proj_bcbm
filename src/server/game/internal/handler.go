@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 	"math/rand"
@@ -40,7 +39,7 @@ func handlerReg(m interface{}, h interface{}) {
 func handlePing(args []interface{}) {
 	// m := args[0].(*msg.Ping)
 	a := args[1].(gate.Agent)
-	// log.Debug("recv Ping %+v", a.RemoteAddr())
+	log.Debug("recv Ping %+v", a.RemoteAddr())
 	a.WriteMsg(&msg.Pong{})
 }
 
@@ -105,15 +104,10 @@ func handleLogin(args []interface{}) {
 }
 
 func handleLogout(args []interface{}) {
-	m := args[0].(*msg.Logout)
+	// m := args[0].(*msg.Logout)
 	a := args[1].(gate.Agent)
 
 	au := a.UserData().(*User)
-
-	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
-	for i := 0; i < len(args); i++ {
-		fmt.Println(reflect.TypeOf(args[i]))
-	}
 
 	delete(Mgr.UserRecord, au.UserID)
 	resp := &msg.LogoutR{}
