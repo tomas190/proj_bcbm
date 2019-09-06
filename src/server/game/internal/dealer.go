@@ -130,10 +130,15 @@ func (dl *Dealer) Settle() {
 		// uWin := dl.UserBets[u.UserID][dl.res]*constant.AreaX[dl.res] - math.SumSliceFloat64(dl.UserBets[u.UserID])
 		user := dl.Users[uID]
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
-		c4c.UserWinScore(user.UserID, uWin, func(data *User) {
-			resp := converter.RSBMsg(uWin, data.Balance, *dl)
+		if uWin > 0 {
+			c4c.UserWinScore(user.UserID, uWin, func(data *User) {
+				resp := converter.RSBMsg(uWin, data.Balance, *dl)
+				user.ConnAgent.WriteMsg(&resp)
+			})
+		} else {
+			resp := converter.RSBMsg(uWin, user.Balance, *dl)
 			user.ConnAgent.WriteMsg(&resp)
-		})
+		}
 	}
 
 	dl.ClockReset(constant.SettleTime, dl.ClearChip)
