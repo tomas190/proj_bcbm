@@ -6,25 +6,24 @@ enum MessageID {
 	MsgError             = 0;
 	MsgPing              = 1;
 	MsgPong              = 2;
-	MsgLoginTest         = 3;
-	MsgLogin             = 4;
-	MsgLoginR            = 5;
-	MsgLogout            = 6;
-	MsgLogoutR           = 7;
-	MsgRoomChangeHB      = 8;
-	MsgJoinRoom          = 9;
-	MsgJoinRoomR         = 10;
-	MsgLeaveRoom         = 11;
-	MsgLeaveRoomR        = 12;
-	MsgGrabBanker        = 13;
-	MsgAutoBet           = 14;
-	MsgAutoBetR          = 15;
-	MsgBet               = 16;
-	MsgBetInfoB          = 17;
-	MsgBankersB          = 18;
-	MsgPlayers           = 19;
-	MsgPlayersR          = 20;
-	MsgRoomStatusB       = 21;
+	MsgLogin             = 3;
+	MsgLoginR            = 4;
+	MsgLogout            = 5;
+	MsgLogoutR           = 6;
+	MsgRoomChangeHB      = 7;
+	MsgJoinRoom          = 8;
+	MsgJoinRoomR         = 9;
+	MsgLeaveRoom         = 10;
+	MsgLeaveRoomR        = 11;
+	MsgGrabBanker        = 12;
+	MsgAutoBet           = 13;
+	MsgAutoBetR          = 14;
+	MsgBet               = 15;
+	MsgBetInfoB          = 16;
+	MsgBankersB          = 17;
+	MsgPlayers           = 18;
+	MsgPlayersR          = 19;
+	MsgRoomStatusB       = 20;
 }
 
 enum AreaID {
@@ -86,11 +85,6 @@ message RoomInfo {
 message Login {
     uint32 UserID = 1;
     string Password = 2;
-}
-
-// 测试登录
-message LoginTest {
-    uint32 UserID = 1;
 }
 
 message LoginR {

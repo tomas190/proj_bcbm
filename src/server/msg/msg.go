@@ -14,7 +14,6 @@ func init() {
 	Processor.Register(&Error{})
 	Processor.Register(&Ping{})
 	Processor.Register(&Pong{})
-	Processor.Register(&LoginTest{})
 
 	Processor.Register(&Login{})
 	Processor.Register(&LoginR{})
