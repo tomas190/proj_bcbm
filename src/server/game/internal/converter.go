@@ -60,7 +60,7 @@ func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
 	return bMsg
 }
 
-func (c *DTOConverter) RSBMsg(userWin float64, money float64, dl Dealer) msg.RoomStatusB {
+func (c *DTOConverter) RSBMsg(userWin float64, autoBetAmount, userBalance float64, dl Dealer) msg.RoomStatusB {
 	bMsg := msg.RoomStatusB{
 		Status:        dl.Status,
 		Counter:       0, // fixme
@@ -68,8 +68,8 @@ func (c *DTOConverter) RSBMsg(userWin float64, money float64, dl Dealer) msg.Roo
 		Result:        dl.res,
 		BankerWin:     dl.bankerWin,
 		WinMoney:      userWin,
-		AutoBetAmount: 3, // 若不可续投则为0
-		PlayerMoney:   money,
+		AutoBetAmount: autoBetAmount, // 若不可续投则为0
+		PlayerMoney:   userBalance,
 		ServerTime:    uint32(time.Now().Unix()),
 	}
 

@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
+	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
 	"reflect"
 	"time"
@@ -29,24 +30,30 @@ type Dealer struct {
 	History   []uint32   // 房间开奖历史
 	HRChan    chan HRMsg // 房间大厅通信
 
-	Users       map[uint32]*User     // 房间用户-不包括机器人
-	Bots        []*Bot               // 房间机器人
-	Bankers     []Player             // 上庄玩家榜单 todo 玩家榜单
-	UserBets    map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
-	AreaBets    []float64            // 每个区域玩家投注总数
-	AreaBotBets []float64            // 每个区域机器人投注总数
+	Users          map[uint32]*User     // 房间用户-不包括机器人
+	Bots           []*Bot               // 房间机器人
+	Bankers        []Player             // 上庄玩家榜单 todo 玩家榜单
+	UserBets       map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
+	UserBetsDetail map[uint32][]msg.Bet // 用户具体投注
+	UserAutoBet    map[uint32]bool      // 本局投注记录
+	AutoBetRecord  map[uint32][]msg.Bet // 续投记录
+	AreaBets       []float64            // 每个区域玩家投注总数
+	AreaBotBets    []float64            // 每个区域机器人投注总数
 }
 
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 	return &Dealer{
-		Users:       make(map[uint32]*User),
-		Bankers:     make([]Player, 0),
-		Room:        NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
-		clock:       time.NewTicker(time.Second),
-		HRChan:      hr,
-		UserBets:    map[uint32][]float64{},
-		AreaBets:    []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
-		AreaBotBets: []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
+		Users:          make(map[uint32]*User),
+		Bankers:        make([]Player, 0),
+		Room:           NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
+		clock:          time.NewTicker(time.Second),
+		HRChan:         hr,
+		UserAutoBet:    map[uint32]bool{},
+		UserBets:       map[uint32][]float64{},
+		UserBetsDetail: map[uint32][]msg.Bet{},
+		AutoBetRecord:  map[uint32][]msg.Bet{},
+		AreaBets:       []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
+		AreaBotBets:    []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 	}
 }
 
@@ -89,9 +96,19 @@ func (dl *Dealer) Bet() {
 
 	dl.ddl = uint32(time.Now().Unix()) + con.BetTime
 	converter := DTOConverter{}
-	// todo 续投
-	resp := converter.RSBMsg(0, 0, *dl)
-	dl.Broadcast(&resp)
+
+	// fixme 其实这种消息分开比较好，不然每次会有很多无谓的计算
+	for u := range dl.Users {
+		user := dl.Users[u]
+		var autoBetSum float64
+		for _, b := range dl.AutoBetRecord[u] {
+			bet := b
+			autoBetSum += constant.ChipSize[bet.Chip]
+		}
+
+		resp := converter.RSBMsg(0, autoBetSum, 0, *dl)
+		user.ConnAgent.WriteMsg(&resp)
+	}
 	// 开始下注广播完之后，机器人开始下注
 	go dl.BotsBet()
 
@@ -133,11 +150,11 @@ func (dl *Dealer) Settle() {
 		beforeBalance := user.Balance
 		if uWin > 0 {
 			c4c.UserWinScore(user.UserID, uWin, func(data *User) {
-				resp := converter.RSBMsg(data.Balance-math.SumSliceFloat64(dl.UserBets[user.UserID])-beforeBalance, data.Balance, *dl)
+				resp := converter.RSBMsg(data.Balance-math.SumSliceFloat64(dl.UserBets[user.UserID])-beforeBalance, 0, data.Balance, *dl)
 				user.ConnAgent.WriteMsg(&resp)
 			})
 		} else {
-			resp := converter.RSBMsg(uDisplayWin, user.Balance, *dl)
+			resp := converter.RSBMsg(uDisplayWin, 0, user.Balance, *dl)
 			user.ConnAgent.WriteMsg(&resp)
 		}
 	}
@@ -156,6 +173,20 @@ func (dl *Dealer) ClearChip() {
 		dl.UserBets[i] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	}
 	dl.AreaBotBets = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+	for u := range dl.Users {
+		// 续投 投注 累加到 auto bet record
+		if dl.UserAutoBet[u] == true && len(dl.UserBetsDetail[u]) != 0 {
+			dl.AutoBetRecord[u] = append(dl.AutoBetRecord[u], dl.UserBetsDetail[u]...)
+			// 投注 不续投 覆盖掉
+		} else if dl.UserAutoBet[u] == false && len(dl.UserBetsDetail[u]) != 0 {
+			dl.AutoBetRecord[u] = dl.UserBetsDetail[u]
+			// 续投 不投注 不变
+			// 不续投 不投注 不变
+		}
+	}
+
+	// 清空投注详情记录
+	dl.UserBetsDetail = map[uint32][]msg.Bet{}
 
 	dl.res = 0
 	dl.bankerWin = 0
@@ -186,7 +217,7 @@ func (dl *Dealer) ClearChip() {
 
 	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime
 
-	resp := converter.RSBMsg(0, 0, *dl)
+	resp := converter.RSBMsg(0, 0, 0, *dl)
 	dl.Broadcast(&resp)
 
 	dl.ClockReset(constant.ClearTime, dl.Bet)

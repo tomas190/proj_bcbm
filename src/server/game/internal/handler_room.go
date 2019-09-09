@@ -28,6 +28,8 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
 		// 当前用户在该区域的历史投注+当前用户投注
 		dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
+		// 用户具体投注信息
+		dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], *m)
 
 		c4c.UserLoseScore(au.UserID, -cs, func(data *User) {
 			log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
@@ -107,13 +109,18 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 	a := args[1].(gate.Agent)
 
 	au := a.UserData().(*User)
-
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
-	fmt.Println("续投", m, au.Balance)
-
-	resp := &msg.AutoBetR{}
-	a.WriteMsg(resp)
+	if dl.Status == constant.RSBetting {
+		// todo 求和计算余额是否足够
+		for r := range dl.AutoBetRecord[au.UserID] {
+			resp := r
+			dl.Broadcast(&resp)
+		}
+		dl.UserAutoBet[au.UserID] = true
+	} else {
+		errorResp(a, msg.ErrorCode_NotInBetting, "当前不再投注状态")
+	}
 }
 
 func (dl *Dealer) handleLeaveRoom(args []interface{}) {
