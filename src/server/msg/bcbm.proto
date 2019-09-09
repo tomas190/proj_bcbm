@@ -142,8 +142,9 @@ message RoomStatusB {
     uint32 Result = 4;                 // 开奖结果-如果是开奖状态的话
     double BankerWin = 5;              // 庄家赢数
     double WinMoney = 6;               // 玩家赢数
-    double PlayerMoney = 7;            // 玩家金币更新
-    uint32 ServerTime = 8;             // 服务器时间
+    double AutoBetAmount = 7;          // 续投金额，若为0则置灰
+    double PlayerMoney = 8;            // 玩家金币更新
+    uint32 ServerTime = 9;             // 服务器时间
 }
 
 // 下注信息广播，收到投注请求即广播
@@ -174,7 +175,7 @@ message PlayersR {
 // 上庄
 message GrabBanker {}
 
-// 自动下注
+// 续投
 message AutoBet {}
 
 message AutoBetR {}

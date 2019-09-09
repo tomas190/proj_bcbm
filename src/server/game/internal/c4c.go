@@ -62,7 +62,7 @@ func (c4c *Client4Center) ReqToken() {
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil || resp.StatusCode != 200 {
-		log.Debug("请求中心服token失败", err)
+		log.Debug("请求中心服token失败 %+v", err)
 	}
 
 	bs, err := ioutil.ReadAll(resp.Body)
