@@ -89,6 +89,7 @@ func (dl *Dealer) Bet() {
 
 	dl.ddl = uint32(time.Now().Unix()) + con.BetTime
 	converter := DTOConverter{}
+	// todo 续投
 	resp := converter.RSBMsg(0, 0, *dl)
 	dl.Broadcast(&resp)
 	// 开始下注广播完之后，机器人开始下注
@@ -124,16 +125,18 @@ func (dl *Dealer) Settle() {
 	for uID := range dl.Users {
 		// 用户在开奖区域投注数*区域倍数-用户所有投注数
 		// 要么加投注赢得数，要么不加，和用户总数，是分开的
-		// uWin := dl.UserBets[u.UserID][dl.res]*constant.AreaX[dl.res] - math.SumSliceFloat64(dl.UserBets[u.UserID])
 		user := dl.Users[uID]
+		// 中心服需要结算的输赢
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
+		// 前端显示的输赢
+		uDisplayWin := dl.UserBets[user.UserID][dl.res]*constant.AreaX[dl.res] - math.SumSliceFloat64(dl.UserBets[user.UserID])
 		if uWin > 0 {
 			c4c.UserWinScore(user.UserID, uWin, func(data *User) {
-				resp := converter.RSBMsg(uWin, data.Balance, *dl)
+				resp := converter.RSBMsg(uDisplayWin, data.Balance, *dl)
 				user.ConnAgent.WriteMsg(&resp)
 			})
 		} else {
-			resp := converter.RSBMsg(uWin, user.Balance, *dl)
+			resp := converter.RSBMsg(uDisplayWin, user.Balance, *dl)
 			user.ConnAgent.WriteMsg(&resp)
 		}
 	}
