@@ -130,9 +130,10 @@ func (dl *Dealer) Settle() {
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
 		// 前端显示的输赢
 		uDisplayWin := dl.UserBets[user.UserID][dl.res]*constant.AreaX[dl.res] - math.SumSliceFloat64(dl.UserBets[user.UserID])
+		beforeBalance := user.Balance
 		if uWin > 0 {
 			c4c.UserWinScore(user.UserID, uWin, func(data *User) {
-				resp := converter.RSBMsg(uDisplayWin, data.Balance, *dl)
+				resp := converter.RSBMsg(data.Balance-math.SumSliceFloat64(dl.UserBets[user.UserID])-beforeBalance, data.Balance, *dl)
 				user.ConnAgent.WriteMsg(&resp)
 			})
 		} else {
