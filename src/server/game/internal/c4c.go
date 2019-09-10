@@ -125,6 +125,8 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 
 			log.Debug("Msg from center %v", string(message))
 
+			// todo message写入数据库
+
 			var msg Server2CenterMsg
 			err = json.Unmarshal(message, &msg)
 			if err != nil {
@@ -241,7 +243,7 @@ func (c4c *Client4Center) onUserWinScore(msg []byte) {
 		if loginCallBack, ok := c4c.userWaitEvent[fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order)]; ok {
 			loginCallBack(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})
 			// 回调成功之后要删除
-			delete(c4c.userWaitEvent, fmt.Sprintf("%+vwin", syncData.Msg.ID))
+			delete(c4c.userWaitEvent, fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order))
 			log.Debug("用户回调已删除: %+v, 回调队列 %+v", fmt.Sprintf("%+vwin", syncData.Msg.ID), c4c.userWaitEvent)
 		} else {
 			log.Error("找不到用户回调")
@@ -262,8 +264,7 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 	if syncData.Code == constant.CRespStatusSuccess {
 		if loginCallBack, ok := c4c.userWaitEvent[fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order)]; ok {
 			loginCallBack(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})
-			// fixme
-			delete(c4c.userWaitEvent, fmt.Sprintf("%+vlose", syncData.Msg.ID))
+			delete(c4c.userWaitEvent, fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order))
 			log.Debug("用户回调已删除: %+v 回调队列 %+v", fmt.Sprintf("%+vwin", syncData.Msg.ID), c4c.userWaitEvent)
 		} else {
 			log.Error("找不到用户回调")
@@ -423,6 +424,7 @@ func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, order stri
 
 // 向中心服发送消息的基础函数
 func (c4c *Client4Center) sendMsg2Center(data interface{}) {
+	// todo 写入数据库
 	bs, err := json.Marshal(data)
 	if err != nil {
 		log.Error("解析失败", err)

@@ -17,6 +17,12 @@ func (dl *Dealer) handleBet(args []interface{}) {
 	a := args[1].(gate.Agent)
 	au := a.UserData().(*User)
 
+	// 没有筹码
+	if m.Chip == 0 {
+		errorResp(a, msg.ErrorCode_InsufficientBalanceBet, "余额不足")
+		return
+	}
+
 	if dl.Status == constant.RSBetting {
 		log.Debug("筹码信息 %+v", m)
 
