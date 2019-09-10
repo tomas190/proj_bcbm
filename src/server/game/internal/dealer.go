@@ -183,6 +183,8 @@ func (dl *Dealer) ClearChip() {
 			// 续投 不投注 不变
 			// 不续投 不投注 不变
 		}
+
+		dl.UserAutoBet[u] = false
 	}
 
 	// 清空投注详情记录

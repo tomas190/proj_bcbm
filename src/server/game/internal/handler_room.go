@@ -113,9 +113,34 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 
 	if dl.Status == constant.RSBetting {
 		// todo 求和计算余额是否足够
-		for r := range dl.AutoBetRecord[au.UserID] {
-			resp := r
-			dl.Broadcast(&resp)
+		for _, b := range dl.AutoBetRecord[au.UserID] {
+			bet := b
+			cs := constant.ChipSize[bet.Chip]
+
+			// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
+			dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
+			// 当前用户在该区域的历史投注+当前用户投注
+			dl.UserBets[au.UserID][bet.Area] = dl.UserBets[au.UserID][bet.Area] + cs
+			// 用户具体投注信息
+			// dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], bet)
+
+			c4c.UserLoseScore(au.UserID, -cs, func(data *User) {
+				log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
+				au.Balance = data.Balance
+
+				resp := &msg.BetInfoB{
+					Area:        bet.Area,
+					Chip:        bet.Chip,
+					AreaTotal:   dl.AreaBets[bet.Area],
+					PlayerTotal: dl.UserBets[au.UserID][bet.Area],
+					PlayerID:    au.UserID,
+					Money:       au.Balance,
+				}
+				dl.Broadcast(resp)
+			})
+
+			// fixme 回调唯一标识有误，这里暂时用这种处理一下，后续需要修改c4c
+			time.Sleep(200 * time.Millisecond)
 		}
 		dl.UserAutoBet[au.UserID] = true
 	} else {
