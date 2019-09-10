@@ -168,6 +168,7 @@ type SyncScoreMsg struct {
 	FinalBalance float64 `json:"final_balance"`
 	Income       float64 `json:"income"`
 	Order        string  `json:"order"`
+	RoundID      string  `json:"round_id"`
 }
 
 /***************************************************

@@ -6,6 +6,7 @@ import (
 	"github.com/name5566/leaf/log"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
+	"proj_bcbm/src/server/util"
 	"reflect"
 	"sort"
 	"time"
@@ -31,7 +32,9 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		// 用户具体投注信息
 		dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], *m)
 
-		c4c.UserLoseScore(au.UserID, -cs, func(data *User) {
+		uuid := util.UUID{}
+		order := uuid.GenUUID()
+		c4c.UserLoseScore(au.UserID, -cs, order, func(data *User) {
 			log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
 			au.Balance = data.Balance
 
@@ -124,7 +127,9 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 			// 用户具体投注信息
 			// dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], bet)
 
-			c4c.UserLoseScore(au.UserID, -cs, func(data *User) {
+			uuid := util.UUID{}
+			order := uuid.GenUUID()
+			c4c.UserLoseScore(au.UserID, -cs, order, func(data *User) {
 				log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
 				au.Balance = data.Balance
 
@@ -138,9 +143,6 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 				}
 				dl.Broadcast(resp)
 			})
-
-			// fixme 回调唯一标识有误，这里暂时用这种处理一下，后续需要修改c4c
-			time.Sleep(200 * time.Millisecond)
 		}
 		dl.UserAutoBet[au.UserID] = true
 	} else {
