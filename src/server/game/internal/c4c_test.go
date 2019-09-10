@@ -24,7 +24,7 @@ func TestClient4Center_ServerLoginCenter(t *testing.T) {
 
 	for {
 		// 在没有收到服务器登陆成功返回之前不应该执行后续操作
-		userID := uint32(955509280)
+		userID := uint32(516499995)
 
 		c.UserLoginCenter(userID, "123456", func(data *User) {
 			log.Debug("<----用户登录回调---->%+v %+v %+v", data.Balance, data.NickName, data.Avatar)

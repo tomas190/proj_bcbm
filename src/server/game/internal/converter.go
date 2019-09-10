@@ -61,6 +61,7 @@ func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
 }
 
 func (c *DTOConverter) RSBMsg(userWin float64, autoBetAmount, userBalance float64, dl Dealer) msg.RoomStatusB {
+	dl.Bankers[0].GetPlayerBasic()
 	bMsg := msg.RoomStatusB{
 		Status:        dl.Status,
 		Counter:       0, // fixme
@@ -68,6 +69,7 @@ func (c *DTOConverter) RSBMsg(userWin float64, autoBetAmount, userBalance float6
 		Result:        dl.res,
 		BankerWin:     dl.bankerWin,
 		WinMoney:      userWin,
+		BankerMoney:   dl.bankerMoney,
 		AutoBetAmount: autoBetAmount, // 若不可续投则为0
 		PlayerMoney:   userBalance,
 		ServerTime:    uint32(time.Now().Unix()),

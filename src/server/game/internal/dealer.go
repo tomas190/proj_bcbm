@@ -24,11 +24,12 @@ type Dealer struct {
 	ddl         uint32
 	bankerRound uint32 // 庄家做了多少轮
 
-	Status    uint32     // 房间状态
-	res       uint32     // 最新开奖结果
-	bankerWin float64    // 庄家输赢
-	History   []uint32   // 房间开奖历史
-	HRChan    chan HRMsg // 房间大厅通信
+	Status      uint32     // 房间状态
+	res         uint32     // 最新开奖结果
+	bankerWin   float64    // 庄家输赢
+	bankerMoney float64    // 庄家余额
+	History     []uint32   // 房间开奖历史
+	HRChan      chan HRMsg // 房间大厅通信
 
 	Users          map[uint32]*User     // 房间用户-不包括机器人
 	Bots           []*Bot               // 房间机器人
@@ -130,7 +131,10 @@ func (dl *Dealer) Settle() {
 	// 玩家赢数 = 开奖区域投注金额*区域倍数-总投注金额
 
 	math := util.Math{}
+	// todo 庄家结算
 	dl.bankerWin = math.SumSliceFloat64(dl.AreaBets) - con.AreaX[dl.res]*dl.AreaBets[dl.res]
+	// fixme 庄家是玩家的情况
+	dl.bankerMoney = dl.bankerMoney + dl.bankerWin
 
 	log.Debug("settle... %+v", dl.RoomID)
 
@@ -202,6 +206,7 @@ func (dl *Dealer) ClearChip() {
 	if dl.bankerRound >= constant.BankerMaxTimes || dl.Bankers[0].(Bot).Balance < constant.BankerMinBar {
 		if len(dl.Bankers) > 1 {
 			dl.Bankers = dl.Bankers[:1]
+			dl.bankerMoney = dl.Bankers[0].(Bot).Balance
 		}
 		// 换一批机器人
 		dl.Bots = nil
