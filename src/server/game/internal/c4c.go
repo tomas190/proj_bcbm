@@ -190,7 +190,6 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 				Avatar:   gameUser.GameIMG,
 				Balance:  gameAccount.Balance,
 			})
-			// fixme 回调成功之后要删除
 		} else {
 			log.Error("找不到用户回调")
 		}
@@ -222,7 +221,6 @@ func (c4c *Client4Center) onUserLogout(msg []byte) {
 				Balance:  gameAccount.Balance,
 			})
 
-			// fixme 回调成功之后要删除
 		} else {
 			log.Error("找不到用户回调")
 		}

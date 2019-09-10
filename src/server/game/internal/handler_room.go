@@ -127,6 +127,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 			// 用户具体投注信息
 			// dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], bet)
 
+			// fixme 为了前端动画代价有点大
 			uuid := util.UUID{}
 			order := uuid.GenUUID()
 			c4c.UserLoseScore(au.UserID, -cs, order, func(data *User) {
