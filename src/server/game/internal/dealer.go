@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/name5566/leaf/log"
+	"github.com/shopspring/decimal"
 	"math/rand"
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
@@ -132,7 +133,7 @@ func (dl *Dealer) Settle() {
 
 	math := util.Math{}
 	// todo 庄家结算
-	dl.bankerWin = math.SumSliceFloat64(dl.AreaBets) - con.AreaX[dl.res]*dl.AreaBets[dl.res]
+	dl.bankerWin, _ = math.SumSliceFloat64(dl.AreaBets).Sub(math.MultiFloat64(con.AreaX[dl.res], dl.AreaBets[dl.res])).Float64()
 	// fixme 庄家是玩家的情况
 	dl.bankerMoney = dl.bankerMoney + dl.bankerWin
 
@@ -149,14 +150,15 @@ func (dl *Dealer) Settle() {
 		user := dl.Users[uID]
 		// 中心服需要结算的输赢
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
-		// 前端显示的输赢
-		uDisplayWin := dl.UserBets[user.UserID][dl.res]*constant.AreaX[dl.res] - math.SumSliceFloat64(dl.UserBets[user.UserID])
+		// 前端显示的输赢 精度问题
+		uDisplayWin, _ := math.MultiFloat64(dl.UserBets[user.UserID][dl.res], constant.AreaX[dl.res]).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Float64()
 		beforeBalance := user.Balance
 		uuid := util.UUID{}
 		order := uuid.GenUUID()
 		if uWin > 0 {
 			c4c.UserWinScore(user.UserID, uWin, order, func(data *User) {
-				resp := converter.RSBMsg(data.Balance-math.SumSliceFloat64(dl.UserBets[user.UserID])-beforeBalance, 0, data.Balance, *dl)
+				win, _ := decimal.NewFromFloat(data.Balance).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Sub(decimal.NewFromFloat(beforeBalance)).Float64()
+				resp := converter.RSBMsg(win, 0, data.Balance, *dl)
 				user.ConnAgent.WriteMsg(&resp)
 			})
 		} else {

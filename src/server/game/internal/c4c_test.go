@@ -34,7 +34,7 @@ func TestClient4Center_ServerLoginCenter(t *testing.T) {
 
 		time.Sleep(7 * time.Second)
 
-		c.UserLoseScore(userID, -5,
+		c.UserLoseScore(userID, -5, "",
 			func(data *User) {
 				log.Debug("<----用户减钱回调---->%+v %+v %+v", data.Balance, data.NickName, data.Avatar)
 			})
@@ -77,7 +77,7 @@ func TestClient4Center_MinusMoney(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 
-	c.UserLoseScore(userID, -1000,
+	c.UserLoseScore(userID, -1000, "",
 		func(data *User) {
 			log.Debug("<----用户减钱回调---->%+v %+v", data.UserID, data.Balance)
 		})
@@ -101,7 +101,7 @@ func TestClient4Center_AddMoney(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 
-	c.UserWinScore(userID, 20000,
+	c.UserWinScore(userID, 20000, "",
 		func(data *User) {
 			log.Debug("<----用户加钱回调---->%+v %+v", data.UserID, data.Balance)
 		})
