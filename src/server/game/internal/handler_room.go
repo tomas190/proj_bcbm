@@ -83,7 +83,7 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
 	if au.Balance < constant.BankerMinBar {
-		errorResp(a, msg.ErrorCode_InsufficientBalanceGrabBanker, "金币不足，无法上庄")
+		errorResp(a, msg.ErrorCode_InsufficientBalanceGrabBanker, "金币未达到50000")
 		return
 	}
 
@@ -153,7 +153,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		}
 		dl.UserAutoBet[au.UserID] = true
 	} else {
-		errorResp(a, msg.ErrorCode_NotInBetting, "当前不再投注状态")
+		errorResp(a, msg.ErrorCode_NotInBetting, "当前不在下注状态")
 	}
 }
 

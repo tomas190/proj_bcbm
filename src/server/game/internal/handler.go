@@ -133,13 +133,13 @@ func handleJoinRoom(args []interface{}) {
 	v, exist := Mgr.RoomRecord.Load(m.RoomID)
 	room := v.(*Dealer)
 	if !exist {
-		errorResp(a, msg.ErrorCode_RoomNotExist, "")
+		errorResp(a, msg.ErrorCode_RoomNotExist, "房间不存在")
 		return
 	}
 
 	// fixme 最大人数
 	if len(room.UserBets) == constant.MaxPlayerCount {
-		errorResp(a, msg.ErrorCode_RoomFull, "")
+		errorResp(a, msg.ErrorCode_RoomFull, "房间已满")
 		return
 	}
 
@@ -187,10 +187,11 @@ func handleRoomEvent(args []interface{}) {
 	}
 }
 
+// 测试用
 func randomLoginMsg() *msg.Login {
 	rand.Seed(time.Now().Unix())
-	userIDs := []uint32{955509280, 409972380, 615426645, 651488813, 900948081, 263936609, 538509606, 704898825, 943979274, 613251393}
-	uID := userIDs[rand.Intn(9)]
+	userIDs := []uint32{955509280}
+	uID := userIDs[rand.Intn(len(userIDs)-1)]
 	return &msg.Login{
 		UserID:   uID,
 		Password: "123456",
