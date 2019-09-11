@@ -1,5 +1,6 @@
 package constant
 
+// Bot Type
 const (
 	BTBetGod     = 0
 	BTNextBanker = 1

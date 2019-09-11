@@ -1,6 +1,6 @@
 package constant
 
-// 房间状态
+// 房间状态 room status
 const (
 	_         = iota
 	RSBetting // 下注
@@ -8,14 +8,17 @@ const (
 	RSClear   // 清理筹码
 )
 
+// 时间间隔
 const (
 	BetTime    = 16 //16
 	SettleTime = 24 //24
 	ClearTime  = 3
 )
 
+// 最大容量
 const MaxPlayerCount = 100
 
+// 房间等级 room level
 const (
 	RL1MinBet   = 1
 	RL1MaxBet   = 10000

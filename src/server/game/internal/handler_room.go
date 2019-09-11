@@ -54,6 +54,9 @@ func (dl *Dealer) handleBet(args []interface{}) {
 			}
 			dl.Broadcast(resp)
 		})
+
+		// 记录玩家投注信息
+
 	} else {
 		errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
 	}
