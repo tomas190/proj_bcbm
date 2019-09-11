@@ -377,7 +377,7 @@ func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order strin
 			Info: SyncScoreReqDataInfo{
 				UserID:     userID,
 				CreateTime: uint32(time.Now().Unix()),
-				PayReason:  "test bm",
+				PayReason:  "奔驰宝马测试赢钱",
 				Money:      money,
 				Order:      order,
 				GameID:     conf.Server.GameID,
@@ -409,7 +409,7 @@ func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, order stri
 			Info: SyncScoreReqDataInfo{
 				UserID:     userID,
 				CreateTime: uint32(time.Now().Unix()),
-				PayReason:  "test",
+				PayReason:  "奔驰宝马测试输钱",
 				Money:      money,
 				Order:      order,
 				GameID:     conf.Server.GameID,
