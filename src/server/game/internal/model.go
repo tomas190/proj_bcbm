@@ -6,7 +6,6 @@ import (
 	"github.com/name5566/leaf/log"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
-	"reflect"
 	"sync"
 	"time"
 )
@@ -91,10 +90,10 @@ func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 // 收到房间消息状态改变的消息后 修改大厅统计任务 发广播
 func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 	rID := hrMsg.RoomID
-	log.Debug("roomStatus: %+v", hrMsg.RoomStatus)
+	// log.Debug("roomStatus: %+v", hrMsg.RoomStatus)
 	if hrMsg.RoomStatus == constant.RSSettle {
 		h.History[rID] = append(h.History[rID], hrMsg.LotteryResult)
-		log.Debug("room: %+v, his: %+v", rID, h.History[rID])
+		// log.Debug("room: %+v, his: %+v", rID, h.History[rID])
 		if len(h.History[rID]) > constant.HisCount {
 			h.History[rID] = h.History[rID][1:]
 		}
@@ -110,7 +109,7 @@ func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 
 // 大厅广播
 func (h *Hall) BroadCast(bMsg interface{}) {
-	log.Debug("hall brd msg %+v, content: %+v", reflect.TypeOf(bMsg), bMsg)
+	// log.Debug("hall brd msg %+v, content: %+v", reflect.TypeOf(bMsg), bMsg)
 	for _, u := range h.UserRecord {
 		user := u
 		if user.ConnAgent != nil {

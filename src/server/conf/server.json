@@ -11,5 +11,5 @@
 	"DevKey": "new_game_17",
 	"DevName": "新游戏开发",
 	"GameID": "5b1f3a3cb76a591e7f251716",
-	"MongoDB": "mongodb://10.63.60.119:27917"
+	"MongoDB": "mongodb://10.63.90.53:27917"
 }

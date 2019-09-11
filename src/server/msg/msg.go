@@ -41,7 +41,7 @@ func init() {
 	Processor.Register(&RoomStatusB{})
 
 	// print ID 打印出想要的任意格式
-	Processor.Range(printMsgIDPB)
+	// Processor.Range(printMsgIDPB)
 	// Processor.Range(printMsgID)
 	// Processor.Range(printMsg)
 }

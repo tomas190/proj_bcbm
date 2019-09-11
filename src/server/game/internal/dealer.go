@@ -1,14 +1,12 @@
 package internal
 
 import (
-	"github.com/name5566/leaf/log"
 	"github.com/shopspring/decimal"
 	"math/rand"
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
-	"reflect"
 	"time"
 )
 
@@ -65,7 +63,7 @@ func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 // 重置表
 func (dl *Dealer) ClockReset(duration uint32, next func()) {
 	defer func() { dl.counter = 0 }()
-	log.Debug("Deadline: %v, Event: %v, RoomID: %+v", duration, util.Function{}.GetFunctionName(next), dl.RoomID)
+	// log.Debug("Deadline: %v, Event: %v, RoomID: %+v", duration, util.Function{}.GetFunctionName(next), dl.RoomID)
 	go func() {
 		for t := range dl.clock.C {
 			// log.Debug("ticker：%v", t)
@@ -94,7 +92,7 @@ func (dl *Dealer) Bet() {
 		RoomStatus: dl.Status,
 		EndTime:    uint32(time.Now().Unix() + constant.BetTime),
 	}
-	log.Debug("bet... %+v", dl.RoomID)
+	// log.Debug("bet... %+v", dl.RoomID)
 
 	dl.ddl = uint32(time.Now().Unix()) + con.BetTime
 	converter := DTOConverter{}
@@ -137,7 +135,7 @@ func (dl *Dealer) Settle() {
 	// fixme 庄家是玩家的情况
 	dl.bankerMoney = dl.bankerMoney + dl.bankerWin
 
-	log.Debug("settle... %+v", dl.RoomID)
+	// log.Debug("settle... %+v", dl.RoomID)
 
 	dl.ddl = uint32(time.Now().Unix()) + con.SettleTime
 	converter := DTOConverter{}
@@ -173,7 +171,7 @@ func (dl *Dealer) Settle() {
 // 清理筹码
 func (dl *Dealer) ClearChip() {
 	dl.Status = constant.RSClear
-	log.Debug("clear chip... %+v", dl.RoomID)
+	// log.Debug("clear chip... %+v", dl.RoomID)
 
 	// 清理
 	dl.AreaBets = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
@@ -235,7 +233,7 @@ func (dl *Dealer) ClearChip() {
 }
 
 func (dl *Dealer) Broadcast(m interface{}) {
-	log.Debug("room %+v brd %+v, content: %+v", dl.RoomID, reflect.TypeOf(m), m)
+	// log.Debug("room %+v brd %+v, content: %+v", dl.RoomID, reflect.TypeOf(m), m)
 	for _, u := range dl.Users {
 		user := u
 		if user.ConnAgent != nil {

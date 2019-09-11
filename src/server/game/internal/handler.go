@@ -39,7 +39,7 @@ func handlerReg(m interface{}, h interface{}) {
 func handlePing(args []interface{}) {
 	// m := args[0].(*msg.Ping)
 	a := args[1].(gate.Agent)
-	log.Debug("recv Ping %+v", a.RemoteAddr())
+	// log.Debug("recv Ping %+v", a.RemoteAddr())
 	a.WriteMsg(&msg.Pong{})
 }
 

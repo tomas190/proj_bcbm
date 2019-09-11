@@ -24,7 +24,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 	}
 
 	if dl.Status == constant.RSBetting {
-		log.Debug("筹码信息 %+v", m)
+		// log.Debug("筹码信息 %+v", m)
 
 		cs := constant.ChipSize[m.Chip]
 		if au.Balance < cs {
@@ -41,7 +41,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		uuid := util.UUID{}
 		order := uuid.GenUUID()
 		c4c.UserLoseScore(au.UserID, -cs, order, func(data *User) {
-			log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
+			// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
 			au.Balance = data.Balance
 
 			resp := &msg.BetInfoB{
@@ -140,7 +140,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 			uuid := util.UUID{}
 			order := uuid.GenUUID()
 			c4c.UserLoseScore(au.UserID, -cs, order, func(data *User) {
-				log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
+				// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
 				au.Balance = data.Balance
 
 				resp := &msg.BetInfoB{

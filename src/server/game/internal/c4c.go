@@ -70,7 +70,7 @@ func (c4c *Client4Center) ReqToken() {
 		log.Fatal("响应体读取失败", err)
 	}
 
-	log.Debug(string(bs))
+	// log.Debug(string(bs))
 	tokenResp := TokenResp{}
 
 	err = json.Unmarshal(bs, &tokenResp)
@@ -153,7 +153,7 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 }
 
 func (c4c *Client4Center) onServerLogin(msg []byte) {
-	log.Debug("收到了中心服确认服务器登陆消息 %v", string(msg))
+	// log.Debug("收到了中心服确认服务器登陆消息 %v", string(msg))
 	sLogin := ServerLoginResp{}
 
 	err := json.Unmarshal(msg, &sLogin)
@@ -163,11 +163,11 @@ func (c4c *Client4Center) onServerLogin(msg []byte) {
 
 	data := sLogin.Data
 	status := data.Status
-	code := data.Code
+	// code := data.Code
 	taxPercent := data.Msg.PlatformTaxPercent
 
 	c4c.isServerLogin = true
-	log.Debug("%+v %+v %+v", status, code, taxPercent)
+	log.Debug("服务器登陆 %+v 税率 %%%+v ...", status, taxPercent)
 }
 
 // 收到用户登录返回之后
@@ -429,7 +429,7 @@ func (c4c *Client4Center) sendMsg2Center(data interface{}) {
 	if err != nil {
 		log.Error("解析失败", err)
 	}
-	log.Debug("发送数据 %v", string(bs))
+	log.Debug("Msg to center %v", string(bs))
 
 	err = c4c.conn.WriteMessage(websocket.TextMessage, bs)
 	if err != nil {
