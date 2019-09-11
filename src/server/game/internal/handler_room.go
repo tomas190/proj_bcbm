@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 	"proj_bcbm/src/server/constant"
@@ -228,6 +227,5 @@ func (dl *Dealer) getBankerInfoResp() []*msg.UserInfo {
 		bankerInfoResp = append(bankerInfoResp, &buInfo)
 	}
 
-	fmt.Println(bankerInfoResp)
 	return bankerInfoResp
 }

@@ -89,6 +89,11 @@ func (c *DTOConverter) BBMsg(dealer Dealer) msg.BankersB {
 
 type DAOConverter struct{}
 
+// 玩家下注
+func (c *DAOConverter) Bet2Bson(betM msg.Bet) betB {
+
+}
+
 func (c *DAOConverter) U2Bson() {
 
 }

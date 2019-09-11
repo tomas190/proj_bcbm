@@ -1,4 +1,4 @@
-package util
+package internal
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"proj_bcbm/src/server/msg"
 	"time"
 )
 
@@ -47,6 +48,6 @@ func (m *MgoC) CUserInfo() {
 
 }
 
-func (m *MgoC) CUserBet() {
+func (m *MgoC) CUserBet(u User, b msg.Bet) {
 
 }

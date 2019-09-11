@@ -2,9 +2,11 @@ package internal
 
 import "github.com/name5566/leaf/gate"
 
-type Player interface {
-	GetPlayerBasic() (uint32, string, string, float64)
-	GetPlayerAccount() (uint32, float64)
+type Bet struct {
+	Area       uint32
+	AreaStr    string
+	Chip       uint32
+	ChipAmount uint32
 }
 
 type User struct {
@@ -23,6 +25,11 @@ type Bot struct {
 	WinCount  uint32
 	BetAmount float64
 	botType   uint32
+}
+
+type Player interface {
+	GetPlayerBasic() (uint32, string, string, float64)
+	GetPlayerAccount() (uint32, float64)
 }
 
 func (u User) GetPlayerBasic() (uint32, string, string, float64) {
