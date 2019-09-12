@@ -143,8 +143,10 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 				c4c.onUserLoseScore(message)
 			case constant.CEventUserWinScore:
 				c4c.onUserWinScore(message)
+			case constant.CEventError:
+				c4c.onError(message)
 			default:
-				c4c.onErrorReq(message)
+				c4c.onDefault(message)
 			}
 		}
 	}()
@@ -275,8 +277,24 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 	}
 }
 
-func (c4c *Client4Center) onErrorReq(msg []byte) {
-	log.Error("错误事件 %v", string(msg))
+func (c4c *Client4Center) onError(msg []byte) {
+	centerErr := CenterErrorResp{}
+	err := json.Unmarshal(msg, &centerErr)
+	if err != nil {
+		log.Error("中心服错误事件解析错误", err)
+	}
+
+	errData := centerErr.Data
+	// todo 重试机制
+	if errData.Code == constant.CRespTokenError {
+		time.Sleep(30 * time.Second)
+		c4c.ReqToken()
+		c4c.HeartBeatAndListen()
+	}
+}
+
+func (c4c *Client4Center) onDefault(msg []byte) {
+	log.Error("中心服务器事件无法识别", string(msg))
 }
 
 /*****************************************************

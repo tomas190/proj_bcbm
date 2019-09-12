@@ -44,3 +44,15 @@ var AreaX = map[uint32]float64{
 	7: 5,
 	8: 5,
 }
+
+var AreaName = map[uint32]string{
+	0: "PlaceHolder",
+	1: "GoldenBenz-40X",
+	2: "GoldenBMW-30X",
+	3: "GoldenAudi-20X",
+	4: "GoldenVW-10X",
+	5: "Benz-5X",
+	6: "BMW-5X",
+	7: "Audi-5X",
+	8: "VW-5X",
+}

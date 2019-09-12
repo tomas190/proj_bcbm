@@ -32,7 +32,7 @@ type Dealer struct {
 
 	Users          map[uint32]*User     // 房间用户-不包括机器人
 	Bots           []*Bot               // 房间机器人
-	Bankers        []Player             // 上庄玩家榜单 todo 玩家榜单
+	Bankers        []Player             // 上庄玩家榜单
 	UserBets       map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
 	UserBetsDetail map[uint32][]msg.Bet // 用户具体投注
 	UserAutoBet    map[uint32]bool      // 本局投注记录

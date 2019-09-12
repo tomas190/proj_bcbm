@@ -2,11 +2,11 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"github.com/name5566/leaf/log"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"proj_bcbm/src/server/msg"
 	"time"
 )
 
@@ -44,10 +44,41 @@ func (m *MgoC) Init() error {
 	return nil
 }
 
-func (m *MgoC) CUserInfo() {
+// 插入用户信息
+func (m *MgoC) CUserInfo(u interface{}) error {
+	collection := m.Database("bcbm_db").Collection("users")
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	res, err := collection.InsertOne(ctx, u)
+	if err != nil {
+		log.Error("%+v", err)
+		return err
+	}
+	id := res.InsertedID
+	fmt.Println(id)
+	return err
+}
+
+func (m *MgoC) RUserInfo() {
 
 }
 
-func (m *MgoC) CUserBet(u User, b msg.Bet) {
+func (m *MgoC) UUserInfo() {
 
+}
+
+func (m *MgoC) DUserInfo() {
+
+}
+
+func (m *MgoC) CUserBet(bet interface{}) error {
+	collection := m.Database("bcbm_db").Collection("bets")
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	res, err := collection.InsertOne(ctx, bet)
+	if err != nil {
+		log.Error("%+v", err)
+		return err
+	}
+	id := res.InsertedID
+	fmt.Println(id)
+	return err
 }

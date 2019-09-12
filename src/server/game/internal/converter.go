@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"go.mongodb.org/mongo-driver/bson"
+	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"time"
 )
@@ -89,15 +91,30 @@ func (c *DTOConverter) BBMsg(dealer Dealer) msg.BankersB {
 
 type DAOConverter struct{}
 
+func (c *DAOConverter) U2DB(u User) UserDB {
+	udb := UserDB{u.UserID, u.NickName, u.Avatar, u.Balance}
+	return udb
+}
+
 // 玩家下注
-func (c *DAOConverter) Bet2Bson(betM msg.Bet) betB {
+func (c *DAOConverter) Bet2DB(u User, betM msg.Bet) BetDB {
+	user := c.U2DB(u)
+	aStr := constant.AreaName[betM.Area]
+	cAmount := constant.ChipSize[betM.Chip]
+	bdb := BetDB{User: user, Area: betM.Area, AreaStr: aStr, Chip: betM.Chip, ChipAmount: cAmount}
+	return bdb
+}
+
+func (c *DAOConverter) R2DB() {
 
 }
 
-func (c *DAOConverter) U2Bson() {
+func ToDoc(v interface{}) (doc interface{}, err error) {
+	data, err := bson.Marshal(v)
+	if err != nil {
+		return
+	}
 
-}
-
-func (c *DAOConverter) R2Bson() {
-
+	err = bson.Unmarshal(data, &doc)
+	return
 }

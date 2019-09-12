@@ -119,6 +119,23 @@ type UserLogoutRespData struct {
 
 /********************************************************
 
+	错误
+
+********************************************************/
+
+type CenterErrorResp struct {
+	Event string              `json:"event"`
+	Data  CenterErrorRespData `json:"data"`
+}
+
+type CenterErrorRespData struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Msg    string `json:"error"`
+}
+
+/********************************************************
+
 	用户加钱减钱-中心服API垃圾！！！
 
 ********************************************************/
