@@ -21,10 +21,14 @@ type Bot struct {
 }
 
 type Player interface {
+	GetBalance() float64
 	GetPlayerBasic() (uint32, string, string, float64)
 	GetPlayerAccount() (uint32, float64)
 }
 
+func (u User) GetBalance() float64 {
+	return u.Balance
+}
 func (u User) GetPlayerBasic() (uint32, string, string, float64) {
 	return u.UserID, u.NickName, u.Avatar, u.Balance
 }
@@ -32,6 +36,10 @@ func (u User) GetPlayerBasic() (uint32, string, string, float64) {
 func (u User) GetPlayerAccount() (uint32, float64) {
 	// todo
 	return 10, 100
+}
+
+func (b Bot) GetBalance() float64 {
+	return b.Balance
 }
 
 func (b Bot) GetPlayerBasic() (uint32, string, string, float64) {
