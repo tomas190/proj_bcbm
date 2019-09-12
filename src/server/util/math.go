@@ -1,17 +1,17 @@
 package util
 
-import "github.com/shopspring/decimal"
+import (
+	"github.com/shopspring/decimal"
+)
 
 type Math struct{}
 
 func (m *Math) SumSliceFloat64(s []float64) decimal.Decimal {
 	sum := decimal.NewFromFloat(0)
-
-	for _, f := range s {
-		fd := decimal.NewFromFloat(f)
-		sum.Add(fd)
+	for i := range s {
+		fd := decimal.NewFromFloat(s[i])
+		sum = sum.Add(fd)
 	}
-
 	return sum
 }
 

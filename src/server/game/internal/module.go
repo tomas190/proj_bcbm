@@ -34,11 +34,11 @@ func (m *Module) OnInit() {
 	// 数据库
 	db, err := NewMgoC(conf.Server.MongoDB)
 	if err != nil {
-		log.Error("创建数据库客户端错误", err)
+		log.Error("创建数据库客户端错误 %+v", err)
 	}
 	err = db.Init()
 	if err != nil {
-		log.Error("数据库初始化错误", err)
+		log.Error("数据库初始化错误 %+v", err)
 	}
 
 	// 游戏大厅

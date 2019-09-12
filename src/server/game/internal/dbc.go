@@ -36,7 +36,7 @@ func (m *MgoC) Init() error {
 	}
 	err = m.Ping(ctx, readpref.Primary())
 	if err != nil {
-		log.Error("ping数据库错误", err)
+		log.Error("ping数据库错误 %+v", err)
 		return err
 	}
 
