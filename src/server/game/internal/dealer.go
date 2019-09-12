@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"github.com/name5566/leaf/log"
 	"github.com/shopspring/decimal"
 	"math/rand"
 	"proj_bcbm/src/server/constant"
@@ -203,14 +202,10 @@ func (dl *Dealer) ClearChip() {
 
 	converter := DTOConverter{}
 
-	// fixme 用户上庄
-	// fixme panic: interface conversion: internal.Player is *internal.User, not internal.Bot
-	// fixme 需要 type switch case一下
-
 	if dl.bankerRound >= constant.BankerMaxTimes || dl.Bankers[0].GetBalance() < constant.BankerMinBar {
 		if len(dl.Bankers) > 1 {
 			dl.Bankers = dl.Bankers[1:]
-			dl.bankerMoney = dl.playerBalance(dl.Bankers[0])
+			dl.bankerMoney = dl.Bankers[0].GetBalance()
 		}
 		// 换一批机器人
 		dl.Bots = nil
@@ -224,6 +219,7 @@ func (dl *Dealer) ClearChip() {
 
 		bankerResp := converter.BBMsg(*dl)
 		dl.Broadcast(&bankerResp)
+		dl.bankerRound = 0
 	}
 
 	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime
@@ -232,24 +228,6 @@ func (dl *Dealer) ClearChip() {
 	dl.Broadcast(&resp)
 
 	dl.ClockReset(constant.ClearTime, dl.Bet)
-}
-
-func (dl *Dealer) playerBalance(p Player) float64 {
-	var pBalance float64
-	switch t := dl.Bankers[0].(type) {
-	case Bot:
-		pBalance = dl.Bankers[0].(Bot).Balance
-	case User:
-		pBalance = dl.Bankers[0].(User).Balance
-	default:
-		{
-			pBalance = 99999
-			log.Error("玩家类型无法识别", t)
-		}
-	}
-
-	return pBalance
-
 }
 
 func (dl *Dealer) Broadcast(m interface{}) {

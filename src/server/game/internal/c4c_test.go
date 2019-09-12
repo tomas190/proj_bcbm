@@ -7,13 +7,6 @@ import (
 	"time"
 )
 
-/*
-
-Dev环境奔驰宝马测试账号 密码全部为 123456
-955509280 409972380 615426645 651488813 900948081 263936609 538509606 704898825 943979274 613251393
-
-*/
-
 func TestClient4Center_ServerLoginCenter(t *testing.T) {
 	c := NewClient4Center()
 	c.ReqToken()
@@ -64,7 +57,7 @@ func TestClient4Center_ServerLoginCenter(t *testing.T) {
 
 // 减钱
 func TestClient4Center_MinusMoney(t *testing.T) {
-	userID := uint32(955509280)
+	userID := uint32(516499995)
 
 	c := NewClient4Center()
 	c.ReqToken()
@@ -88,7 +81,7 @@ func TestClient4Center_MinusMoney(t *testing.T) {
 
 // 加钱
 func TestClient4Center_AddMoney(t *testing.T) {
-	userID := uint32(955509280)
+	userID := uint32(789694945)
 
 	c := NewClient4Center()
 	c.ReqToken()
@@ -101,7 +94,7 @@ func TestClient4Center_AddMoney(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 
-	c.UserWinScore(userID, 20000, "",
+	c.UserWinScore(userID, 6000, "test-order-add",
 		func(data *User) {
 			log.Debug("<----用户加钱回调---->%+v %+v", data.UserID, data.Balance)
 		})
