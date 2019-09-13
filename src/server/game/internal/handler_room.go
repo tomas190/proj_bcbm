@@ -170,6 +170,12 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 	// fixme 可能会有并发问题
 	delete(dl.Users, au.UserID)
 
+	// todo 玩家离开房间后 清空续投 需要结算
+	//dl.Bankers
+	//dl.UserAutoBet
+	//dl.UserBetsDetail
+	dl.AutoBetRecord[au.UserID] = nil
+
 	resp := &msg.LeaveRoomR{
 		User: &msg.UserInfo{
 			UserID:   au.UserID,
