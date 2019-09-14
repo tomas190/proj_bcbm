@@ -1,13 +1,17 @@
 package internal
 
-import "github.com/name5566/leaf/gate"
+import (
+	"github.com/name5566/leaf/gate"
+	"sync"
+)
 
 type User struct {
-	UserID    uint32     // 用户id
-	NickName  string     // 用户昵称
-	Avatar    string     // 用户头像
-	Balance   float64    // 用户金额
-	ConnAgent gate.Agent // 网络连接代理
+	Balance     float64      // 用户金额
+	BalanceLock sync.RWMutex // 锁
+	UserID      uint32       // 用户id
+	NickName    string       // 用户昵称
+	Avatar      string       // 用户头像
+	ConnAgent   gate.Agent   // 网络连接代理
 }
 
 type Bot struct {
