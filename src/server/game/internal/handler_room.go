@@ -30,18 +30,18 @@ func (dl *Dealer) handleBet(args []interface{}) {
 			errorResp(a, msg.ErrorCode_InsufficientBalanceBet, "余额不足")
 		}
 
-		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
-		dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
-		// 当前用户在该区域的历史投注+当前用户投注
-		dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
-		// 用户具体投注信息
-		dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], *m)
-
 		uuid := util.UUID{}
 		order := uuid.GenUUID()
 		c4c.UserLoseScore(au.UserID, -cs, order, func(data *User) {
 			// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
 			au.Balance = data.Balance
+
+			// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
+			dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
+			// 当前用户在该区域的历史投注+当前用户投注
+			dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
+			// 用户具体投注信息
+			dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], *m)
 
 			resp := &msg.BetInfoB{
 				Area:        m.Area,
