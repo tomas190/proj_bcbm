@@ -95,6 +95,8 @@ func handleLogin(args []interface{}) {
 
 			// 重新绑定信息
 			u.ConnAgent = a
+			// fixme
+			u.Avatar = "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png"
 			a.SetUserData(u)
 
 			Mgr.UserRecord[u.UserID] = u
