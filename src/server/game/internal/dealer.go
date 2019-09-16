@@ -156,6 +156,7 @@ func (dl *Dealer) Settle() {
 		if uWin > 0 {
 			c4c.UserWinScore(user.UserID, uWin, order, func(data *User) {
 				win, _ := decimal.NewFromFloat(data.Balance).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Sub(decimal.NewFromFloat(beforeBalance)).Float64()
+				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
