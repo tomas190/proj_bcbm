@@ -81,8 +81,9 @@ func handleLogin(args []interface{}) {
 		c4c.UserLoginCenter(userID, m.Password, func(u *User) {
 			resp := &msg.LoginR{
 				User: &msg.UserInfo{
-					UserID:   u.UserID,
-					Avatar:   u.Avatar,
+					UserID: u.UserID,
+					// Avatar:   u.Avatar,
+					Avatar:   "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png",
 					NickName: u.NickName,
 					Money:    u.Balance,
 				},
