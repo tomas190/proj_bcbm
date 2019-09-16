@@ -81,7 +81,10 @@ func TestClient4Center_MinusMoney(t *testing.T) {
 
 // 加钱
 func TestClient4Center_AddMoney(t *testing.T) {
-	userID := uint32(789694945)
+
+	// 516499995、404005181、789694945、547874059、699590045
+	// 115177351、515775801、781352999、567472342、846053346
+	userID := uint32(547874059)
 
 	c := NewClient4Center()
 	c.ReqToken()
@@ -94,7 +97,7 @@ func TestClient4Center_AddMoney(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 
-	c.UserWinScore(userID, 6000, "test-order-add",
+	c.UserWinScore(userID, 20000, "test-order-add",
 		func(data *User) {
 			log.Debug("<----用户加钱回调---->%+v %+v", data.UserID, data.Balance)
 		})
