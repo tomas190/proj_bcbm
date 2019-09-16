@@ -62,8 +62,9 @@ func handleLogin(args []interface{}) {
 		u := Mgr.UserRecord[userID]
 		resp := &msg.LoginR{
 			User: &msg.UserInfo{
-				UserID:   u.UserID,
-				Avatar:   u.Avatar,
+				UserID: u.UserID,
+				// Avatar:   u.Avatar,
+				Avatar:   "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png",
 				Money:    u.Balance,
 				NickName: u.NickName,
 			},
