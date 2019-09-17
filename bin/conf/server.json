@@ -5,8 +5,8 @@
 	"WSAddr": "0.0.0.0:10086",
 	"MaxConnNum": 20000,
 
-	"TokenServer":"http://swoole.0717996.com/Token/getToken",
-	"CenterServer": "http://swoole.0717996.com",
+	"TokenServer":"http://172.16.100.2:9502/Token/getToken",
+	"CenterServer": "http://172.16.100.2:9502",
 	"CenterServerPort": "9502",
 	"DevKey": "new_game_17",
 	"DevName": "新游戏开发",
