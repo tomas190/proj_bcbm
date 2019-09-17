@@ -95,7 +95,7 @@ func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 		h.History[rID] = append(h.History[rID], hrMsg.LotteryResult)
 		// log.Debug("room: %+v, his: %+v", rID, h.History[rID])
 		if len(h.History[rID]) > constant.HisCount {
-			h.History[rID] = h.History[rID][1:]
+			h.History[rID] = h.History[rID][:40]
 		}
 		v, _ := h.RoomRecord.Load(rID)
 		v.(*Dealer).History = h.History[rID]
@@ -123,11 +123,27 @@ func (h *Hall) GetRoomsInfoResp() []*msg.RoomInfo {
 	var roomsInfoResp []*msg.RoomInfo
 	converter := DTOConverter{}
 
-	h.RoomRecord.Range(func(key, value interface{}) bool {
-		rMsg := converter.R2Msg(*value.(*Dealer))
-		roomsInfoResp = append(roomsInfoResp, &rMsg)
-		return true
-	})
+	//h.RoomRecord.Range(func(key, value interface{}) bool {
+	//	rMsg := converter.R2Msg(*value.(*Dealer))
+	//	roomsInfoResp = append(roomsInfoResp, &rMsg)
+	//	return true
+	//})
+
+	// 因为前端需要排序
+	var sortedKeys []uint32
+	for i := 0; i < constant.RoomCount; i++ {
+		sortedKeys = append(sortedKeys, uint32(i)+1)
+	}
+
+	for _, k := range sortedKeys {
+		kx := k
+		if v, ok := h.RoomRecord.Load(kx); ok {
+			rMsg := converter.R2Msg(*v.(*Dealer))
+			roomsInfoResp = append(roomsInfoResp, &rMsg)
+		} else {
+			log.Debug("GetRoomsInfoResp 找不到房间id")
+		}
+	}
 
 	return roomsInfoResp
 }
