@@ -1,8 +1,10 @@
 package internal
 
 import (
+	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
+	"github.com/patrickmn/go-cache"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
@@ -16,23 +18,32 @@ func (dl *Dealer) handleBet(args []interface{}) {
 	a := args[1].(gate.Agent)
 	au := a.UserData().(*User)
 
-	// 没有筹码
 	if m.Chip == 0 {
 		errorResp(a, msg.ErrorCode_InsufficientBalanceBet, "余额不足")
 		return
 	}
 
-	if dl.Status == constant.RSBetting {
-		// log.Debug("筹码信息 %+v", m)
+	if dl.Status != constant.RSBetting {
+		errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
+		return
+	}
 
+	_, found := ca.Get(fmt.Sprintf("%+v-bet", au.UserID))
+	if found {
+		errorResp(a, msg.ErrorCode_ServerBusy, "服务器忙")
+		return
+	} else {
 		cs := constant.ChipSize[m.Chip]
 		if au.Balance < cs {
 			errorResp(a, msg.ErrorCode_InsufficientBalanceBet, "余额不足")
+			return
 		}
 
 		uuid := util.UUID{}
 		order := uuid.GenUUID()
-		c4c.UserLoseScore(au.UserID, -cs, order, func(data *User) {
+
+		ca.Set(fmt.Sprintf("%+v-bet", au.UserID), order, cache.DefaultExpiration)
+		c4c.UserLoseScore(au.UserID, -cs, order, "", func(data *User) {
 			// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
 			au.BalanceLock.Lock()
 			au.Balance = data.Balance
@@ -55,12 +66,54 @@ func (dl *Dealer) handleBet(args []interface{}) {
 			}
 			dl.Broadcast(resp)
 		})
-
+		ca.Delete(fmt.Sprintf("%+v-bet", au.UserID))
 		// 记录玩家投注信息
-
-	} else {
-		errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
+		return
 	}
+}
+
+func (dl *Dealer) handleAutoBet(args []interface{}) {
+	m := args[0].(*msg.AutoBet)
+	a := args[1].(gate.Agent)
+
+	au := a.UserData().(*User)
+	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
+
+	if dl.Status != constant.RSBetting {
+		errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
+		return
+	}
+
+	for _, b := range dl.AutoBetRecord[au.UserID] {
+		bet := b
+		cs := constant.ChipSize[bet.Chip]
+
+		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
+		dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
+		// 当前用户在该区域的历史投注+当前用户投注
+		dl.UserBets[au.UserID][bet.Area] = dl.UserBets[au.UserID][bet.Area] + cs
+		// 用户具体投注信息
+		// dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], bet)
+
+		// fixme 为了前端动画代价有点大
+		uuid := util.UUID{}
+		order := uuid.GenUUID()
+		c4c.UserLoseScore(au.UserID, -cs, order, dl.RoundID, func(data *User) {
+			// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
+			au.Balance = data.Balance
+
+			resp := &msg.BetInfoB{
+				Area:        bet.Area,
+				Chip:        bet.Chip,
+				AreaTotal:   dl.AreaBets[bet.Area],
+				PlayerTotal: dl.UserBets[au.UserID][bet.Area],
+				PlayerID:    au.UserID,
+				Money:       au.Balance,
+			}
+			dl.Broadcast(resp)
+		})
+	}
+	dl.UserAutoBet[au.UserID] = true
 }
 
 func (dl *Dealer) handlePlayers(args []interface{}) {
@@ -115,50 +168,6 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 	}
 
 	dl.Broadcast(resp)
-}
-
-func (dl *Dealer) handleAutoBet(args []interface{}) {
-	m := args[0].(*msg.AutoBet)
-	a := args[1].(gate.Agent)
-
-	au := a.UserData().(*User)
-	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
-
-	if dl.Status == constant.RSBetting {
-		// todo 求和计算余额是否足够
-		for _, b := range dl.AutoBetRecord[au.UserID] {
-			bet := b
-			cs := constant.ChipSize[bet.Chip]
-
-			// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
-			dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
-			// 当前用户在该区域的历史投注+当前用户投注
-			dl.UserBets[au.UserID][bet.Area] = dl.UserBets[au.UserID][bet.Area] + cs
-			// 用户具体投注信息
-			// dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], bet)
-
-			// fixme 为了前端动画代价有点大
-			uuid := util.UUID{}
-			order := uuid.GenUUID()
-			c4c.UserLoseScore(au.UserID, -cs, order, func(data *User) {
-				// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
-				au.Balance = data.Balance
-
-				resp := &msg.BetInfoB{
-					Area:        bet.Area,
-					Chip:        bet.Chip,
-					AreaTotal:   dl.AreaBets[bet.Area],
-					PlayerTotal: dl.UserBets[au.UserID][bet.Area],
-					PlayerID:    au.UserID,
-					Money:       au.Balance,
-				}
-				dl.Broadcast(resp)
-			})
-		}
-		dl.UserAutoBet[au.UserID] = true
-	} else {
-		errorResp(a, msg.ErrorCode_NotInBetting, "当前不在下注状态")
-	}
 }
 
 func (dl *Dealer) handleLeaveRoom(args []interface{}) {

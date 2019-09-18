@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"github.com/shopspring/decimal"
 	"math/rand"
 	"proj_bcbm/src/server/constant"
@@ -23,6 +24,7 @@ type Dealer struct {
 	ddl         uint32
 	bankerRound uint32 // 庄家做了多少轮
 
+	RoundID     string     // 轮次
 	Status      uint32     // 房间状态
 	res         uint32     // 最新开奖结果
 	bankerWin   float64    // 庄家输赢
@@ -86,6 +88,9 @@ func (dl *Dealer) StartGame() {
 
 // 下注
 func (dl *Dealer) Bet() {
+	// 时间戳+随机数，每局一个
+	uid := util.UUID{}
+	dl.RoundID = fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
 	dl.Status = constant.RSBetting
 	dl.HRChan <- HRMsg{
 		RoomID:     dl.RoomID,
@@ -154,7 +159,7 @@ func (dl *Dealer) Settle() {
 		uuid := util.UUID{}
 		order := uuid.GenUUID()
 		if uWin > 0 {
-			c4c.UserWinScore(user.UserID, uWin, order, func(data *User) {
+			c4c.UserWinScore(user.UserID, uWin, order, dl.RoundID, func(data *User) {
 				win, _ := decimal.NewFromFloat(data.Balance).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Sub(decimal.NewFromFloat(beforeBalance)).Float64()
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()

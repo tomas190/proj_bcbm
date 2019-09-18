@@ -376,7 +376,7 @@ func (c4c *Client4Center) UserLogoutCenter(userID uint32, callback UserCallback)
 	c4c.userWaitEvent[fmt.Sprintf("%+vlogout", userID)] = callback
 }
 
-func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order string, callback UserCallback) {
+func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order, roundID string, callback UserCallback) {
 	if !c4c.isServerLogin {
 		log.Debug("Game Server NOT Ready! Need login to Center Server!")
 		return
@@ -399,7 +399,7 @@ func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order strin
 				Money:      money,
 				Order:      order,
 				GameID:     conf.Server.GameID,
-				RoundID:    fmt.Sprintf("%+v_win", userID), // fixme
+				RoundID:    roundID,
 			},
 		},
 	}
@@ -408,7 +408,7 @@ func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order strin
 	c4c.userWaitEvent[fmt.Sprintf("%+v-win-%+v", userID, order)] = callback
 }
 
-func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, order string, callback UserCallback) {
+func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, order, roundID string, callback UserCallback) {
 	if !c4c.isServerLogin {
 		log.Debug("Game Server NOT Ready! Need login to Center Server!")
 		return
@@ -431,7 +431,7 @@ func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, order stri
 				Money:      money,
 				Order:      order,
 				GameID:     conf.Server.GameID,
-				RoundID:    fmt.Sprintf("%+vlose", userID), // fixme
+				RoundID:    roundID,
 			},
 		},
 	}

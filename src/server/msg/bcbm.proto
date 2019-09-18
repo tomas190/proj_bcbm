@@ -208,6 +208,8 @@ enum ErrorCode {
     RoomFull = 304;            // 房间已经满了
 
     NotInBetting = 401;        // 当前不是下注状态
+
+    ServerBusy = 501;          // 服务器忙
 }
 
 message Error {

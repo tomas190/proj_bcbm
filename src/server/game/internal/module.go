@@ -3,9 +3,11 @@ package internal
 import (
 	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/module"
+	"github.com/patrickmn/go-cache"
 	"proj_bcbm/src/server/base"
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/msg"
+	"time"
 )
 
 var (
@@ -14,6 +16,7 @@ var (
 
 	c4c *Client4Center // 连接中心服的客户端
 	db  *MgoC          // 数据库客户端
+	ca  *cache.Cache   // 内存缓存
 	Mgr = NewHall()
 )
 
@@ -40,6 +43,9 @@ func (m *Module) OnInit() {
 	if err != nil {
 		log.Error("数据库初始化错误 %+v", err)
 	}
+
+	// 缓存
+	ca = cache.New(5*time.Minute, 10*time.Minute)
 
 	// 游戏大厅
 	Mgr.OpenCasino()
