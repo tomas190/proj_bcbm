@@ -28,6 +28,12 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		return
 	}
 
+	// 最后一秒
+	if dl.Status == constant.RSBetting && dl.counter > 14 {
+		errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
+		return
+	}
+
 	_, found := ca.Get(fmt.Sprintf("%+v-bet", au.UserID))
 	if found {
 		errorResp(a, msg.ErrorCode_ServerBusy, "服务器忙")
@@ -80,6 +86,11 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
 	if dl.Status != constant.RSBetting {
+		errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
+		return
+	}
+
+	if dl.Status == constant.RSBetting && dl.counter > 14 {
 		errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
 		return
 	}
