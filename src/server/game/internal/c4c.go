@@ -187,13 +187,15 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 		gameUser := userData.Msg.GameUser
 		gameAccount := userData.Msg.GameAccount
 
-		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+vlogin", gameUser.UserID)); ok {
+		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-login", gameUser.UserID)); ok {
 			loginCallBack.(UserCallback)(&User{
 				UserID:   gameUser.UserID,
 				NickName: gameUser.GameNick,
 				Avatar:   gameUser.GameIMG,
 				Balance:  gameAccount.Balance,
 			})
+
+			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-login", gameUser.UserID))
 		} else {
 			log.Error("找不到用户回调")
 		}
@@ -217,13 +219,15 @@ func (c4c *Client4Center) onUserLogout(msg []byte) {
 		gameUser := userData.Msg.GameUser
 		gameAccount := userData.Msg.GameAccount
 
-		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+vlogout", gameUser.UserID)); ok {
+		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-logout", gameUser.UserID)); ok {
 			loginCallBack.(UserCallback)(&User{
 				UserID:   gameUser.UserID,
 				NickName: gameUser.GameNick,
 				Avatar:   gameUser.GameIMG,
 				Balance:  gameAccount.Balance,
 			})
+
+			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-logout", gameUser.UserID))
 
 		} else {
 			log.Error("找不到用户回调")
@@ -247,7 +251,7 @@ func (c4c *Client4Center) onUserWinScore(msg []byte) {
 			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})
 			// 回调成功之后要删除
 			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order))
-			log.Debug("用户回调已删除: %+v, 回调队列 %+v", fmt.Sprintf("%+vwin", syncData.Msg.ID), c4c.userWaitEvent)
+			log.Debug("用户回调已删除: %+v, 回调队列 %+v", fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order), c4c.userWaitEvent)
 		} else {
 			log.Error("找不到用户回调")
 		}
@@ -269,7 +273,7 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
 			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})
 			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order))
-			log.Debug("用户回调已删除: %+v 回调队列 %+v", fmt.Sprintf("%+vwin", syncData.Msg.ID), c4c.userWaitEvent)
+			log.Debug("用户回调已删除: %+v 回调队列 %+v", fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order), c4c.userWaitEvent)
 		} else {
 			log.Error("找不到用户回调")
 		}
@@ -352,7 +356,7 @@ func (c4c *Client4Center) UserLoginCenter(userID uint32, password string, callba
 	}
 
 	c4c.sendMsg2Center(userLoginMsg)
-	c4c.userWaitEvent.Store(fmt.Sprintf("%+vlogin", userID), callback)
+	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-login", userID), callback)
 }
 
 // UserLogoutCenter 用户登出
@@ -375,7 +379,7 @@ func (c4c *Client4Center) UserLogoutCenter(userID uint32, callback UserCallback)
 	}
 
 	c4c.sendMsg2Center(logoutMsg)
-	c4c.userWaitEvent.Store(fmt.Sprintf("%+vlogout", userID), callback)
+	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-logout", userID), callback)
 }
 
 func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order, roundID string, callback UserCallback) {
