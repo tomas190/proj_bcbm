@@ -95,7 +95,7 @@ func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 		h.History[rID] = append(h.History[rID], hrMsg.LotteryResult)
 		// log.Debug("room: %+v, his: %+v", rID, h.History[rID])
 		if len(h.History[rID]) > constant.HisCount {
-			h.History[rID] = h.History[rID][:40]
+			h.History[rID] = h.History[rID][1:]
 		}
 		v, _ := h.RoomRecord.Load(rID)
 		v.(*Dealer).History = h.History[rID]
