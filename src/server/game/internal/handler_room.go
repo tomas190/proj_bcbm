@@ -189,8 +189,8 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
-	// fixme 可能会有并发问题
-	delete(dl.Users, au.UserID)
+	// fixme 不能直接删除
+	dl.Users.Delete(au.UserID)
 
 	// todo 玩家离开房间后 清空续投 需要结算
 	//dl.Bankers
@@ -217,11 +217,13 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 func (dl *Dealer) getPlayerInfoResp() []*msg.UserInfo {
 	var playerInfoResp []*msg.UserInfo
 	converter := DTOConverter{}
-	for _, u := range dl.Users {
+
+	dl.Users.Range(func(key, value interface{}) bool {
+		u := value.(*User)
 		uInfo := converter.U2Msg(*u)
 		playerInfoResp = append(playerInfoResp, &uInfo)
-
-	}
+		return true
+	})
 
 	for _, b := range dl.Bots {
 		pInfo := converter.U2Msg(*b)

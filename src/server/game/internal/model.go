@@ -19,7 +19,7 @@ type HRMsg struct {
 }
 
 type Hall struct {
-	UserRecord map[uint32]*User    // 用户记录
+	UserRecord sync.Map            // 用户记录
 	RoomRecord sync.Map            // 房间记录
 	UserRoom   map[uint32]uint32   // 用户房间
 	History    map[uint32][]uint32 // 各房间历史记录
@@ -28,7 +28,7 @@ type Hall struct {
 
 func NewHall() *Hall {
 	return &Hall{
-		UserRecord: make(map[uint32]*User),
+		UserRecord: sync.Map{},
 		RoomRecord: sync.Map{},
 		UserRoom:   make(map[uint32]uint32),
 		History:    make(map[uint32][]uint32),
@@ -69,7 +69,7 @@ func (h *Hall) openRoom(rID uint32) {
 
 func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 	h.UserRoom[u.UserID] = dl.RoomID
-	dl.Users[u.UserID] = u
+	dl.Users.Store(u.UserID, u)
 	dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 	converter := DTOConverter{}
@@ -110,12 +110,13 @@ func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 // 大厅广播
 func (h *Hall) BroadCast(bMsg interface{}) {
 	// log.Debug("hall brd msg %+v, content: %+v", reflect.TypeOf(bMsg), bMsg)
-	for _, u := range h.UserRecord {
-		user := u
+	h.UserRecord.Range(func(key, value interface{}) bool {
+		user := value.(*User)
 		if user.ConnAgent != nil {
 			user.ConnAgent.WriteMsg(bMsg)
 		}
-	}
+		return true
+	})
 }
 
 // 当前房间信息
@@ -152,11 +153,12 @@ func (h *Hall) GetRoomsInfoResp() []*msg.RoomInfo {
 func (h *Hall) ReplaceUserAgent(userID uint32, agent gate.Agent) error {
 	log.Debug("用户重连或顶替，正在替换agent %+v", userID)
 	// tip 这里会拷贝一份数据，需要替换的是记录中的，而非拷贝数据中的，还要注意替换连接之后要把数据绑定到新连接上
-	if _, ok := h.UserRecord[userID]; ok {
+	if v, ok := h.UserRecord.Load(userID); ok {
 		errorResp(agent, msg.ErrorCode_UserRemoteLogin, "异地登录")
-		h.UserRecord[userID].ConnAgent.Destroy()
-		h.UserRecord[userID].ConnAgent = agent
-		h.UserRecord[userID].ConnAgent.SetUserData(h.UserRecord[userID])
+		user := v.(*User)
+		user.ConnAgent.Destroy()
+		user.ConnAgent = agent
+		user.ConnAgent.SetUserData(v)
 		return nil
 	} else {
 		return errors.New("用户不在登记表中")
@@ -166,13 +168,16 @@ func (h *Hall) ReplaceUserAgent(userID uint32, agent gate.Agent) error {
 // agent 是否已经存在
 // 是否开销过大？后续可通过新增记录解决
 func (h *Hall) agentExist(a gate.Agent) bool {
-	for _, u := range h.UserRecord {
+	var exist bool
+	h.UserRecord.Range(func(key, value interface{}) bool {
+		u := value.(*User)
 		if u.ConnAgent == a {
-			return true
+			exist = true
 		}
-	}
+		return true
+	})
 
-	return false
+	return exist
 }
 
 type Room struct {

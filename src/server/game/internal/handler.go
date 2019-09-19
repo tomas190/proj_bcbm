@@ -49,17 +49,23 @@ func handleLogin(args []interface{}) {
 	a := args[1].(gate.Agent)
 	userID := m.GetUserID()
 	log.Debug("处理用户登录请求 %+v", userID)
-	if u, ok := Mgr.UserRecord[userID]; ok && u.ConnAgent == a { // 用户和连接都相同
-		log.Debug("rpcUserLogin 同一用户相同连接重复登录")
-		errorResp(a, msg.ErrorCode_UserRepeatLogin, "重复登录")
-		return
-	} else if _, ok := Mgr.UserRecord[userID]; ok { // 用户存在，但连接不同
+	v, ok := Mgr.UserRecord.Load(userID)
+	if ok { // 用户和连接都相同
+		u := v.(*User)
+		if u.ConnAgent == a {
+			log.Debug("rpcUserLogin 同一用户相同连接重复登录")
+			errorResp(a, msg.ErrorCode_UserRepeatLogin, "重复登录")
+			return
+		}
+	} else if _, ok := Mgr.UserRecord.Load(userID); ok { // 用户存在，但连接不同
 		err := Mgr.ReplaceUserAgent(userID, a)
 		if err != nil {
 			log.Error("用户连接替换错误", err)
 		}
 
-		u := Mgr.UserRecord[userID]
+		v, _ := Mgr.UserRecord.Load(userID)
+		u := v.(*User)
+
 		resp := &msg.LoginR{
 			User: &msg.UserInfo{
 				UserID: u.UserID,
@@ -75,7 +81,6 @@ func handleLogin(args []interface{}) {
 		if rID, ok := Mgr.UserRoom[userID]; ok {
 			resp.RoomID = rID // 如果用户之前在房间里后来退出，返回房间号
 		}
-		log.Debug("<----当前大厅人数---->%+v", len(Mgr.UserRecord))
 		log.Debug("<----login 登录 resp---->%+v %+v", resp.User.UserID)
 		a.WriteMsg(resp)
 	} else if !Mgr.agentExist(a) { // 正常大多数情况
@@ -99,8 +104,7 @@ func handleLogin(args []interface{}) {
 			u.Avatar = "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png"
 			a.SetUserData(u)
 
-			Mgr.UserRecord[u.UserID] = u
-			log.Debug("<----当前大厅人数---->%+v", len(Mgr.UserRecord))
+			Mgr.UserRecord.Store(u.UserID, u)
 			log.Debug("<----login 登录 resp---->%+v", resp.User.UserID)
 			a.WriteMsg(resp)
 		})
@@ -113,7 +117,7 @@ func handleLogout(args []interface{}) {
 
 	au := a.UserData().(*User)
 
-	delete(Mgr.UserRecord, au.UserID)
+	Mgr.UserRecord.Delete(au.UserID)
 	resp := &msg.LogoutR{}
 	a.WriteMsg(resp)
 	a.Close()
@@ -159,7 +163,7 @@ func handleJoinRoom(args []interface{}) {
 func handleRoomEvent(args []interface{}) {
 	a := args[1].(gate.Agent)
 	u, ok := a.UserData().(*User)
-	_, logged := Mgr.UserRecord[u.UserID]
+	_, logged := Mgr.UserRecord.Load(u.UserID)
 	_, inRoom := Mgr.UserRoom[u.UserID]
 	log.Debug("<----game 房间事件 %v %v %v---->", u.UserID, reflect.TypeOf(args[0]), args[0])
 

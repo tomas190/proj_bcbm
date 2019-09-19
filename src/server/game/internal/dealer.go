@@ -8,6 +8,7 @@ import (
 	con "proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
+	"sync"
 	"time"
 )
 
@@ -32,7 +33,7 @@ type Dealer struct {
 	History     []uint32   // 房间开奖历史
 	HRChan      chan HRMsg // 房间大厅通信
 
-	Users          map[uint32]*User     // 房间用户-不包括机器人
+	Users          sync.Map             // 房间用户-不包括机器人
 	Bots           []*Bot               // 房间机器人
 	Bankers        []Player             // 上庄玩家榜单
 	UserBets       map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
@@ -45,7 +46,7 @@ type Dealer struct {
 
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 	return &Dealer{
-		Users:          make(map[uint32]*User),
+		Users:          sync.Map{},
 		Bankers:        make([]Player, 0),
 		Room:           NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
 		clock:          time.NewTicker(time.Second),
@@ -103,17 +104,17 @@ func (dl *Dealer) Bet() {
 	converter := DTOConverter{}
 
 	// fixme 其实这种消息分开比较好，不然每次会有很多无谓的计算
-	for u := range dl.Users {
-		user := dl.Users[u]
+	dl.Users.Range(func(key, value interface{}) bool {
+		user := value.(*User)
 		var autoBetSum float64
-		for _, b := range dl.AutoBetRecord[u] {
+		for _, b := range dl.AutoBetRecord[key.(uint32)] {
 			bet := b
 			autoBetSum += constant.ChipSize[bet.Chip]
 		}
-
 		resp := converter.RSBMsg(0, autoBetSum, 0, *dl)
 		user.ConnAgent.WriteMsg(&resp)
-	}
+		return true
+	})
 	// 开始下注广播完之后，机器人开始下注
 	go dl.BotsBet()
 
@@ -147,10 +148,8 @@ func (dl *Dealer) Settle() {
 
 	// fixme 用户离开房间之后要删除掉
 
-	for uID := range dl.Users {
-		// 用户在开奖区域投注数*区域倍数-用户所有投注数
-		// 要么加投注赢得数，要么不加，和用户总数，是分开的
-		user := dl.Users[uID]
+	dl.Users.Range(func(key, value interface{}) bool {
+		user := value.(*User)
 		// 中心服需要结算的输赢
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
 		// 前端显示的输赢 精度问题
@@ -172,7 +171,9 @@ func (dl *Dealer) Settle() {
 			resp := converter.RSBMsg(uDisplayWin, 0, user.Balance, *dl)
 			user.ConnAgent.WriteMsg(&resp)
 		}
-	}
+
+		return true
+	})
 
 	dl.ClockReset(constant.SettleTime, dl.ClearChip)
 }
@@ -188,8 +189,10 @@ func (dl *Dealer) ClearChip() {
 		dl.UserBets[i] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	}
 	dl.AreaBotBets = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
-	for u := range dl.Users {
+
+	dl.Users.Range(func(key, value interface{}) bool {
 		// 续投 投注 累加到 auto bet record
+		u := key.(uint32)
 		if dl.UserAutoBet[u] == true && len(dl.UserBetsDetail[u]) != 0 {
 			dl.AutoBetRecord[u] = append(dl.AutoBetRecord[u], dl.UserBetsDetail[u]...)
 			// 投注 不续投 覆盖掉
@@ -200,7 +203,8 @@ func (dl *Dealer) ClearChip() {
 		}
 
 		dl.UserAutoBet[u] = false
-	}
+		return true
+	})
 
 	// 清空投注详情记录
 	dl.UserBetsDetail = map[uint32][]msg.Bet{}
@@ -241,12 +245,14 @@ func (dl *Dealer) ClearChip() {
 
 func (dl *Dealer) Broadcast(m interface{}) {
 	// log.Debug("room %+v brd %+v, content: %+v", dl.RoomID, reflect.TypeOf(m), m)
-	for _, u := range dl.Users {
-		user := u
+	dl.Users.Range(func(key, value interface{}) bool {
+		user := value.(*User)
 		if user.ConnAgent != nil {
 			user.ConnAgent.WriteMsg(m)
 		}
-	}
+
+		return true
+	})
 }
 
 // 根据盈余池开奖
