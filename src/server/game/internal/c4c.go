@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/name5566/leaf/log"
-	"io/ioutil"
-	"net/http"
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/constant"
 	"strings"
@@ -32,7 +30,7 @@ func NewClient4Center() *Client4Center {
 		log.Fatal("dial error %v", err)
 	}
 	return &Client4Center{
-		token:         "",
+		token:         conf.Server.DevName,
 		isServerLogin: false,
 		conn:          c,
 		userWaitEvent: sync.Map{},
@@ -45,50 +43,50 @@ func NewClient4Center() *Client4Center {
 
 ************************************************************/
 
-// 从中心服请求token
-func (c4c *Client4Center) ReqToken() {
-	req, err := http.NewRequest("GET", conf.Server.TokenServer, nil)
-	if err != nil {
-		log.Fatal("生成请求失败")
-		panic(err)
-	}
-	params := req.URL.Query()
-	params.Add("dev_key", conf.Server.DevKey)
-	params.Add("dev_name", conf.Server.DevName)
-	req.URL.RawQuery = params.Encode()
-
-	log.Debug("请求Token %+v", req.URL.String())
-
-	client := http.Client{}
-	resp, err := client.Do(req)
-	if err != nil || resp.StatusCode != 200 {
-		log.Debug("请求中心服token失败 %+v", err)
-	}
-
-	bs, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal("响应体读取失败", err)
-	}
-
-	// log.Debug(string(bs))
-	tokenResp := TokenResp{}
-
-	err = json.Unmarshal(bs, &tokenResp)
-
-	if err != nil {
-		log.Fatal("Token响应解析失败", err)
-	}
-
-	if tokenResp.StatusCode != 200 {
-		log.Fatal("Token响应码不是200", tokenResp.StatusCode)
-	}
-
-	c4c.tokenLock.Lock()
-	c4c.token = tokenResp.TokenMsg.Token
-	c4c.tokenLock.Unlock()
-
-	log.Debug("Token更新完成 %+v", c4c.token)
-}
+//// 从中心服请求token
+//func (c4c *Client4Center) ReqToken() {
+//	req, err := http.NewRequest("GET", conf.Server.TokenServer, nil)
+//	if err != nil {
+//		log.Fatal("生成请求失败")
+//		panic(err)
+//	}
+//	params := req.URL.Query()
+//	params.Add("dev_key", conf.Server.DevKey)
+//	params.Add("dev_name", conf.Server.DevName)
+//	req.URL.RawQuery = params.Encode()
+//
+//	log.Debug("请求Token %+v", req.URL.String())
+//
+//	client := http.Client{}
+//	resp, err := client.Do(req)
+//	if err != nil || resp.StatusCode != 200 {
+//		log.Debug("请求中心服token失败 %+v", err)
+//	}
+//
+//	bs, err := ioutil.ReadAll(resp.Body)
+//	if err != nil {
+//		log.Fatal("响应体读取失败", err)
+//	}
+//
+//	// log.Debug(string(bs))
+//	tokenResp := TokenResp{}
+//
+//	err = json.Unmarshal(bs, &tokenResp)
+//
+//	if err != nil {
+//		log.Fatal("Token响应解析失败", err)
+//	}
+//
+//	if tokenResp.StatusCode != 200 {
+//		log.Fatal("Token响应码不是200", tokenResp.StatusCode)
+//	}
+//
+//	c4c.tokenLock.Lock()
+//	c4c.token = tokenResp.TokenMsg.Token
+//	c4c.tokenLock.Unlock()
+//
+//	log.Debug("Token更新完成 %+v", c4c.token)
+//}
 
 func (c4c *Client4Center) CronUpdateToken() {
 	// ticker := time.NewTicker(time.Second * 7200)
@@ -294,7 +292,7 @@ func (c4c *Client4Center) onError(msg []byte) {
 	// todo 重试机制
 	if errData.Code == constant.CRespTokenError {
 		time.Sleep(30 * time.Second)
-		c4c.ReqToken()
+		//c4c.ReqToken()
 		c4c.HeartBeatAndListen()
 	}
 }

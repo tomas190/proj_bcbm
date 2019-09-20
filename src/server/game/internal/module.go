@@ -30,7 +30,7 @@ func (m *Module) OnInit() {
 
 	// 中心服务器
 	c4c = NewClient4Center()
-	c4c.ReqToken()
+	//c4c.ReqToken()
 	c4c.HeartBeatAndListen()
 	c4c.CronUpdateToken()
 
