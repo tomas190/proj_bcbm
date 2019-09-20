@@ -3,6 +3,7 @@ package internal
 import (
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
+	"proj_bcbm/src/server/msg"
 )
 
 func init() {
@@ -22,10 +23,16 @@ func rpcNewAgent(args []interface{}) {
 // todo 暂时删除用户
 func rpcCloseAgent(args []interface{}) {
 	a := args[0].(gate.Agent)
-	u, ok := a.UserData().(*User)
+	au, ok := a.UserData().(*User)
 
 	if ok {
-		log.Debug("玩家 %+v 主动断开连接...", u.UserID)
-		Mgr.UserRecord.Delete(u.UserID)
+		log.Debug("玩家 %+v 主动断开连接...", au.UserID)
+		Mgr.UserRecord.Delete(au.UserID)
+		c4c.UserLogoutCenter(au.UserID, func(data *User) {
+			Mgr.UserRecord.Delete(au.UserID)
+			resp := &msg.LogoutR{}
+			a.WriteMsg(resp)
+			a.Close()
+		})
 	}
 }
