@@ -87,17 +87,17 @@ func NewClient4Center() *Client4Center {
 //
 //	log.Debug("Token更新完成 %+v", c4c.token)
 //}
-
-func (c4c *Client4Center) CronUpdateToken() {
-	// ticker := time.NewTicker(time.Second * 7200)
-	ticker := time.NewTicker(time.Second * 600)
-	go func() {
-		for {
-			<-ticker.C
-			c4c.ReqToken()
-		}
-	}()
-}
+//
+//func (c4c *Client4Center) CronUpdateToken() {
+//	// ticker := time.NewTicker(time.Second * 7200)
+//	ticker := time.NewTicker(time.Second * 600)
+//	go func() {
+//		for {
+//			<-ticker.C
+//			c4c.ReqToken()
+//		}
+//	}()
+//}
 
 /*****************************************
 
