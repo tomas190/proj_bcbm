@@ -15,8 +15,8 @@ import (
 type UserCallback func(data *User)
 
 type Client4Center struct {
-	token         string
-	tokenLock     sync.RWMutex
+	//token         string
+	//tokenLock     sync.RWMutex
 	conn          *websocket.Conn
 	isServerLogin bool
 	userWaitEvent sync.Map
@@ -30,7 +30,7 @@ func NewClient4Center() *Client4Center {
 		log.Fatal("dial error %v", err)
 	}
 	return &Client4Center{
-		token:         conf.Server.DevName,
+		//token:         conf.Server.DevName,
 		isServerLogin: false,
 		conn:          c,
 		userWaitEvent: sync.Map{},
@@ -312,11 +312,11 @@ func (c4c *Client4Center) ServerLoginCenter() {
 	serverLoginMsg := ServerLoginReq{
 		constant.CEventServerLogin,
 		ServerLoginReqData{
-			Host:   conf.Server.CenterServer,
-			Port:   conf.Server.CenterServerPort,
-			GameID: conf.Server.GameID,
-			Token:  c4c.token,
-			DevKey: conf.Server.DevKey,
+			Host:    conf.Server.CenterServer,
+			Port:    conf.Server.CenterServerPort,
+			GameID:  conf.Server.GameID,
+			DevName: conf.Server.DevName,
+			DevKey:  conf.Server.DevKey,
 		},
 	}
 
@@ -340,14 +340,14 @@ func (c4c *Client4Center) UserLoginCenter(userID uint32, password string, callba
 		return
 	}
 
-	log.Debug("UserLoginCenter c4c.Token- %+v", c4c.token)
+	//log.Debug("UserLoginCenter c4c.Token- %+v", c4c.token)
 
 	userLoginMsg := UserLoginReq{
 		Event: constant.CEventUserLogin,
 		Data: UserLoginReqData{
 			UserID:   userID,
 			Password: password,
-			Token:    c4c.token,
+			DevName:  conf.Server.DevName,
 			GameID:   conf.Server.GameID,
 			DevKey:   conf.Server.DevKey,
 		},
@@ -364,15 +364,16 @@ func (c4c *Client4Center) UserLogoutCenter(userID uint32, callback UserCallback)
 		return
 	}
 
-	log.Debug("UserLogoutCenter c4c.Token- %+v", c4c.token)
+	//log.Debug("UserLogoutCenter c4c.Token- %+v", c4c.token)
 
 	logoutMsg := UserLogoutReq{
 		Event: constant.CEventUserLogout,
 		Data: UserLogoutReqData{
 			UserID: userID,
-			Token:  c4c.token,
-			GameID: conf.Server.GameID,
-			DevKey: conf.Server.DevKey,
+			//Token:  c4c.token,
+			DevName: conf.Server.DevName,
+			GameID:  conf.Server.GameID,
+			DevKey:  conf.Server.DevKey,
 		},
 	}
 
@@ -386,14 +387,15 @@ func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order, roun
 		return
 	}
 
-	log.Debug("UserWinScore c4c.Token- %+v", c4c.token)
+	//log.Debug("UserWinScore c4c.Token- %+v", c4c.token)
 
 	winSettleMsg := SyncScoreReq{
 		Event: constant.CEventUserWinScore,
 		Data: SyncScoreReqData{
 			Auth: ServerAuth{
-				Token:  c4c.token,
-				DevKey: conf.Server.DevKey,
+				//Token:  c4c.token,
+				DevName: conf.Server.DevName,
+				DevKey:  conf.Server.DevKey,
 			},
 
 			Info: SyncScoreReqDataInfo{
@@ -418,14 +420,15 @@ func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, order, rou
 		return
 	}
 
-	log.Debug("UserLoseScore c4c.Token- %+v", c4c.token)
+	//log.Debug("UserLoseScore c4c.Token- %+v", c4c.token)
 
 	loseSettleMsg := SyncScoreReq{
 		Event: constant.CEventUserLoseScore,
 		Data: SyncScoreReqData{
 			Auth: ServerAuth{
-				Token:  c4c.token,
-				DevKey: conf.Server.DevKey,
+				//Token:  c4c.token,
+				DevName: conf.Server.DevName,
+				DevKey:  conf.Server.DevKey,
 			},
 
 			Info: SyncScoreReqDataInfo{

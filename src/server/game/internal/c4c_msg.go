@@ -18,11 +18,11 @@ type ServerLoginReq struct {
 }
 
 type ServerLoginReqData struct {
-	Host   string `json:"host"`
-	Port   string `json:"port"`
-	GameID string `json:"game_id"`
-	Token  string `json:"token"`
-	DevKey string `json:"dev_key"`
+	Host    string `json:"host"`
+	Port    string `json:"port"`
+	GameID  string `json:"game_id"`
+	DevName string `json:"dev_name"`
+	DevKey  string `json:"dev_key"`
 }
 
 type ServerLoginResp struct {
@@ -54,7 +54,7 @@ type UserLoginReq struct {
 type UserLoginReqData struct {
 	UserID   uint32 `json:"id"`
 	Password string `json:"password"`
-	Token    string `json:"token"`
+	DevName  string `json:"dev_name"`
 	GameID   string `json:"game_id"`
 	DevKey   string `json:"dev_key"`
 }
@@ -100,10 +100,10 @@ type UserLogoutReq struct {
 }
 
 type UserLogoutReqData struct {
-	UserID uint32 `json:"id"`
-	Token  string `json:"token"`
-	GameID string `json:"game_id"`
-	DevKey string `json:"dev_key"`
+	UserID  uint32 `json:"id"`
+	DevName string `json:"dev_name"`
+	GameID  string `json:"game_id"`
+	DevKey  string `json:"dev_key"`
 }
 
 type UserLogoutResp struct {
@@ -151,8 +151,8 @@ type SyncScoreReqData struct {
 
 // 服务器验证信息
 type ServerAuth struct {
-	Token  string `json:"token"`
-	DevKey string `json:"dev_key"`
+	DevName string `json:"dev_name"`
+	DevKey  string `json:"dev_key"`
 }
 
 // 请求信息
@@ -194,11 +194,11 @@ type SyncScoreMsg struct {
 
 ****************************************************/
 
-type TokenResp struct {
-	StatusCode int      `json:"code"`
-	TokenMsg   tokenMsg `json:"msg"`
-}
-
-type tokenMsg struct {
-	Token string `json:"token"`
-}
+//type TokenResp struct {
+//	StatusCode int      `json:"code"`
+//	TokenMsg   tokenMsg `json:"msg"`
+//}
+//
+//type tokenMsg struct {
+//	Token string `json:"token"`
+//}
