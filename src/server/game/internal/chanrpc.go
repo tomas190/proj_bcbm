@@ -19,10 +19,13 @@ func rpcNewAgent(args []interface{}) {
 	a.SetUserData(u) // 附加用户信息到连接
 }
 
+// todo 暂时删除用户
 func rpcCloseAgent(args []interface{}) {
 	a := args[0].(gate.Agent)
 	u, ok := a.UserData().(*User)
 
-	// fixme
-	_, _ = u, ok
+	if ok {
+		log.Debug("玩家 %+v 主动断开连接...", u.UserID)
+		Mgr.UserRecord.Delete(u.UserID)
+	}
 }
