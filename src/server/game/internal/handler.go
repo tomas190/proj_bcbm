@@ -116,11 +116,12 @@ func handleLogout(args []interface{}) {
 	a := args[1].(gate.Agent)
 
 	au := a.UserData().(*User)
-
-	Mgr.UserRecord.Delete(au.UserID)
-	resp := &msg.LogoutR{}
-	a.WriteMsg(resp)
-	a.Close()
+	c4c.UserLogoutCenter(au.UserID, func(data *User) {
+		Mgr.UserRecord.Delete(au.UserID)
+		resp := &msg.LogoutR{}
+		a.WriteMsg(resp)
+		a.Close()
+	})
 }
 
 /*************************************
