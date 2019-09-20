@@ -32,7 +32,7 @@ func (m *Module) OnInit() {
 	c4c = NewClient4Center()
 	//c4c.ReqToken()
 	c4c.HeartBeatAndListen()
-	c4c.CronUpdateToken()
+	//c4c.CronUpdateToken()
 
 	// 数据库
 	db, err := NewMgoC(conf.Server.MongoDB)
