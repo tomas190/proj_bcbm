@@ -48,6 +48,10 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		uuid := util.UUID{}
 		order := uuid.GenUUID()
 
+		// fixme 暂时延迟处理
+		rd := util.Random{}
+		delay := rd.RandInRange(0, 100)
+		time.Sleep(time.Millisecond * time.Duration(delay))
 		ca.Set(fmt.Sprintf("%+v-bet", au.UserID), order, cache.DefaultExpiration)
 		c4c.UserLoseScore(au.UserID, -cs, order, "", func(data *User) {
 			// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
@@ -72,6 +76,8 @@ func (dl *Dealer) handleBet(args []interface{}) {
 			}
 			dl.Broadcast(resp)
 		})
+		// fixme 暂时延迟处理
+		time.Sleep(4 * time.Millisecond)
 		ca.Delete(fmt.Sprintf("%+v-bet", au.UserID))
 		// 记录玩家投注信息
 		return
@@ -124,8 +130,8 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 			dl.Broadcast(resp)
 		})
 
-		// 暂时延迟处理
-		time.Sleep(time.Millisecond * 3)
+		// fixme 暂时延迟处理
+		time.Sleep(time.Millisecond * 4)
 	}
 	dl.UserAutoBet[au.UserID] = true
 }
