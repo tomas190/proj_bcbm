@@ -17,13 +17,14 @@ enum MessageID {
 	MsgLeaveRoomR        = 11;
 	MsgGrabBanker        = 12;
 	MsgAutoBet           = 13;
-	MsgAutoBetR          = 14;
+	MsgAutoBetB          = 14;
 	MsgBet               = 15;
-	MsgBetInfoB          = 16;
-	MsgBankersB          = 17;
-	MsgPlayers           = 18;
-	MsgPlayersR          = 19;
-	MsgRoomStatusB       = 20;
+	MsgBetR              = 16;
+	MsgBetInfoB          = 17;
+	MsgBankersB          = 18;
+	MsgPlayers           = 19;
+	MsgPlayersR          = 20;
+	MsgRoomStatusB       = 21;
 }
 
 enum AreaID {
@@ -132,6 +133,10 @@ message Bet {
     uint32 Chip = 2;      // 筹码
 }
 
+// todo 下注返回
+message BetR {
+}
+
 // 进入房间后房间状态广播，比大厅广播更细粒度
 // 包含了清理筹码倒计时，以及结算结果
 // 状态枚举在 enum RoomStatus
@@ -148,7 +153,7 @@ message RoomStatusB {
     uint32 ServerTime = 10;             // 服务器时间
 }
 
-// 下注信息广播，收到投注请求即广播
+// 下注信息广播 todo 定时发送广播
 message BetInfoB {
      uint32 Area = 1;        // 下注区域
      uint32 Chip = 2;        // 下注筹码
@@ -174,12 +179,22 @@ message PlayersR {
 }
 
 // 上庄
-message GrabBanker {}
+message GrabBanker {
+    double LockMoney = 1;  // 上庄带钱
+}
 
 // 续投
 message AutoBet {}
 
-message AutoBetR {}
+// 续投广播
+message AutoBetB {
+    uint32 UserID = 1;
+    repeated double Amounts = 2;
+    double AreaTotal = 3;   // 当前区域投注总数
+    double PlayerTotal = 4; // 当前玩家在此区域投注总数
+    uint32 PlayerID = 5;    // 谁下的注
+    double Money = 6;       // 该玩家投注后剩余金币
+}
 
 // 离开房间
 message LeaveRoom {}
