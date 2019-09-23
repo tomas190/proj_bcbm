@@ -77,7 +77,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 			dl.Broadcast(resp)
 		})
 		// fixme 暂时延迟处理
-		time.Sleep(4 * time.Millisecond)
+		time.Sleep(6 * time.Millisecond)
 		ca.Delete(fmt.Sprintf("%+v-bet", au.UserID))
 		// 记录玩家投注信息
 		return
@@ -131,7 +131,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		})
 
 		// fixme 暂时延迟处理
-		time.Sleep(time.Millisecond * 4)
+		time.Sleep(time.Millisecond * 6)
 	}
 	dl.UserAutoBet[au.UserID] = true
 }
