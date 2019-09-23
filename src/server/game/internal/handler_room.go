@@ -101,6 +101,8 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		return
 	}
 
+	var csSum float64
+	var autoBetAmounts = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	for _, b := range dl.AutoBetRecord[au.UserID] {
 		bet := b
 		cs := constant.ChipSize[bet.Chip]
@@ -109,30 +111,28 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
 		// 当前用户在该区域的历史投注+当前用户投注
 		dl.UserBets[au.UserID][bet.Area] = dl.UserBets[au.UserID][bet.Area] + cs
-		// 用户具体投注信息
-		// dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], bet)
 
-		// fixme 为了前端动画代价有点大
-		uuid := util.UUID{}
-		order := uuid.GenUUID()
-		c4c.UserLoseScore(au.UserID, -cs, order, dl.RoundID, func(data *User) {
-			// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
-			au.Balance = data.Balance
-
-			resp := &msg.BetInfoB{
-				Area:        bet.Area,
-				Chip:        bet.Chip,
-				AreaTotal:   dl.AreaBets[bet.Area],
-				PlayerTotal: dl.UserBets[au.UserID][bet.Area],
-				PlayerID:    au.UserID,
-				Money:       au.Balance,
-			}
-			dl.Broadcast(resp)
-		})
-
-		// fixme 暂时延迟处理
-		time.Sleep(time.Millisecond * 6)
+		autoBetAmounts[bet.Area] += cs
+		csSum += cs
 	}
+
+	uuid := util.UUID{}
+	order := uuid.GenUUID()
+	c4c.UserLoseScore(au.UserID, -csSum, order, dl.RoundID, func(data *User) {
+		// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
+		au.Balance = data.Balance
+
+		resp := &msg.AutoBetB{
+			UserID:      au.UserID,
+			Amounts:     autoBetAmounts,
+			AreaTotal:   dl.AreaBets,
+			PlayerTotal: dl.UserBets[au.UserID],
+			Money:       au.Balance,
+		}
+
+		dl.Broadcast(resp)
+	})
+
 	dl.UserAutoBet[au.UserID] = true
 }
 
