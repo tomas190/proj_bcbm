@@ -125,7 +125,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		})
 
 		// 暂时延迟处理
-		time.Sleep(time.Millisecond * 2)
+		time.Sleep(time.Millisecond * 3)
 	}
 	dl.UserAutoBet[au.UserID] = true
 }
