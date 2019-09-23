@@ -28,10 +28,11 @@ func init() {
 
 	Processor.Register(&GrabBanker{})
 	Processor.Register(&AutoBet{})
-	Processor.Register(&AutoBetR{})
+	Processor.Register(&AutoBetB{})
 
 	// 下注
 	Processor.Register(&Bet{})
+	Processor.Register(&BetR{})
 
 	// 特定情况触发的广播消息
 	Processor.Register(&BetInfoB{}) // 有人投注广播一次
@@ -41,7 +42,7 @@ func init() {
 	Processor.Register(&RoomStatusB{})
 
 	// print ID 打印出想要的任意格式
-	// Processor.Range(printMsgIDPB)
+	//Processor.Range(printMsgIDPB)
 	// Processor.Range(printMsgID)
 	// Processor.Range(printMsg)
 }
