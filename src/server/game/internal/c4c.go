@@ -3,13 +3,14 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
-	"github.com/name5566/leaf/log"
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/constant"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gorilla/websocket"
+	"github.com/name5566/leaf/log"
 )
 
 type UserCallback func(data *User)
@@ -249,7 +250,7 @@ func (c4c *Client4Center) onUserWinScore(msg []byte) {
 			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})
 			// 回调成功之后要删除
 			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order))
-			log.Debug("用户回调已删除: %+v, 回调队列 %+v", fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order), c4c.userWaitEvent)
+			// log.Debug("用户回调已删除: %+v, 回调队列 %+v", fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order), c4c.userWaitEvent)
 		} else {
 			log.Error("找不到用户回调")
 		}
