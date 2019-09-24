@@ -98,3 +98,4 @@ $RECYCLE.BIN/
 
 bin/bcbm_dev
 bin/nohup.out
+.vscode/launch.json

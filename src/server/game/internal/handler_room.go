@@ -2,15 +2,16 @@ package internal
 
 import (
 	"fmt"
-	"github.com/name5566/leaf/gate"
-	"github.com/name5566/leaf/log"
-	"github.com/patrickmn/go-cache"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
 	"reflect"
 	"sort"
 	"time"
+
+	"github.com/name5566/leaf/gate"
+	"github.com/name5566/leaf/log"
+	"github.com/patrickmn/go-cache"
 )
 
 func (dl *Dealer) handleBet(args []interface{}) {
@@ -53,7 +54,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		delay := rd.RandInRange(0, 100)
 		time.Sleep(time.Millisecond * time.Duration(delay))
 		ca.Set(fmt.Sprintf("%+v-bet", au.UserID), order, cache.DefaultExpiration)
-		c4c.UserLoseScore(au.UserID, -cs, order, "", func(data *User) {
+		c4c.UserLoseScore(au.UserID, -cs, 0, 0, order, "", func(data *User) {
 			// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
 			au.BalanceLock.Lock()
 			au.Balance = data.Balance
@@ -118,7 +119,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 
 	uuid := util.UUID{}
 	order := uuid.GenUUID()
-	c4c.UserLoseScore(au.UserID, -csSum, order, dl.RoundID, func(data *User) {
+	c4c.UserLoseScore(au.UserID, -csSum, 0, 0, order, dl.RoundID, func(data *User) {
 		// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
 		au.Balance = data.Balance
 
@@ -159,8 +160,8 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
-	if au.Balance < constant.BankerMinBar {
-		errorResp(a, msg.ErrorCode_InsufficientBalanceGrabBanker, "金币未达到50000")
+	if m.LockMoney < constant.BankerMinBar || m.LockMoney > au.Balance {
+		errorResp(a, msg.ErrorCode_InsufficientBalanceGrabBanker, "上庄金币不足")
 		return
 	}
 
@@ -178,16 +179,34 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		}
 	}
 
+	bUser := User{
+		UserID:   au.UserID,
+		Balance:  m.LockMoney,
+		Avatar:   au.Avatar,
+		NickName: au.NickName,
+	}
+
 	if flag == false {
-		dl.Bankers = append(dl.Bankers, au)
+		dl.Bankers = append(dl.Bankers, bUser)
+	} else {
+		// errorResp(a, msg.ErrorCode, "已经在上庄队列")
+		return
 	}
 
-	resp := &msg.BankersB{
-		Banker:     dl.getBankerInfoResp(),
-		ServerTime: uint32(time.Now().Unix()),
-	}
+	uuid := util.UUID{}
+	order := uuid.GenUUID()
+	c4c.UserLoseScore(au.UserID, 0, m.LockMoney, 0, order, dl.RoundID, func(data *User) {
+		// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
+		au.Balance = data.Balance
 
-	dl.Broadcast(resp)
+		resp := &msg.BankersB{
+			Banker:     dl.getBankerInfoResp(),
+			ServerTime: uint32(time.Now().Unix()),
+		}
+
+		log.Debug("<--- 庄家列表更新 --->")
+		dl.Broadcast(resp)
+	})
 }
 
 func (dl *Dealer) handleLeaveRoom(args []interface{}) {

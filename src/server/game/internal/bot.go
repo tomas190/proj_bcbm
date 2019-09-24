@@ -35,12 +35,9 @@ func (dl *Dealer) BotsBet() {
 		dl.AreaBotBets[area] = dl.AreaBotBets[area] + cs
 
 		resp := &msg.BetInfoB{
-			Area:        area,
-			Chip:        chip,
-			AreaTotal:   dl.AreaBets[area],
-			PlayerTotal: 0,
-			PlayerID:    0, // todo
-			Money:       0,
+			Area:      area,
+			Chip:      chip,
+			AreaTotal: dl.AreaBets[area],
 		}
 
 		dl.Broadcast(resp)

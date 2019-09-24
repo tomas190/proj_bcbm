@@ -12,5 +12,5 @@ type UserDB struct {
 	UserID   uint32  `bson:"UserID" json:"UserID"`     // 用户id
 	NickName string  `bson:"NickName" json:"NickName"` // 用户昵称
 	Avatar   string  `bson:"Avatar" json:"Avatar"`     // 用户头像
-	Balance  float64 `bson:"Balance"json:"Balance"`    // 用户金额
+	Balance  float64 `bson:"Balance" json:"Balance"`   // 用户金额
 }

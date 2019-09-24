@@ -30,6 +30,7 @@ func NewClient4Center() *Client4Center {
 	if err != nil {
 		log.Fatal("dial error %v", err)
 	}
+
 	return &Client4Center{
 		//token:         conf.Server.DevName,
 		isServerLogin: false,
@@ -382,7 +383,7 @@ func (c4c *Client4Center) UserLogoutCenter(userID uint32, callback UserCallback)
 	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-logout", userID), callback)
 }
 
-func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order, roundID string, callback UserCallback) {
+func (c4c *Client4Center) UserWinScore(userID uint32, money, lockMoney, preMoney float64, order, roundID string, callback UserCallback) {
 	if !c4c.isServerLogin {
 		log.Debug("Game Server NOT Ready! Need login to Center Server!")
 		return
@@ -404,6 +405,8 @@ func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order, roun
 				CreateTime: uint32(time.Now().Unix()),
 				PayReason:  "奔驰宝马测试赢钱",
 				Money:      money,
+				LockMoney:  lockMoney,
+				PreMoney:   preMoney,
 				Order:      order,
 				GameID:     conf.Server.GameID,
 				RoundID:    roundID,
@@ -415,7 +418,7 @@ func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order, roun
 	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-win-%+v", userID, order), callback)
 }
 
-func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, order, roundID string, callback UserCallback) {
+func (c4c *Client4Center) UserLoseScore(userID uint32, money, lockMoney, preMoney float64, order, roundID string, callback UserCallback) {
 	if !c4c.isServerLogin {
 		log.Debug("Game Server NOT Ready! Need login to Center Server!")
 		return
@@ -437,6 +440,8 @@ func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, order, rou
 				CreateTime: uint32(time.Now().Unix()),
 				PayReason:  "奔驰宝马测试输钱",
 				Money:      money,
+				LockMoney:  lockMoney,
+				PreMoney:   preMoney,
 				Order:      order,
 				GameID:     conf.Server.GameID,
 				RoundID:    roundID,
