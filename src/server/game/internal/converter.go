@@ -1,10 +1,11 @@
 package internal
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type DTOConverter struct{}
