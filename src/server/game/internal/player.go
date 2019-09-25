@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/name5566/leaf/gate"
+	"github.com/name5566/leaf/log"
 	"sync"
 )
 
@@ -37,9 +38,25 @@ func (u User) GetPlayerBasic() (uint32, string, string, float64) {
 	return u.UserID, u.NickName, u.Avatar, u.Balance
 }
 
+// 返回玩家投注了的近20局获胜局数和总下注数
 func (u User) GetPlayerAccount() (uint32, float64) {
-	// todo
-	return 10, 100
+	his, err := db.RUserSettle(u.UserID)
+	if err != nil {
+		log.Debug("获取用户历史数据错误 %+v", err)
+		return 10, 100
+	}
+
+	var winCount uint32
+	var totalBet float64
+	for _, sRecord := range his {
+		sr := sRecord
+		if sr.IsWin == true {
+			winCount++
+		}
+		totalBet += sr.BetAmount
+	}
+
+	return winCount, totalBet
 }
 
 func (b Bot) GetBalance() float64 {

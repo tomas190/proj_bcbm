@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"math/rand"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/util"
@@ -89,7 +88,9 @@ func (dl *Dealer) profitPool() float64 {
 		return -1
 	}
 
-	fmt.Println(playerCount)
+	_ = playerCount
+
+	//log.Debug("玩家数量: %+v", playerCount)
 	return -1
 	// return pTotalLose - pTotalWin*constant.HouseEdgePercent - playerCount*constant.GiftAmount
 }

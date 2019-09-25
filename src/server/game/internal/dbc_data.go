@@ -1,11 +1,12 @@
 package internal
 
-type BetDB struct {
-	User       UserDB  `bson:"User"`
-	Area       uint32  `bson:"Area"`
-	AreaStr    string  `bson:"AreaStr"`
-	Chip       uint32  `bson:"Chip"`
-	ChipAmount float64 `bson:"ChipAmount"`
+type SettleDB struct {
+	User      UserDB  `bson:"User"`
+	WinOrder  string  `bson:"WinOrder"`
+	RoundID   string  `bson:"RoundID"`
+	IsWin     bool    `bson:"IsWin"`
+	BetAmount float64 `bson:"BetAmount"`
+	WinAmount float64 `bson:"WinAmount"`
 }
 
 type UserDB struct {

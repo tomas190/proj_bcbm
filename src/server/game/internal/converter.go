@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"time"
 
@@ -99,13 +98,11 @@ func (c *DAOConverter) U2DB(u User) UserDB {
 	return udb
 }
 
-// 玩家下注
-func (c *DAOConverter) Bet2DB(u User, betM msg.Bet) BetDB {
+// 玩家结算记录
+func (c *DAOConverter) Settle2DB(u User, winOrder, rID string, isWin bool, betAmount, winAmount float64) SettleDB {
 	user := c.U2DB(u)
-	aStr := constant.AreaName[betM.Area]
-	cAmount := constant.ChipSize[betM.Chip]
-	bdb := BetDB{User: user, Area: betM.Area, AreaStr: aStr, Chip: betM.Chip, ChipAmount: cAmount}
-	return bdb
+	sdb := SettleDB{User: user, WinOrder: winOrder, RoundID: rID, IsWin: isWin, BetAmount: betAmount, WinAmount: winAmount}
+	return sdb
 }
 
 func (c *DAOConverter) R2DB() {

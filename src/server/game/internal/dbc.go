@@ -2,12 +2,12 @@ package internal
 
 import (
 	"context"
-	"fmt"
 	"github.com/name5566/leaf/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"proj_bcbm/src/server/constant"
 	"time"
 )
 
@@ -50,7 +50,7 @@ func (m *MgoC) Init() error {
 
 // 插入用户信息
 func (m *MgoC) CUserInfo(u interface{}) error {
-	collection := m.Database("BENCHIBAOMA-Game").Collection("users")
+	collection := m.Database(constant.DBName).Collection("users")
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
 	res, err := collection.InsertOne(ctx, u)
@@ -64,7 +64,7 @@ func (m *MgoC) CUserInfo(u interface{}) error {
 }
 
 func (m *MgoC) RUserInfo(userID uint32) error {
-	collection := m.Database("BENCHIBAOMA-Game").Collection("users")
+	collection := m.Database(constant.DBName).Collection("users")
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
 	var userInfo UserDB
@@ -79,10 +79,10 @@ func (m *MgoC) RUserInfo(userID uint32) error {
 }
 
 func (m *MgoC) RUserCount() (int64, error) {
-	collection := m.Database("BENCHIBAOMA-Game").Collection("users")
+	collection := m.Database(constant.DBName).Collection("users")
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
-	count, err := collection.CountDocuments(ctx, nil)
+	count, err := collection.CountDocuments(ctx, bson.M{})
 	if err != nil {
 		log.Debug("查找用户数量错误 %+v", err)
 		return 0, err
@@ -98,8 +98,8 @@ func (m *MgoC) DUserInfo() {
 
 }
 
-func (m *MgoC) CUserBet(bet interface{}) error {
-	collection := m.Database("bcbm_db").Collection("bets")
+func (m *MgoC) CUserSettle(bet interface{}) error {
+	collection := m.Database(constant.DBName).Collection("settles")
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	res, err := collection.InsertOne(ctx, bet)
 	if err != nil {
@@ -107,6 +107,33 @@ func (m *MgoC) CUserBet(bet interface{}) error {
 		return err
 	}
 	id := res.InsertedID
-	fmt.Println(id)
+	log.Debug("用户结算信息已保存 %+v", id)
 	return err
+}
+
+func (m *MgoC) RUserSettle(userID uint32) ([]SettleDB, error) {
+	collection := m.Database(constant.DBName).Collection("settles")
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+
+	var res []SettleDB
+	filter := bson.M{"User.UserID": userID}
+	opt := options.Find()
+	opt.SetLimit(20)
+	opt.SetSort(bson.M{"_id": -1})
+
+	cur, err := collection.Find(ctx, filter, opt)
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(ctx)
+
+	for cur.Next(ctx) {
+		var result SettleDB
+		err := cur.Decode(&result)
+		if err != nil {
+			log.Debug("数据库数据解码错误 %+v", err)
+		}
+		res = append(res, result)
+	}
+	return res, nil
 }

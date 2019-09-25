@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"github.com/name5566/leaf/log"
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
@@ -144,7 +145,8 @@ func (dl *Dealer) Settle() {
 	// log.Debug("settle... %+v", dl.RoomID)
 
 	dl.ddl = uint32(time.Now().Unix()) + con.SettleTime
-	converter := DTOConverter{}
+	dtoC := DTOConverter{}
+	daoC := DAOConverter{}
 
 	// fixme 用户离开房间之后要删除掉
 
@@ -155,21 +157,35 @@ func (dl *Dealer) Settle() {
 		// 前端显示的输赢 精度问题
 		uDisplayWin, _ := math.MultiFloat64(dl.UserBets[user.UserID][dl.res], constant.AreaX[dl.res]).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Float64()
 		beforeBalance := user.Balance
+
 		uuid := util.UUID{}
 		order := uuid.GenUUID()
+		var winFlag bool
 		if uWin > 0 {
+			winFlag = true
 			c4c.UserWinScore(user.UserID, uWin, 0, 0, order, dl.RoundID, func(data *User) {
 				win, _ := decimal.NewFromFloat(data.Balance).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Sub(decimal.NewFromFloat(beforeBalance)).Float64()
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
-				resp := converter.RSBMsg(win, 0, data.Balance, *dl)
+				resp := dtoC.RSBMsg(win, 0, data.Balance, *dl)
 				user.ConnAgent.WriteMsg(&resp)
 			})
 		} else {
-			resp := converter.RSBMsg(uDisplayWin, 0, user.Balance, *dl)
+			winFlag = false
+			resp := dtoC.RSBMsg(uDisplayWin, 0, user.Balance, *dl)
 			user.ConnAgent.WriteMsg(&resp)
+		}
+
+		// 玩家结算记录
+		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
+		if uBet > 0 {
+			sdb := daoC.Settle2DB(*user, order, dl.RoundID, winFlag, uBet, uWin)
+			err := db.CUserSettle(sdb)
+			if err != nil {
+				log.Debug("保存用户结算数据错误 %+v", err)
+			}
 		}
 
 		return true
