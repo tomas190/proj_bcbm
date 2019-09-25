@@ -78,6 +78,15 @@ func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 		dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	}
 
+	for i, lu := range dl.UserLeave {
+		user := lu
+		// 把玩家从掉线列表中移除
+		if user == u.UserID {
+			dl.UserLeave = append(dl.UserLeave[:i], dl.UserLeave[i+1:]...)
+			break
+		}
+	}
+
 	converter := DTOConverter{}
 	r := converter.R2Msg(*dl)
 	mu := converter.U2Msg(*u)
