@@ -35,8 +35,10 @@ type Dealer struct {
 	HRChan      chan HRMsg // 房间大厅通信
 
 	Users          sync.Map             // 房间用户-不包括机器人
+	UserLeave      []uint32             // 用户是否在房间
 	Bots           []*Bot               // 房间机器人
 	Bankers        []Player             // 上庄玩家榜单
+	DownBanker     bool                 // 手动下庄
 	UserBets       map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
 	UserBetsDetail map[uint32][]msg.Bet // 用户具体投注
 	UserAutoBet    map[uint32]bool      // 本局投注记录
@@ -48,6 +50,7 @@ type Dealer struct {
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 	return &Dealer{
 		Users:          sync.Map{},
+		UserLeave:      make([]uint32, 0),
 		Bankers:        make([]Player, 0),
 		Room:           NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
 		clock:          time.NewTicker(time.Second),
@@ -148,8 +151,6 @@ func (dl *Dealer) Settle() {
 	dtoC := DTOConverter{}
 	daoC := DAOConverter{}
 
-	// fixme 用户离开房间之后要删除掉
-
 	dl.Users.Range(func(key, value interface{}) bool {
 		user := value.(*User)
 		// 中心服需要结算的输赢
@@ -191,6 +192,14 @@ func (dl *Dealer) Settle() {
 		return true
 	})
 
+	for _, uid := range dl.UserLeave {
+		userID := uid
+		_, ok := dl.Users.Load(userID)
+		if ok {
+			dl.Users.Delete(userID)
+		}
+	}
+
 	dl.ClockReset(constant.SettleTime, dl.ClearChip)
 }
 
@@ -224,6 +233,7 @@ func (dl *Dealer) ClearChip() {
 
 	// 清空投注详情记录
 	dl.UserBetsDetail = map[uint32][]msg.Bet{}
+	dl.UserLeave = []uint32{}
 
 	dl.res = 0
 	dl.bankerWin = 0
@@ -231,7 +241,7 @@ func (dl *Dealer) ClearChip() {
 
 	converter := DTOConverter{}
 
-	if dl.bankerRound >= constant.BankerMaxTimes || dl.Bankers[0].GetBalance() < constant.BankerMinBar {
+	if dl.bankerRound >= constant.BankerMaxTimes || dl.Bankers[0].GetBalance() < constant.BankerMinBar || dl.DownBanker == true {
 		if len(dl.Bankers) > 1 {
 			dl.Bankers = dl.Bankers[1:]
 			dl.bankerMoney = dl.Bankers[0].GetBalance()
@@ -249,6 +259,7 @@ func (dl *Dealer) ClearChip() {
 		bankerResp := converter.BBMsg(*dl)
 		dl.Broadcast(&bankerResp)
 		dl.bankerRound = 0
+		dl.DownBanker = false
 	}
 
 	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime

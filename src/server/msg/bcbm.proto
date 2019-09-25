@@ -124,7 +124,8 @@ message JoinRoomR {
     repeated double PAmount = 3;       // 如果玩家是重新进入房间，需要玩家在该房间的下注信息
     RoomInfo Room = 4;                 // 当前房间状态
     repeated uint32 History = 5;       // 历史记录
-    uint32 ServerTime = 6;             // 服务器时间
+    UserInfo User = 6;                 // 玩家信息
+    uint32 ServerTime = 7;             // 服务器时间
 }
 
 // 下注

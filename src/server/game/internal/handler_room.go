@@ -158,6 +158,38 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 
 	au := a.UserData().(*User)
 
+	// 取消上庄申请
+	if m.LockMoney == constant.CancelGrab {
+		for _, b := range dl.Bankers {
+			banker := b
+			userID, _, _, _ := banker.GetPlayerBasic()
+			if userID == au.UserID {
+				curBanker := dl.Bankers[0]
+				dl.Bankers = []Player{}
+				dl.Bankers = append(dl.Bankers, curBanker)
+				nextB := dl.NextBotBanker()
+				dl.Bankers = append(dl.Bankers, nextB)
+				dl.Bots = append(dl.Bots, &nextB)
+			}
+		}
+
+		resp := &msg.BankersB{
+			Banker:     dl.getBankerInfoResp(),
+			ServerTime: uint32(time.Now().Unix()),
+		}
+
+		log.Debug("<--- 庄家列表更新 --->")
+		dl.Broadcast(resp)
+
+		return
+	}
+
+	// 申请下庄，先标记，一局结束之后轮换
+	if m.LockMoney == constant.DownBanker {
+		dl.DownBanker = true
+		return
+	}
+
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
 	if m.LockMoney < constant.BankerMinBar || m.LockMoney > au.Balance {
@@ -217,13 +249,14 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
-	// fixme 不能直接删除
-	dl.Users.Delete(au.UserID)
+	math := util.Math{}
+	uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64()
+	if uBets == 0 {
+		dl.Users.Delete(au.UserID)
+	} else {
+		dl.UserLeave = append(dl.UserLeave, au.UserID)
+	}
 
-	// todo 玩家离开房间后 清空续投 需要结算
-	//dl.Bankers
-	//dl.UserAutoBet
-	//dl.UserBetsDetail
 	dl.AutoBetRecord[au.UserID] = nil
 
 	resp := &msg.LeaveRoomR{

@@ -58,7 +58,7 @@ func (h *Hall) OpenCasino() {
 // 大厅开房
 func (h *Hall) openRoom(rID uint32) {
 	dl := NewDealer(rID, h.HRChan)
-	dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker(), dl.NextBotBanker(), dl.NextBotBanker())
+	dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
 
 	// fixme
 	dl.bankerMoney = dl.Bankers[0].(Bot).Balance
@@ -70,12 +70,16 @@ func (h *Hall) openRoom(rID uint32) {
 func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 	h.UserRoom[u.UserID] = dl.RoomID
 	dl.Users.Store(u.UserID, u)
-	dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+	if _, ok := dl.UserBets[u.UserID]; !ok {
+		dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+	}
 
 	converter := DTOConverter{}
 	r := converter.R2Msg(*dl)
+	mu := converter.U2Msg(*u)
 
 	resp := &msg.JoinRoomR{
+		User:       &mu,
 		CurBankers: dl.getBankerInfoResp(),
 		Amount:     dl.AreaBets,
 		PAmount:    dl.UserBets[u.UserID],
