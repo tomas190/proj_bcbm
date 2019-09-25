@@ -1,5 +1,7 @@
 package internal
 
+import "time"
+
 type SettleDB struct {
 	User      UserDB  `bson:"User"`
 	WinOrder  string  `bson:"WinOrder"`
@@ -17,10 +19,10 @@ type UserDB struct {
 }
 
 type ProfitDB struct {
-	UpdateTime    uint32  `bson:"UpdateTime"`
-	UpdateTimeStr string  `bson:"UpdateTimeStr"`
-	AllWin        float64 `bson:"AllWin"`
-	AllLost       float64 `bson:"AllLost"`
-	Profit        float64 `bson:"Profit"`
-	PlayerNum     uint32  `bson:"PlayerNum"`
+	UpdateTime    time.Time `bson:"UpdateTime"`
+	UpdateTimeStr string    `bson:"UpdateTimeStr"`
+	AllWin        float64   `bson:"AllWin"`
+	AllLost       float64   `bson:"AllLost"`
+	Profit        float64   `bson:"Profit"`
+	PlayerNum     uint32    `bson:"PlayerNum"`
 }

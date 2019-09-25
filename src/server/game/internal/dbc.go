@@ -167,7 +167,6 @@ func (m *MgoC) UProfitPool(lose, win float64) error {
 
 	//init the loc
 	loc, _ := time.LoadLocation("Asia/Shanghai")
-
 	//set timezone,
 	now := time.Now().In(loc)
 
@@ -177,7 +176,7 @@ func (m *MgoC) UProfitPool(lose, win float64) error {
 	if err != nil {
 		log.Debug("未查找到盈余池数据 %+v", err)
 		var newProfit = ProfitDB{
-			UpdateTime:    uint32(time.Now().Unix()),
+			UpdateTime:    time.Now(),
 			UpdateTimeStr: "",
 			AllWin:        win,
 			AllLost:       lose,
@@ -195,11 +194,11 @@ func (m *MgoC) UProfitPool(lose, win float64) error {
 	newLost := lastProfit.AllLost + win
 	newWin := lastProfit.AllWin + lose
 	newCount := userCount
-	newProfit := newWin - newLost*1.03 - float64(userCount*constant.GiftAmount)
+	newProfit := newWin - newLost
 
 	newRecord := ProfitDB{
-		UpdateTime:    uint32(time.Now().Unix()),
-		UpdateTimeStr: loc.String(),
+		UpdateTime:    time.Now(),
+		UpdateTimeStr: now.Format("2006-01-02T15:04:05"),
 		AllWin:        newWin,
 		AllLost:       newLost,
 		Profit:        newProfit,
