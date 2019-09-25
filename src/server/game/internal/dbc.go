@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/name5566/leaf/log"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -16,15 +17,15 @@ type MgoC struct {
 }
 
 // "mongodb://localhost:27017"
-func NewMgoC(url string) (*MgoC, error) {
+func NewMgoC(url string) *MgoC {
 	client, err := mongo.NewClient(options.Client().ApplyURI(url))
 	if err != nil {
 		log.Error("新建数据库客户端错误", err)
-		return nil, err
+		return nil
 	}
 
 	log.Debug("数据库客户端 %+v 创建成功...", url)
-	return &MgoC{client}, err
+	return &MgoC{client}
 }
 
 func (m *MgoC) Init() error {
@@ -40,26 +41,53 @@ func (m *MgoC) Init() error {
 		return err
 	}
 
+	u := UserDB{UserID: 100000001}
+	err = m.CUserInfo(u)
+
 	log.Debug("数据库连接成功...")
 	return nil
 }
 
 // 插入用户信息
 func (m *MgoC) CUserInfo(u interface{}) error {
-	collection := m.Database("bcbm_db").Collection("users")
+	collection := m.Database("BENCHIBAOMA-Game").Collection("users")
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+
 	res, err := collection.InsertOne(ctx, u)
 	if err != nil {
 		log.Error("%+v", err)
 		return err
 	}
 	id := res.InsertedID
-	fmt.Println(id)
+	log.Debug("玩家信息已保存 %+v", id)
 	return err
 }
 
-func (m *MgoC) RUserInfo() {
+func (m *MgoC) RUserInfo(userID uint32) error {
+	collection := m.Database("BENCHIBAOMA-Game").Collection("users")
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
+	var userInfo UserDB
+
+	filter := bson.M{"UserID": userID}
+	err := collection.FindOne(ctx, filter).Decode(&userInfo)
+	if err != nil {
+		log.Debug("查找用户信息错误 %+v", err)
+	}
+
+	return err
+}
+
+func (m *MgoC) RUserCount() (int64, error) {
+	collection := m.Database("BENCHIBAOMA-Game").Collection("users")
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+
+	count, err := collection.CountDocuments(ctx, nil)
+	if err != nil {
+		log.Debug("查找用户数量错误 %+v", err)
+		return 0, err
+	}
+	return count, nil
 }
 
 func (m *MgoC) UUserInfo() {

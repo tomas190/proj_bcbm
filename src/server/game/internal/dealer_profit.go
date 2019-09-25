@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"math/rand"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/util"
@@ -13,12 +14,12 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 	randomUtil := util.Random{}
 	profitPoolRatePercent := randomUtil.RandInRange(constant.ProfitPoolMinPercent, constant.ProfitPoolMaxPercent)
 	profitPoolRate := float64(profitPoolRatePercent) / 100.0
-	acceptableMaxLose := profitPool() * profitPoolRate
+	acceptableMaxLose := dl.profitPool() * profitPoolRate
 
 	var area uint32
 	for i := 0; i < 100; i++ {
 		preArea := dl.fairLottery()
-		preLoseAmount := preUserWin(dl.UserBets, preArea)
+		preLoseAmount := dl.preUserWin(dl.UserBets, preArea)
 		if preLoseAmount > acceptableMaxLose {
 			area = preArea
 			continue
@@ -61,15 +62,34 @@ func (dl *Dealer) fairLottery() uint32 {
 }
 
 // 玩家赢 - 官方庄家和机器人赢
-// todo
-func preUserWin(userBets map[uint32][]float64, preArea uint32) float64 {
-	return 5
+// userBets 玩家投注
+// preArea 预开奖区域
+func (dl *Dealer) preUserWin(userBets map[uint32][]float64, preArea uint32) float64 {
+	userWin := dl.AreaBets[preArea] * constant.AreaX[preArea]
+	botWin := dl.AreaBotBets[preArea] * constant.AreaX[preArea]
+
+	math := util.Math{}
+	bWin, _ := math.SumSliceFloat64(dl.AreaBets).Sub(math.MultiFloat64(constant.AreaX[dl.res], dl.AreaBets[dl.res])).Float64()
+
+	switch dl.Bankers[0].(type) {
+	case User:
+		return bWin + userWin - botWin
+	case Bot:
+		return userWin - bWin - botWin
+	}
+
+	return 1000
 }
 
 // 盈余池 = 玩家总输 - 玩家总赢 * 杀数 - (玩家数量 * 6)
-// todo 统计计算玩家总赢和玩家总输、玩家数量
-func profitPool() float64 {
+func (dl *Dealer) profitPool() float64 {
 	// 需要数据库
-	// return pTotalLose - pTotalWin * constant.HouseEdgePercent - pCount*constant.GiftAmount
-	return 20.0
+	playerCount, err := db.RUserCount()
+	if err != nil {
+		return -1
+	}
+
+	fmt.Println(playerCount)
+	return -1
+	// return pTotalLose - pTotalWin*constant.HouseEdgePercent - playerCount*constant.GiftAmount
 }

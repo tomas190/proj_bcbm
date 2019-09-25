@@ -35,11 +35,8 @@ func (m *Module) OnInit() {
 	//c4c.CronUpdateToken()
 
 	// 数据库
-	db, err := NewMgoC(conf.Server.MongoDB)
-	if err != nil {
-		log.Error("创建数据库客户端错误 %+v", err)
-	}
-	err = db.Init()
+	db = NewMgoC(conf.Server.MongoDB)
+	err := db.Init()
 	if err != nil {
 		log.Error("数据库初始化错误 %+v", err)
 	}

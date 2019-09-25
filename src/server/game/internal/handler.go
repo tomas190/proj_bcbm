@@ -104,6 +104,16 @@ func handleLogin(args []interface{}) {
 			u.Avatar = "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png"
 			a.SetUserData(u)
 
+			err := db.RUserInfo(u.UserID)
+			if err != nil {
+				converter := DAOConverter{}
+				udb := converter.U2DB(*u)
+				errC := db.CUserInfo(udb)
+				if errC != nil {
+					log.Debug("玩家信息保存错误 %+v", errC)
+				}
+			}
+
 			Mgr.UserRecord.Store(u.UserID, u)
 			log.Debug("<----login 登录 resp---->%+v", resp.User.UserID)
 			a.WriteMsg(resp)

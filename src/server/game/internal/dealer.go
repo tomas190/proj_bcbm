@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"math/rand"
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"

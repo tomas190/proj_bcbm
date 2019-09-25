@@ -189,7 +189,7 @@ message AutoBet {}
 // 续投广播
 message AutoBetB {
     uint32 UserID = 1;
-    repeated double Amounts = 2;  // 玩家xutou在每个区域的数量
+    repeated double Amounts = 2;  // 玩家续投在每个区域的数量
     repeated double AreaTotal = 3; // 当前8个区域的总数
     repeated double PlayerTotal = 4; // 当前玩家在8个区域投注总数
     double Money = 5;       // 该玩家投注后剩余金币
