@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"github.com/name5566/leaf/log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -108,6 +109,7 @@ func (m *MgoC) CUserSettle(bet interface{}) error {
 	}
 	id := res.InsertedID
 	log.Debug("用户结算信息已保存 %+v", id)
+
 	return err
 }
 
@@ -136,4 +138,79 @@ func (m *MgoC) RUserSettle(userID uint32) ([]SettleDB, error) {
 		res = append(res, result)
 	}
 	return res, nil
+}
+
+func (m *MgoC) RProfitPool() ProfitDB {
+	collection := m.Database(constant.DBName).Collection("profits")
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+
+	opt := options.FindOne()
+	opt.SetSort(bson.M{"UpdateTime": -1})
+
+	var lastProfit ProfitDB
+	err := collection.FindOne(ctx, bson.M{}, opt).Decode(&lastProfit)
+	if err != nil {
+		log.Debug("查找最新盈余池数据失败 %+v", err)
+		return lastProfit
+	}
+
+	return lastProfit
+}
+
+func (m *MgoC) UProfitPool(lose, win float64) error {
+	collection := m.Database(constant.DBName).Collection("profits")
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+
+	opt := options.FindOne()
+	opt.SetSort(bson.M{"UpdateTime": -1})
+	userCount, _ := m.RUserCount()
+
+	//init the loc
+	loc, _ := time.LoadLocation("Asia/Shanghai")
+
+	//set timezone,
+	now := time.Now().In(loc)
+
+	fmt.Print(now)
+	var lastProfit ProfitDB
+	err := collection.FindOne(ctx, bson.M{}, opt).Decode(&lastProfit)
+	if err != nil {
+		log.Debug("未查找到盈余池数据 %+v", err)
+		var newProfit = ProfitDB{
+			UpdateTime:    uint32(time.Now().Unix()),
+			UpdateTimeStr: "",
+			AllWin:        win,
+			AllLost:       lose,
+			Profit:        lose - win,
+			PlayerNum:     uint32(userCount),
+		}
+		res, err := collection.InsertOne(ctx, newProfit)
+		if err != nil {
+			log.Debug("插入第一条盈余数据 %+v", err)
+		}
+
+		log.Debug("插入第一条盈余数据 %+v", res)
+	}
+
+	newLost := lastProfit.AllLost + win
+	newWin := lastProfit.AllWin + lose
+	newCount := userCount
+	newProfit := newWin - newLost*1.03 - float64(userCount*constant.GiftAmount)
+
+	newRecord := ProfitDB{
+		UpdateTime:    uint32(time.Now().Unix()),
+		UpdateTimeStr: loc.String(),
+		AllWin:        newWin,
+		AllLost:       newLost,
+		Profit:        newProfit,
+		PlayerNum:     uint32(newCount),
+	}
+
+	res, err := collection.InsertOne(ctx, newRecord)
+	if err != nil {
+		log.Debug("插入盈余数据 %+v", err)
+	}
+	log.Debug("插入盈余数据 %+v", res)
+
+	return nil
 }

@@ -15,3 +15,12 @@ type UserDB struct {
 	Avatar   string  `bson:"Avatar" json:"Avatar"`     // 用户头像
 	Balance  float64 `bson:"Balance" json:"Balance"`   // 用户金额
 }
+
+type ProfitDB struct {
+	UpdateTime    uint32  `bson:"UpdateTime"`
+	UpdateTimeStr string  `bson:"UpdateTimeStr"`
+	AllWin        float64 `bson:"AllWin"`
+	AllLost       float64 `bson:"AllLost"`
+	Profit        float64 `bson:"Profit"`
+	PlayerNum     uint32  `bson:"PlayerNum"`
+}

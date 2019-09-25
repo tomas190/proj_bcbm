@@ -83,14 +83,8 @@ func (dl *Dealer) preUserWin(userBets map[uint32][]float64, preArea uint32) floa
 // 盈余池 = 玩家总输 - 玩家总赢 * 杀数 - (玩家数量 * 6)
 func (dl *Dealer) profitPool() float64 {
 	// 需要数据库
-	playerCount, err := db.RUserCount()
-	if err != nil {
-		return -1
-	}
 
-	_ = playerCount
-
-	//log.Debug("玩家数量: %+v", playerCount)
-	return -1
+	pp := db.RProfitPool()
+	return pp.Profit
 	// return pTotalLose - pTotalWin*constant.HouseEdgePercent - playerCount*constant.GiftAmount
 }

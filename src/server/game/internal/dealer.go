@@ -189,9 +189,15 @@ func (dl *Dealer) Settle() {
 			}
 		}
 
+		err := db.UProfitPool(uBet, uWin)
+		if err != nil {
+			log.Debug("更新盈余池失败 %+v", err)
+		}
+
 		return true
 	})
 
+	// 处理离开房间的用户
 	for _, uid := range dl.UserLeave {
 		userID := uid
 		_, ok := dl.Users.Load(userID)
