@@ -47,20 +47,20 @@ func TestClient4Center_ServerLoginCenter(t *testing.T) {
 
 // 减钱
 func TestClient4Center_MinusMoney(t *testing.T) {
-	userID := uint32(516499995)
+	userID := uint32(139366987)
 
 	c := NewClient4Center()
 	// c.ReqToken()
 	c.HeartBeatAndListen()
 	time.Sleep(1 * time.Second)
 
-	c.UserLoginCenter(userID, "123456", func(data *User) {
-		log.Debug("<----用户登录回调---->%+v %+v %+V", data.UserID, data.NickName, data.Balance)
+	c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", func(data *User) {
+		log.Debug("<----用户登录回调---->%+v %+v %+v", data.UserID, data.NickName, data.Balance)
 	})
 
 	time.Sleep(2 * time.Second)
 
-	c.UserLoseScore(userID, -1000, 0, 0, "", "",
+	c.UserLoseScore(userID, 1, -1000, 0, "", "",
 		func(data *User) {
 			log.Debug("<----用户减钱回调---->%+v %+v", data.UserID, data.Balance)
 		})
@@ -70,26 +70,29 @@ func TestClient4Center_MinusMoney(t *testing.T) {
 // 加钱
 func TestClient4Center_AddMoney(t *testing.T) {
 
-	// 516499995、404005181、789694945、547874059、699590045
-	// 115177351、515775801、781352999、567472342、846053346
-	userID := uint32(547874059)
+	var userIDs = []uint32{194989239, 735835433, 990684188, 909098851, 612303604,
+		100148012, 139366987, 303586538, 828606651, 984968541,
+		678653255, 617222183, 415824137, 251735891, 243271456}
 
 	c := NewClient4Center()
 	// c.ReqToken()
 	c.HeartBeatAndListen()
 	time.Sleep(1 * time.Second)
 
-	c.UserLoginCenter(userID, "123456", func(data *User) {
-		log.Debug("<----用户登录回调---->%+v %+v", data.UserID, data.Balance)
-	})
-
-	time.Sleep(2 * time.Second)
-
-	c.UserWinScore(userID, 20000, 0, 0, "test-order-add", "",
-		func(data *User) {
-			log.Debug("<----用户加钱回调---->%+v %+v", data.UserID, data.Balance)
+	for _, uid := range userIDs {
+		userID := uid
+		c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", func(data *User) {
+			log.Debug("<----用户登录回调---->%+v %+v", data.UserID, data.Balance)
 		})
-	time.Sleep(5 * time.Second)
+
+		time.Sleep(2 * time.Second)
+
+		c.UserWinScore(userID, 2000, 0, 0, "test-order-add", "",
+			func(data *User) {
+				log.Debug("<----用户加钱回调---->%+v %+v", data.UserID, data.Balance)
+			})
+		time.Sleep(5 * time.Second)
+	}
 }
 
 // 测试中心服重连和断连
