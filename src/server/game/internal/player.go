@@ -41,7 +41,7 @@ func (u User) GetPlayerBasic() (uint32, string, string, float64) {
 
 // 返回玩家投注了的近20局获胜局数和总下注数
 func (u User) GetPlayerAccount() (uint32, float64) {
-	// 只记录玩家进入房间之后的，不从库中读取
+
 	//his, err := db.RUserSettle(u.UserID)
 	//if err != nil {
 	//	log.Debug("获取用户历史数据错误 %+v", err)
@@ -59,6 +59,8 @@ func (u User) GetPlayerAccount() (uint32, float64) {
 	//}
 	//
 	//return winCount, totalBet
+
+	// 只记录玩家进入房间之后的，不从库中读取
 	var winCount uint32
 	var betAmount float64
 
