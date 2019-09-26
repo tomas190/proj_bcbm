@@ -73,7 +73,7 @@ func (u User) GetPlayerAccount() (uint32, float64) {
 	}
 
 	if v2, exist2 := ca.Get(fmt.Sprintf("%+v-betAmount", u.UserID)); exist2 {
-		if wc, ok := v2.(uint64); ok {
+		if wc, ok := v2.(int64); ok {
 			winCount = uint32(wc)
 		} else {
 			log.Debug("转换胜场数错误 error")
