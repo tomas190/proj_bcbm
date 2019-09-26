@@ -224,8 +224,10 @@ func (dl *Dealer) ClearChip() {
 		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
 		if uBet > 0 {
 			if _, exist := ca.Get(fmt.Sprintf("%+v-betAmount", user.UserID)); !exist {
+				var winCount int64
+				winCount = 0
 				ca.Set(fmt.Sprintf("%+v-betAmount", user.UserID), 0.0, cache.DefaultExpiration)
-				ca.Set(fmt.Sprintf("%+v-winCount", user.UserID), 0, cache.DefaultExpiration)
+				ca.Set(fmt.Sprintf("%+v-winCount", user.UserID), winCount, cache.DefaultExpiration)
 			} else {
 				addBet, err := ca.IncrementFloat64(fmt.Sprintf("%+v-betAmount", user.UserID), uBet)
 				if err != nil {
