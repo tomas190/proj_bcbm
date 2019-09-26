@@ -188,6 +188,7 @@ func (dl *Dealer) Settle() {
 				log.Debug("保存用户结算数据错误 %+v", err)
 			}
 
+			// fixme 遍历里面写数据
 			err = db.UProfitPool(uBet, uWin)
 			if err != nil {
 				log.Debug("更新盈余池失败 %+v", err)
