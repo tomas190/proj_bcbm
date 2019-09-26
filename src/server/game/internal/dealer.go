@@ -247,8 +247,10 @@ func (dl *Dealer) ClearChip() {
 				}
 			}
 		} else {
+			var winCount int64
+			winCount = 0
 			ca.Set(fmt.Sprintf("%+v-betAmount", user.UserID), 0.0, cache.DefaultExpiration)
-			ca.Set(fmt.Sprintf("%+v-winCount", user.UserID), 0, cache.DefaultExpiration)
+			ca.Set(fmt.Sprintf("%+v-winCount", user.UserID), winCount, cache.DefaultExpiration)
 		}
 		return true
 	})
