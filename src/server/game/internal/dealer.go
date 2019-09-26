@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"github.com/name5566/leaf/log"
+	"github.com/patrickmn/go-cache"
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
@@ -215,6 +216,40 @@ func (dl *Dealer) Settle() {
 func (dl *Dealer) ClearChip() {
 	dl.Status = constant.RSClear
 	// log.Debug("clear chip... %+v", dl.RoomID)
+	//玩家列表数据统计
+	// 玩家结算记录
+	math := util.Math{}
+	dl.Users.Range(func(key, value interface{}) bool {
+		user := value.(*User)
+		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
+		if uBet > 0 {
+			if _, exist := ca.Get(fmt.Sprintf("%+v-betAmount", user.UserID)); !exist {
+				ca.Set(fmt.Sprintf("%+v-betAmount", user.UserID), 0.0, cache.DefaultExpiration)
+				ca.Set(fmt.Sprintf("%+v-winCount", user.UserID), 0, cache.DefaultExpiration)
+			} else {
+				addBet, err := ca.IncrementFloat64(fmt.Sprintf("%+v-betAmount", user.UserID), uBet)
+				if err != nil {
+					log.Debug("累加用户投注数错误 %+v", err)
+				}
+
+				log.Debug("用户累计投注 %+v", addBet)
+
+				uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
+				if uWin > 0 {
+					addWin, err := ca.IncrementInt64(fmt.Sprintf("%+v-winCount", user.UserID), 1)
+					if err != nil {
+						log.Debug("累加用户赢数错误 %+v", err)
+					}
+
+					log.Debug("用户累计赢数 %+v", addWin)
+				}
+			}
+		} else {
+			ca.Set(fmt.Sprintf("%+v-betAmount", user.UserID), 0.0, cache.DefaultExpiration)
+			ca.Set(fmt.Sprintf("%+v-winCount", user.UserID), 0, cache.DefaultExpiration)
+		}
+		return true
+	})
 
 	// 清理
 	dl.AreaBets = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}

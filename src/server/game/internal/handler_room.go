@@ -258,6 +258,8 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 	}
 
 	dl.AutoBetRecord[au.UserID] = nil
+	ca.Delete(fmt.Sprintf("%+v-betAmount", au.UserID))
+	ca.Delete(fmt.Sprintf("%+v-winCount", au.UserID))
 
 	resp := &msg.LeaveRoomR{
 		User: &msg.UserInfo{

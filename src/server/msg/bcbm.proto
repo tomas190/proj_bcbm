@@ -154,7 +154,7 @@ message RoomStatusB {
     uint32 ServerTime = 10;             // 服务器时间
 }
 
-// 下注信息广播 todo 定时发送广播
+// 下注信息广播
 message BetInfoB {
      uint32 Area = 1;        // 下注区域
      uint32 Chip = 2;        // 下注筹码

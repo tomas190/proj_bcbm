@@ -1108,7 +1108,7 @@ func (m *RoomStatusB) GetServerTime() uint32 {
 	return 0
 }
 
-// 下注信息广播 todo 定时发送广播
+// 下注信息广播
 type BetInfoB struct {
 	Area                 uint32   `protobuf:"varint,1,opt,name=Area,proto3" json:"Area,omitempty"`
 	Chip                 uint32   `protobuf:"varint,2,opt,name=Chip,proto3" json:"Chip,omitempty"`
