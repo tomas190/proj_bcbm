@@ -187,11 +187,12 @@ func (dl *Dealer) Settle() {
 			if err != nil {
 				log.Debug("保存用户结算数据错误 %+v", err)
 			}
-		}
 
-		err := db.UProfitPool(uBet, uWin)
-		if err != nil {
-			log.Debug("更新盈余池失败 %+v", err)
+			err = db.UProfitPool(uBet, uWin)
+			if err != nil {
+				log.Debug("更新盈余池失败 %+v", err)
+			}
+
 		}
 
 		return true
