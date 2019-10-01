@@ -21,19 +21,20 @@ import (
 //           Bots
 
 type Dealer struct {
+	bankerWin   float64 // 庄家输赢
+	bankerMoney float64 // 庄家余额
+
 	*Room
 	clock       *time.Ticker
 	counter     uint32
 	ddl         uint32
 	bankerRound uint32 // 庄家做了多少轮
 
-	RoundID     string     // 轮次
-	Status      uint32     // 房间状态
-	res         uint32     // 最新开奖结果
-	bankerWin   float64    // 庄家输赢
-	bankerMoney float64    // 庄家余额
-	History     []uint32   // 房间开奖历史
-	HRChan      chan HRMsg // 房间大厅通信
+	RoundID string     // 轮次
+	Status  uint32     // 房间状态
+	res     uint32     // 最新开奖结果
+	History []uint32   // 房间开奖历史
+	HRChan  chan HRMsg // 房间大厅通信
 
 	Users          sync.Map             // 房间用户-不包括机器人
 	UserLeave      []uint32             // 用户是否在房间
@@ -97,7 +98,10 @@ func (dl *Dealer) Bet() {
 	// 时间戳+随机数，每局一个
 	uid := util.UUID{}
 	dl.RoundID = fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
+
 	dl.Status = constant.RSBetting
+	dl.ddl = uint32(time.Now().Unix()) + con.BetTime
+
 	dl.HRChan <- HRMsg{
 		RoomID:     dl.RoomID,
 		RoomStatus: dl.Status,
@@ -105,7 +109,6 @@ func (dl *Dealer) Bet() {
 	}
 	// log.Debug("bet... %+v", dl.RoomID)
 
-	dl.ddl = uint32(time.Now().Unix()) + con.BetTime
 	converter := DTOConverter{}
 
 	// fixme 其实这种消息分开比较好，不然每次会有很多无谓的计算
@@ -130,28 +133,91 @@ func (dl *Dealer) Bet() {
 func (dl *Dealer) Settle() {
 	res := dl.profitPoolLottery()
 	dl.res = res
+
 	dl.Status = constant.RSSettle
+	dl.ddl = uint32(time.Now().Unix()) + con.SettleTime
+
 	dl.HRChan <- HRMsg{
 		RoomID:        dl.RoomID,
 		RoomStatus:    dl.Status,
 		LotteryResult: res,
 	}
+
+	uuid := util.UUID{}
+
 	// 结算
 	// 庄家赢数 = Sum(所有筹码数) - 中奖倍数*中奖筹码数
 	// 玩家赢数 = 开奖区域投注金额*区域倍数-总投注金额
 
 	math := util.Math{}
-	// todo 庄家结算
-	dl.bankerWin, _ = math.SumSliceFloat64(dl.AreaBets).Sub(math.MultiFloat64(con.AreaX[dl.res], dl.AreaBets[dl.res])).Float64()
-	// fixme 庄家是玩家的情况
-	dl.bankerMoney = dl.bankerMoney + dl.bankerWin
+	// 税前庄家输赢
+	preBankerWin, _ := math.SumSliceFloat64(dl.AreaBets).Sub(math.MultiFloat64(con.AreaX[dl.res], dl.AreaBets[dl.res])).Float64()
+	switch dl.Bankers[0].(type) {
+	case User:
+		{
+			u := dl.Bankers[0].(User)
+			v, _ := dl.Users.Load(u.UserID)
+			up := v.(*User)
+			preBalance := up.Balance
+			order := uuid.GenUUID()
+
+			if preBankerWin > 0 {
+				c4c.UserWinScore(u.UserID, preBankerWin, 0, 0, order+"-banker-win", dl.RoundID, func(data *User) {
+					up.BalanceLock.Lock()
+					up.Balance = data.Balance
+					up.BalanceLock.Unlock()
+
+					win, _ := decimal.NewFromFloat(data.Balance).Sub(decimal.NewFromFloat(preBalance)).Float64()
+
+					dl.bankerWin = win
+					dl.bankerMoney = dl.bankerMoney + dl.bankerWin
+
+					u.IncBankerBalance(dl.bankerWin)
+					u.IncBalance(dl.bankerWin)
+				})
+			} else {
+				c4c.UserLoseScore(u.UserID, preBankerWin, 0, 0, order+"-banker-lose", dl.RoundID, func(data *User) {
+					up.BalanceLock.Lock()
+					up.Balance = data.Balance
+					up.BalanceLock.Unlock()
+
+					win, _ := decimal.NewFromFloat(data.Balance).Sub(decimal.NewFromFloat(preBalance)).Float64()
+
+					dl.bankerWin = win
+					dl.bankerMoney = dl.bankerMoney + dl.bankerWin
+
+					u.IncBankerBalance(dl.bankerWin)
+					u.IncBalance(dl.bankerWin)
+				})
+			}
+		}
+	case Bot:
+		dl.bankerWin = preBankerWin * 0.95
+		dl.bankerMoney = dl.bankerMoney + dl.bankerWin
+	}
+
+	time.Sleep(500 * time.Millisecond)
 
 	// log.Debug("settle... %+v", dl.RoomID)
+	dl.playerSettle()
 
-	dl.ddl = uint32(time.Now().Unix()) + con.SettleTime
+	// 处理离开房间的用户
+	for _, uid := range dl.UserLeave {
+		userID := uid
+		_, ok := dl.Users.Load(userID)
+		if ok {
+			dl.Users.Delete(userID)
+		}
+	}
+
+	dl.ClockReset(constant.SettleTime, dl.ClearChip)
+}
+
+func (dl *Dealer) playerSettle() {
 	dtoC := DTOConverter{}
 	daoC := DAOConverter{}
-
+	math := util.Math{}
+	uuid := util.UUID{}
 	dl.Users.Range(func(key, value interface{}) bool {
 		user := value.(*User)
 		// 中心服需要结算的输赢
@@ -160,7 +226,6 @@ func (dl *Dealer) Settle() {
 		uDisplayWin, _ := math.MultiFloat64(dl.UserBets[user.UserID][dl.res], constant.AreaX[dl.res]).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Float64()
 		beforeBalance := user.Balance
 
-		uuid := util.UUID{}
 		order := uuid.GenUUID()
 		var winFlag bool
 		if uWin > 0 {
@@ -189,33 +254,82 @@ func (dl *Dealer) Settle() {
 				log.Debug("保存用户结算数据错误 %+v", err)
 			}
 
-			// fixme 遍历里面写数据
 			err = db.UProfitPool(uBet, uWin)
 			if err != nil {
 				log.Debug("更新盈余池失败 %+v", err)
 			}
-
 		}
 
 		return true
 	})
-
-	// 处理离开房间的用户
-	for _, uid := range dl.UserLeave {
-		userID := uid
-		_, ok := dl.Users.Load(userID)
-		if ok {
-			dl.Users.Delete(userID)
-		}
-	}
-
-	dl.ClockReset(constant.SettleTime, dl.ClearChip)
 }
 
 // 清理筹码
 func (dl *Dealer) ClearChip() {
 	dl.Status = constant.RSClear
+	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime
+
 	// log.Debug("clear chip... %+v", dl.RoomID)
+
+	// 更新玩家列表数据
+	dl.UpdatePlayerList()
+	// 清空数据
+	dl.ClearData()
+
+	converter := DTOConverter{}
+
+	resp := converter.RSBMsg(0, 0, 0, *dl)
+	dl.Broadcast(&resp)
+
+	// 玩家金币总数不足上庄金币数 移除金币不足的列表中玩家
+	for i, b := range dl.Bankers {
+		banker := b
+		if banker.GetBalance() < banker.GetBankerBalance() && i != 0 {
+			dl.Bankers = append(dl.Bankers[:i], dl.Bankers[i+1:]...)
+		}
+	}
+
+	// 庄家轮换
+	fmt.Println("************ 上庄金币 ****************", dl.Bankers[0].GetBankerBalance())
+	if dl.bankerRound >= constant.BankerMaxTimes || dl.Bankers[0].GetBankerBalance() < constant.BankerMinBar || dl.DownBanker == true {
+		if len(dl.Bankers) > 1 {
+			dl.Bankers = dl.Bankers[1:]
+			dl.bankerMoney = dl.Bankers[0].GetBankerBalance()
+		}
+
+		// 换一批机器人
+		dl.Bots = nil
+		dl.AddBots()
+
+		for _, b := range dl.Bots {
+			if b.botType == constant.BTNextBanker {
+				dl.Bankers = append(dl.Bankers, b)
+			}
+		}
+
+		bankerResp := converter.BBMsg(*dl)
+		dl.Broadcast(&bankerResp)
+		dl.bankerRound = 0
+		dl.DownBanker = false
+	}
+
+	// 下一阶段
+	dl.ClockReset(constant.ClearTime, dl.Bet)
+}
+
+func (dl *Dealer) Broadcast(m interface{}) {
+	// log.Debug("room %+v brd %+v, content: %+v", dl.RoomID, reflect.TypeOf(m), m)
+	dl.Users.Range(func(key, value interface{}) bool {
+		user := value.(*User)
+		if user.ConnAgent != nil {
+			user.ConnAgent.WriteMsg(m)
+		}
+
+		return true
+	})
+}
+
+func (dl *Dealer) UpdatePlayerList() {
 	//玩家列表数据统计
 	// 玩家结算记录
 	math := util.Math{}
@@ -256,7 +370,9 @@ func (dl *Dealer) ClearChip() {
 		}
 		return true
 	})
+}
 
+func (dl *Dealer) ClearData() {
 	// 清理
 	dl.AreaBets = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	for i := range dl.UserBets {
@@ -288,45 +404,4 @@ func (dl *Dealer) ClearChip() {
 	dl.bankerWin = 0
 	dl.bankerRound += 1
 
-	converter := DTOConverter{}
-
-	if dl.bankerRound >= constant.BankerMaxTimes || dl.Bankers[0].GetBalance() < constant.BankerMinBar || dl.DownBanker == true {
-		if len(dl.Bankers) > 1 {
-			dl.Bankers = dl.Bankers[1:]
-			dl.bankerMoney = dl.Bankers[0].GetBalance()
-		}
-		// 换一批机器人
-		dl.Bots = nil
-		dl.AddBots()
-
-		for _, b := range dl.Bots {
-			if b.botType == constant.BTNextBanker {
-				dl.Bankers = append(dl.Bankers, b)
-			}
-		}
-
-		bankerResp := converter.BBMsg(*dl)
-		dl.Broadcast(&bankerResp)
-		dl.bankerRound = 0
-		dl.DownBanker = false
-	}
-
-	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime
-
-	resp := converter.RSBMsg(0, 0, 0, *dl)
-	dl.Broadcast(&resp)
-
-	dl.ClockReset(constant.ClearTime, dl.Bet)
-}
-
-func (dl *Dealer) Broadcast(m interface{}) {
-	// log.Debug("room %+v brd %+v, content: %+v", dl.RoomID, reflect.TypeOf(m), m)
-	dl.Users.Range(func(key, value interface{}) bool {
-		user := value.(*User)
-		if user.ConnAgent != nil {
-			user.ConnAgent.WriteMsg(m)
-		}
-
-		return true
-	})
 }

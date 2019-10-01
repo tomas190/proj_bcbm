@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"proj_bcbm/src/server/util"
 	"testing"
 	"time"
 
@@ -69,7 +70,6 @@ func TestClient4Center_MinusMoney(t *testing.T) {
 
 // 加钱
 func TestClient4Center_AddMoney(t *testing.T) {
-
 	var userIDs = []uint32{194989239, 735835433, 990684188, 909098851, 612303604,
 		100148012, 139366987, 303586538, 828606651, 984968541,
 		678653255, 617222183, 415824137, 251735891, 243271456}
@@ -79,19 +79,27 @@ func TestClient4Center_AddMoney(t *testing.T) {
 	c.HeartBeatAndListen()
 	time.Sleep(1 * time.Second)
 
+	uuid := util.UUID{}
+	round := uuid.GenUUID()
+
 	for _, uid := range userIDs {
+		winOrder := uuid.GenUUID()
 		userID := uid
 		c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", func(data *User) {
 			log.Debug("<----用户登录回调---->%+v %+v", data.UserID, data.Balance)
 		})
 
-		time.Sleep(2 * time.Second)
+		time.Sleep(1 * time.Second)
 
-		c.UserWinScore(userID, 2000, 0, 0, "test-order-add", "",
+		c.UserWinScore(userID, 20000, 0, 0, winOrder+"-add", round,
 			func(data *User) {
 				log.Debug("<----用户加钱回调---->%+v %+v", data.UserID, data.Balance)
 			})
-		time.Sleep(5 * time.Second)
+		time.Sleep(1 * time.Second)
+
+		c.UserLogoutCenter(userID, func(data *User) {
+			log.Debug("<----用户登出回调---->%+v %+v", data.UserID, data.Balance)
+		})
 	}
 }
 

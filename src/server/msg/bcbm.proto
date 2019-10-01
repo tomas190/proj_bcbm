@@ -147,10 +147,10 @@ message RoomStatusB {
     uint32 EndTime = 3;                // 倒计时结束时间
     uint32 Result = 4;                 // 开奖结果-如果是开奖状态的话
     double BankerWin = 5;              // 庄家赢数
-    double BankerMoney = 6;            // 庄家余额
-    double WinMoney = 7;               // 玩家赢数
+    double BankerMoney = 6;            // 庄家显示金币数
+    double WinMoney = 7;               // 玩家赢数，如果玩家为庄 - 0
+    double PlayerMoney = 9;            // 玩家金币更新 总金币
     double AutoBetAmount = 8;          // 续投金额，若为0则置灰
-    double PlayerMoney = 9;            // 玩家金币更新
     uint32 ServerTime = 10;             // 服务器时间
 }
 
