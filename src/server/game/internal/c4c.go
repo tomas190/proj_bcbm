@@ -119,42 +119,39 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 	go func() {
 		for {
 
-			_, message, err := c4c.conn.ReadMessage()
+			msgType, message, err := c4c.conn.ReadMessage()
 			if err != nil {
 				log.Error("Read msg error %+v", err.Error())
 				c4c.isServerLogin = false
 				break
 			}
 
-			// fixme
-			if len(message) == 0 {
-				time.Sleep(1000 * time.Millisecond)
-			}
+			if msgType == websocket.TextMessage {
+				log.Debug("Msg from center %v", string(message))
 
-			log.Debug("Msg from center %v", string(message))
+				// todo message写入数据库
 
-			// todo message写入数据库
-
-			var msg Server2CenterMsg
-			err = json.Unmarshal(message, &msg)
-			if err != nil {
-				log.Error("Json Unmarshal error", err.Error())
-			}
-			switch msg.Event {
-			case constant.CEventServerLogin:
-				c4c.onServerLogin(message)
-			case constant.CEventUserLogin:
-				c4c.onUserLogin(message)
-			case constant.CEventUserLogout:
-				c4c.onUserLogout(message)
-			case constant.CEventUserLoseScore:
-				c4c.onUserLoseScore(message)
-			case constant.CEventUserWinScore:
-				c4c.onUserWinScore(message)
-			case constant.CEventError:
-				c4c.onError(message)
-			default:
-				c4c.onDefault(message)
+				var msg Server2CenterMsg
+				err = json.Unmarshal(message, &msg)
+				if err != nil {
+					log.Error("Json Unmarshal error", err.Error())
+				}
+				switch msg.Event {
+				case constant.CEventServerLogin:
+					c4c.onServerLogin(message)
+				case constant.CEventUserLogin:
+					c4c.onUserLogin(message)
+				case constant.CEventUserLogout:
+					c4c.onUserLogout(message)
+				case constant.CEventUserLoseScore:
+					c4c.onUserLoseScore(message)
+				case constant.CEventUserWinScore:
+					c4c.onUserWinScore(message)
+				case constant.CEventError:
+					c4c.onError(message)
+				default:
+					c4c.onDefault(message)
+				}
 			}
 		}
 	}()
