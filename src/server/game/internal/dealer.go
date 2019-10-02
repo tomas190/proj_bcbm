@@ -171,9 +171,6 @@ func (dl *Dealer) Settle() {
 
 					dl.bankerWin = win
 					dl.bankerMoney = dl.bankerMoney + dl.bankerWin
-
-					u.IncBankerBalance(dl.bankerWin)
-					u.IncBalance(dl.bankerWin)
 				})
 			} else {
 				c4c.UserLoseScore(u.UserID, preBankerWin, 0, 0, order+"-banker-lose", dl.RoundID, func(data *User) {
@@ -185,15 +182,19 @@ func (dl *Dealer) Settle() {
 
 					dl.bankerWin = win
 					dl.bankerMoney = dl.bankerMoney + dl.bankerWin
-
-					u.IncBankerBalance(dl.bankerWin)
-					u.IncBalance(dl.bankerWin)
 				})
 			}
 		}
-	case Bot:
-		dl.bankerWin = preBankerWin * 0.95
-		dl.bankerMoney = dl.bankerMoney + dl.bankerWin
+	default:
+		{
+			if preBankerWin > 0 {
+				dl.bankerWin = preBankerWin * 0.95
+				dl.bankerMoney = dl.bankerMoney + dl.bankerWin
+			} else {
+				dl.bankerWin = preBankerWin
+				dl.bankerMoney = dl.bankerMoney + dl.bankerWin
+			}
+		}
 	}
 
 	time.Sleep(500 * time.Millisecond)
@@ -290,8 +291,7 @@ func (dl *Dealer) ClearChip() {
 	}
 
 	// 庄家轮换
-	fmt.Println("************ 上庄金币 ****************", dl.Bankers[0].GetBankerBalance())
-	if dl.bankerRound >= constant.BankerMaxTimes || dl.Bankers[0].GetBankerBalance() < constant.BankerMinBar || dl.DownBanker == true {
+	if dl.bankerRound >= constant.BankerMaxTimes || dl.bankerMoney < constant.BankerMinBar || dl.DownBanker == true {
 		if len(dl.Bankers) > 1 {
 			dl.Bankers = dl.Bankers[1:]
 			dl.bankerMoney = dl.Bankers[0].GetBankerBalance()

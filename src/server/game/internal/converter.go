@@ -81,7 +81,6 @@ func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
 }
 
 func (c *DTOConverter) RSBMsg(userWin float64, autoBetAmount, userBalance float64, dl Dealer) msg.RoomStatusB {
-	dl.Bankers[0].GetPlayerBasic()
 	bMsg := msg.RoomStatusB{
 		Status:        dl.Status,
 		Counter:       0, // fixme

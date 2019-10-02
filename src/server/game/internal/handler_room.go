@@ -197,8 +197,10 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		return
 	}
 
-	// 当前庄家不变，其他清空
+	// 当前庄家不变，其他机器人清空
 	curBanker := dl.Bankers[0]
+
+	// 清理机器人 fixme 只清理机器人
 	dl.Bankers = []Player{}
 	dl.Bankers = append(dl.Bankers, curBanker)
 
