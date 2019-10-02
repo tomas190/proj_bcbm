@@ -118,11 +118,17 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 
 	go func() {
 		for {
+
 			_, message, err := c4c.conn.ReadMessage()
 			if err != nil {
 				log.Error("Read msg error %+v", err.Error())
 				c4c.isServerLogin = false
 				break
+			}
+
+			// fixme
+			if message == nil {
+				time.Sleep(100 * time.Millisecond)
 			}
 
 			log.Debug("Msg from center %v", string(message))
