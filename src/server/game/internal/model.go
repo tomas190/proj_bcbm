@@ -60,12 +60,7 @@ func (h *Hall) openRoom(rID uint32) {
 	dl := NewDealer(rID, h.HRChan)
 	dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
 
-	switch dl.Bankers[0].(type) {
-	case Bot:
-		dl.bankerMoney = dl.Bankers[0].(Bot).Balance
-	case User:
-		dl.bankerMoney = dl.Bankers[0].(User).Balance
-	}
+	dl.bankerMoney = dl.Bankers[0].(Bot).Balance
 
 	h.RoomRecord.Store(rID, dl)
 	dl.StartGame()

@@ -212,10 +212,11 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 	}
 
 	bUser := User{
-		UserID:   au.UserID,
-		Balance:  m.LockMoney,
-		Avatar:   au.Avatar,
-		NickName: au.NickName,
+		UserID:        au.UserID,
+		Balance:       au.Balance,
+		BankerBalance: m.LockMoney,
+		Avatar:        au.Avatar,
+		NickName:      au.NickName,
 	}
 
 	if flag == false {
@@ -225,20 +226,13 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		return
 	}
 
-	uuid := util.UUID{}
-	order := uuid.GenUUID()
-	c4c.UserLoseScore(au.UserID, 0, m.LockMoney, 0, order, dl.RoundID, func(data *User) {
-		// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
-		au.Balance = data.Balance
+	resp := &msg.BankersB{
+		Banker:     dl.getBankerInfoResp(),
+		ServerTime: uint32(time.Now().Unix()),
+	}
 
-		resp := &msg.BankersB{
-			Banker:     dl.getBankerInfoResp(),
-			ServerTime: uint32(time.Now().Unix()),
-		}
-
-		log.Debug("<--- 庄家列表更新 --->")
-		dl.Broadcast(resp)
-	})
+	log.Debug("<--- 庄家列表更新 --->")
+	dl.Broadcast(resp)
 }
 
 func (dl *Dealer) handleLeaveRoom(args []interface{}) {
@@ -317,7 +311,7 @@ func (dl *Dealer) getBankerInfoResp() []*msg.UserInfo {
 	var bankerInfoResp []*msg.UserInfo
 	for _, b := range dl.Bankers {
 		converter := DTOConverter{}
-		buInfo := converter.U2Msg(b)
+		buInfo := converter.Banker2Msg(b)
 		bankerInfoResp = append(bankerInfoResp, &buInfo)
 	}
 

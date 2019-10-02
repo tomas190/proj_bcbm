@@ -22,11 +22,27 @@ func (dl *Dealer) AddBots() {
 
 // 机器人下注，随机下注后把结果赋值到下注结果列表中
 func (dl *Dealer) BotsBet() {
+	ru := util.Random{}
+	chipCount := ru.RandInRange(100, 150)
 	time.Sleep(time.Second * 1)
-	for i := 0; i < 10; i++ {
-		time.Sleep(time.Millisecond * time.Duration(rand.Intn(2000)))
+	for i := 0; i < chipCount; i++ {
+		time.Sleep(time.Millisecond * time.Duration(rand.Intn(150)))
 		area := uint32(rand.Intn(8) + 1)
-		chip := uint32(rand.Intn(5) + 1)
+		var chip uint32
+
+		prob := ru.RandInRange(0, 10)
+
+		if prob >= 0 && prob <= 5 {
+			chip = 1
+		} else if prob > 5 && prob <= 7 {
+			chip = 2
+		} else if prob > 7 && prob <= 8 {
+			chip = 3
+		} else if prob > 8 && prob < 10 {
+			chip = 4
+		} else {
+			chip = 5
+		}
 
 		cs := constant.ChipSize[chip]
 		// 区域所有玩家投注总数
@@ -42,28 +58,14 @@ func (dl *Dealer) BotsBet() {
 
 		dl.Broadcast(resp)
 	}
-
 }
-
-// 若无真人玩家上庄随机一个机器人上
-// 若有真人玩家上装机器人机器人靠后
-func (dl *Dealer) BotsGrabBanker() {
-
-}
-
-// 庄家轮换时修改列表
-// 若上庄列表只有一个
-// 保留之前上庄的
-// 玩家列表中只有一个机器人大于50000，作为上庄
-// bot 玩家
-// 玩家的近20局统计从数据库中找
 
 func (dl *Dealer) BetGod() Bot {
 	r := util.Random{}
-	WinCount := uint32(r.RandInRange(4, 5))               // 获胜局数
-	BetAmount := float64(r.RandInRange(800, 5000))        // 下注金额
-	Balance := float64(20000 + r.RandInRange(0, 20000))   // 金币数
-	UserID := uint32(1000000 + r.RandInRange(0, 2000000)) // 用户ID
+	WinCount := uint32(r.RandInRange(4, 5))                                                   // 获胜局数
+	BetAmount := float64(r.RandInRange(800, 5000))                                            // 下注金额
+	Balance := float64(20000+r.RandInRange(0, 20000)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
+	UserID := uint32(1000000 + r.RandInRange(0, 2000000))                                     // 用户ID
 	Avatar := "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png"
 
 	betGod := Bot{
@@ -81,10 +83,10 @@ func (dl *Dealer) BetGod() Bot {
 
 func (dl *Dealer) RichMan() Bot {
 	r := util.Random{}
-	WinCount := uint32(r.RandInRange(0, 3))               // 获胜局数
-	BetAmount := float64(r.RandInRange(800, 5000))        // 下注金额
-	Balance := float64(20000 + r.RandInRange(0, 20000))   // 金币数
-	UserID := uint32(1000000 + r.RandInRange(0, 2000000)) // 用户ID
+	WinCount := uint32(r.RandInRange(0, 3))                                                   // 获胜局数
+	BetAmount := float64(r.RandInRange(800, 5000))                                            // 下注金额
+	Balance := float64(20000+r.RandInRange(0, 20000)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
+	UserID := uint32(1000000 + r.RandInRange(0, 2000000))                                     // 用户ID
 	Avatar := "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png"
 
 	richMan := Bot{
@@ -102,10 +104,10 @@ func (dl *Dealer) RichMan() Bot {
 
 func (dl *Dealer) NextBotBanker() Bot {
 	r := util.Random{}
-	WinCount := uint32(r.RandInRange(0, 3))               // 获胜局数
-	BetAmount := float64(r.RandInRange(800, 5000))        // 下注金额
-	Balance := float64(50000 + r.RandInRange(0, 20000))   // 金币数
-	UserID := uint32(1000000 + r.RandInRange(0, 2000000)) // 用户ID
+	WinCount := uint32(r.RandInRange(0, 3))                                                   // 获胜局数
+	BetAmount := float64(r.RandInRange(800, 5000))                                            // 下注金额
+	Balance := float64(50000+r.RandInRange(0, 20000)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
+	UserID := uint32(1000000 + r.RandInRange(0, 2000000))                                     // 用户ID
 	Avatar := "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png"
 
 	nextBanker := Bot{

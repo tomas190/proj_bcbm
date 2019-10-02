@@ -4,8 +4,8 @@
 	"WSAddr": "0.0.0.0:1220",
 	"MaxConnNum": 20000,
 
-	"TokenServer":"http://172.16.100.2:9502/Token/getToken",
-	"CenterServer": "http://172.16.100.2:9502",
+	"TokenServer":"http://161.117.178.174:12345/Token/getToken",
+	"CenterServer": "http://161.117.178.174:12345",
 	"CenterServerPort": "9502",
 	"DevKey": "new_game_17",
 	"DevName": "新游戏开发",
