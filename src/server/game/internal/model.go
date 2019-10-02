@@ -49,7 +49,6 @@ func (h *Hall) OpenCasino() {
 			select {
 			case hrMsg := <-h.HRChan:
 				h.ChangeRoomStatus(hrMsg)
-			default:
 			}
 		}
 	}()
