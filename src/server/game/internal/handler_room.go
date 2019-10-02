@@ -326,7 +326,7 @@ func (dl *Dealer) roomBonusLimit(area uint32) float64 {
 
 // 区域剩余限红
 func (dl *Dealer) dynamicBonusLimit(area uint32) float64 {
-	return dl.bankerMoney + dl.sumAreaExcept(area) - dl.AreaBets[area]
+	return (dl.bankerMoney+dl.sumAreaExcept(area))/constant.AreaX[area] - dl.AreaBets[area]
 }
 
 // 其他区域投注数总和
