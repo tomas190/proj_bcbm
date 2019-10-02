@@ -127,8 +127,8 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 			}
 
 			// fixme
-			if message == nil {
-				time.Sleep(100 * time.Millisecond)
+			if len(message) == 0 {
+				time.Sleep(1000 * time.Millisecond)
 			}
 
 			log.Debug("Msg from center %v", string(message))
