@@ -18,13 +18,14 @@ type User struct {
 }
 
 type Bot struct {
-	UserID    uint32
-	NickName  string
-	Avatar    string
-	Balance   float64
-	WinCount  uint32
-	BetAmount float64
-	botType   uint32
+	UserID        uint32
+	NickName      string
+	Avatar        string
+	Balance       float64
+	BankerBalance float64
+	WinCount      uint32
+	BetAmount     float64
+	botType       uint32
 }
 
 type Player interface {
@@ -41,14 +42,6 @@ func (u User) GetBalance() float64 {
 
 func (u User) GetBankerBalance() float64 {
 	return u.BankerBalance
-}
-
-func (u User) IncBankerBalance(b float64) {
-	u.BankerBalance = u.BankerBalance + b
-}
-
-func (u User) IncBalance(b float64) {
-	u.Balance = u.Balance + b
 }
 
 func (u User) GetPlayerBasic() (uint32, string, string, float64) {
