@@ -46,6 +46,11 @@ func (dl *Dealer) handleBet(args []interface{}) {
 			return
 		}
 
+		if dl.roomBonusLimit(m.Area) < cs || dl.dynamicBonusLimit(m.Area) < cs {
+			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
+			return
+		}
+
 		uuid := util.UUID{}
 		order := uuid.GenUUID()
 
@@ -107,6 +112,11 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 	for _, b := range dl.AutoBetRecord[au.UserID] {
 		bet := b
 		cs := constant.ChipSize[bet.Chip]
+
+		if dl.roomBonusLimit(bet.Area) < cs || dl.dynamicBonusLimit(bet.Area) < cs {
+			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
+			break
+		}
 
 		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
 		dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
@@ -307,6 +317,30 @@ func (dl *Dealer) getPlayerInfoResp() []*msg.UserInfo {
 	playerInfoResp = append([]*msg.UserInfo{betGod}, playerInfoResp...)
 
 	return playerInfoResp
+}
+
+// 房间剩余限红
+func (dl *Dealer) roomBonusLimit(area uint32) float64 {
+	return constant.RoomMaxBonus/constant.AreaX[area] - dl.AreaBets[area]
+}
+
+// 区域剩余限红
+func (dl *Dealer) dynamicBonusLimit(area uint32) float64 {
+	return dl.bankerMoney + dl.sumAreaExcept(area) - dl.AreaBets[area]
+}
+
+// 其他区域投注数总和
+func (dl *Dealer) sumAreaExcept(area uint32) float64 {
+	var sum float64
+	for i, a := range dl.AreaBets {
+		if uint32(i) == area {
+			break
+		}
+		areaBet := a
+		sum += areaBet
+	}
+
+	return sum
 }
 
 func (dl *Dealer) getBankerInfoResp() []*msg.UserInfo {

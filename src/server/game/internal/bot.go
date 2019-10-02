@@ -45,6 +45,11 @@ func (dl *Dealer) BotsBet() {
 		}
 
 		cs := constant.ChipSize[chip]
+
+		// 限红
+		if dl.roomBonusLimit(area) < cs || dl.dynamicBonusLimit(area) < cs {
+			return
+		}
 		// 区域所有玩家投注总数
 		dl.AreaBets[area] = dl.AreaBets[area] + cs
 		// 区域机器人投注总数

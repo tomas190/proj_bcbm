@@ -4,6 +4,7 @@ import (
 	"github.com/name5566/leaf/log"
 	"github.com/name5566/leaf/module"
 	"github.com/patrickmn/go-cache"
+	_ "net/http/pprof"
 	"proj_bcbm/src/server/base"
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/msg"
@@ -46,6 +47,15 @@ func (m *Module) OnInit() {
 
 	// 游戏大厅
 	Mgr.OpenCasino()
+
+	// net/http/pprof 已经在 init()函数中通过 import 副作用完成默认 Handler 的注册
+	//go func() {
+	//	err := http.ListenAndServe("localhost:6060", nil)
+	//	if err != nil {
+	//		log.Debug("性能分析服务启动错误...")
+	//	}
+	//	log.Debug("性能分析服务...")
+	//}()
 }
 
 // 模块销毁
