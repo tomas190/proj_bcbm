@@ -180,12 +180,43 @@ type SyncScoreRespData struct {
 }
 
 type SyncScoreMsg struct {
-	ID           uint32  `json:"id"`
-	Balance      float64 `json:"balance"`
-	FinalBalance float64 `json:"final_balance"`
-	Income       float64 `json:"income"`
-	Order        string  `json:"order"`
-	RoundID      string  `json:"round_id"`
+	ID            uint32  `json:"id"`
+	Balance       float64 `json:"balance"`
+	FinalBalance  float64 `json:"final_balance"`
+	BankerBalance float64 `json:"banker_balance"`
+	Income        float64 `json:"income"`
+	Order         string  `json:"order"`
+	RoundID       string  `json:"round_id"`
+}
+
+/***************************************************
+
+	庄家上庄下庄
+
+****************************************************/
+
+type BankerReq struct {
+	Event string        `json:"event"`
+	Data  BankerReqData `json:"data"`
+}
+
+type BankerReqData struct {
+	Auth ServerAuth        `json:"auth"`
+	Info BankerReqDataInfo `json:"info"`
+}
+
+// 请求信息
+type BankerReqDataInfo struct {
+	UserID     uint32  `json:"id"`
+	Status     int     `json:"status"`
+	CreateTime uint32  `json:"create_time"`
+	PayReason  string  `json:"pay_reason"`
+	Money      float64 `json:"money"`
+	LockMoney  float64 `json:"lock_money"`
+	PreMoney   float64 `json:"pre_money"`
+	Order      string  `json:"order"`
+	GameID     string  `json:"game_id"`
+	RoundID    string  `json:"round_id"`
 }
 
 /***************************************************

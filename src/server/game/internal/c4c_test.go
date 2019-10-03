@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/util"
 	"testing"
 	"time"
@@ -103,22 +105,64 @@ func TestClient4Center_AddMoney(t *testing.T) {
 	}
 }
 
-// 测试中心服重连和断连
-func TestClient4Center_ReconnectCenter(t *testing.T) {
+func TestClient4Center_ChangeBankerStatus(t *testing.T) {
+	c := NewClient4Center()
+	// c.ReqToken()
+	c.HeartBeatAndListen()
+	time.Sleep(1 * time.Second)
 
-}
+	uuid := util.UUID{}
+	round := uuid.GenUUID()
+	userID := uint32(194989239)
+	// 登录
+	c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", func(data *User) {
+		log.Debug("<----用户登录回调---->%+v %+v", data.UserID, data.Balance)
+	})
 
-// 测试定时更新token同时加钱减钱行为
-func TestClient4Center_UpdateToken(t *testing.T) {
+	time.Sleep(1 * time.Second)
 
-}
+	// 投注
+	c.UserLoseScore(userID, -100, 0, 0, uuid.GenUUID(), round, func(data *User) {
+		fmt.Println("减钱完成")
+	})
 
-// 并发减钱
-func TestClient4Center_ConcurrentLose(t *testing.T) {
+	time.Sleep(1 * time.Second)
 
-}
+	// 申请上庄
+	c.ChangeBankerStatus(userID, constant.BSGrabbingBanker, 5000, 0, 0, uuid.GenUUID(), round, func(data *User) {
+		fmt.Println("申请上庄")
+	})
 
-// 并发加钱
-func TestClient4Center_ConcurrentWin(t *testing.T) {
+	time.Sleep(1 * time.Second)
+
+	// 坐庄
+
+	// 庄家输
+	c.BankerLoseScore(userID, -200, 0, 0, uuid.GenUUID(), round, func(data *User) {
+		fmt.Println("庄家输")
+	})
+
+	time.Sleep(1 * time.Second)
+
+	// 庄家赢
+	c.BankerWinScore(userID, 400, 0, 0, uuid.GenUUID(), round, func(data *User) {
+		fmt.Println("庄家赢")
+	})
+
+	time.Sleep(1 * time.Second)
+
+	// 下庄
+	c.ChangeBankerStatus(userID, constant.BSNotBanker, 5180, 0, 0, uuid.GenUUID(), round, func(data *User) {
+		fmt.Println("庄家下庄")
+	})
+
+	time.Sleep(1 * time.Second)
+
+	// 登出（如果不在游戏里面）
+	c.UserLogoutCenter(userID, func(data *User) {
+		fmt.Println("登出")
+	})
+
+	time.Sleep(1 * time.Second)
 
 }

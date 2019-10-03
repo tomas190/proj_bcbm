@@ -146,6 +146,12 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 					c4c.onUserLoseScore(message)
 				case constant.CEventUserWinScore:
 					c4c.onUserWinScore(message)
+				case constant.CEventChangeBankerStatus:
+					c4c.onChangeBankerStatus(message)
+				case constant.CEventBankerLoseScore:
+					c4c.onBankerLoseScore(message)
+				case constant.CEventBankerWinScore:
+					c4c.onBankerWinScore(message)
 				case constant.CEventError:
 					c4c.onError(message)
 				default:
@@ -287,6 +293,57 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 	}
 }
 
+// todo
+func (c4c *Client4Center) onChangeBankerStatus(msg []byte) {
+
+}
+
+func (c4c *Client4Center) onBankerLoseScore(msg []byte) {
+	loseResp := SyncScoreResp{}
+	err := json.Unmarshal(msg, &loseResp)
+	if err != nil {
+		log.Error("解析减钱返回错误", err)
+	}
+
+	syncData := loseResp.Data
+	if syncData.Code == constant.CRespStatusSuccess {
+
+		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
+			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.BankerBalance})
+			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-banker-lose-%+v", syncData.Msg.ID, syncData.Msg.Order))
+			// log.Debug("用户回调已删除: %+v 回调队列 %+v", fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order), c4c.userWaitEvent)
+		} else {
+			log.Error("找不到用户回调")
+		}
+
+	} else {
+		log.Error("中心服务器状态码 %+v", syncData.Code)
+	}
+}
+
+func (c4c *Client4Center) onBankerWinScore(msg []byte) {
+	winResp := SyncScoreResp{}
+	err := json.Unmarshal(msg, &winResp)
+	if err != nil {
+		log.Error("解析加钱返回错误", err)
+	}
+
+	syncData := winResp.Data
+	if syncData.Code == constant.CRespStatusSuccess {
+
+		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
+			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.BankerBalance})
+			// 回调成功之后要删除
+			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-banker-win-%+v", syncData.Msg.ID, syncData.Msg.Order))
+			// log.Debug("用户回调已删除: %+v, 回调队列 %+v", fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order), c4c.userWaitEvent)
+		} else {
+			log.Error("找不到用户回调")
+		}
+	} else {
+		log.Error("中心服务器状态码 %+v", syncData.Code)
+	}
+}
+
 func (c4c *Client4Center) onError(msg []byte) {
 	centerErr := CenterErrorResp{}
 	err := json.Unmarshal(msg, &centerErr)
@@ -304,7 +361,7 @@ func (c4c *Client4Center) onError(msg []byte) {
 }
 
 func (c4c *Client4Center) onDefault(msg []byte) {
-	log.Error("中心服务器事件无法识别", string(msg))
+	log.Error("中心服务器事件无法识别 %+v", string(msg))
 }
 
 /*****************************************************
@@ -455,6 +512,110 @@ func (c4c *Client4Center) UserLoseScore(userID uint32, money, lockMoney, preMone
 
 	c4c.sendMsg2Center(loseSettleMsg)
 	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-lose-%+v", userID, order), callback)
+}
+
+func (c4c *Client4Center) ChangeBankerStatus(userID uint32, status int, money, lockMoney, preMoney float64, order, roundID string, callback UserCallback) {
+	if !c4c.isServerLogin {
+		log.Debug("Game Server NOT Ready! Need login to Center Server!")
+		return
+	}
+
+	bankerMsg := BankerReq{
+		Event: constant.CEventChangeBankerStatus,
+		Data: BankerReqData{
+			Auth: ServerAuth{
+				//Token:  c4c.token,
+				DevName: conf.Server.DevName,
+				DevKey:  conf.Server.DevKey,
+			},
+
+			Info: BankerReqDataInfo{
+				UserID:     userID,
+				Status:     status,
+				CreateTime: uint32(time.Now().Unix()),
+				PayReason:  "奔驰宝马测试庄家状态",
+				Money:      money,
+				LockMoney:  lockMoney,
+				PreMoney:   preMoney,
+				Order:      order,
+				GameID:     conf.Server.GameID,
+				RoundID:    roundID,
+			},
+		},
+	}
+
+	c4c.sendMsg2Center(bankerMsg)
+	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-banker-status-%+v", userID, order), callback)
+}
+
+func (c4c *Client4Center) BankerWinScore(userID uint32, money, lockMoney, preMoney float64, order, roundID string, callback UserCallback) {
+	if !c4c.isServerLogin {
+		log.Debug("Game Server NOT Ready! Need login to Center Server!")
+		return
+	}
+
+	//log.Debug("UserWinScore c4c.Token- %+v", c4c.token)
+
+	winSettleMsg := SyncScoreReq{
+		Event: constant.CEventBankerWinScore,
+		Data: SyncScoreReqData{
+			Auth: ServerAuth{
+				//Token:  c4c.token,
+				DevName: conf.Server.DevName,
+				DevKey:  conf.Server.DevKey,
+			},
+
+			Info: SyncScoreReqDataInfo{
+				UserID:     userID,
+				CreateTime: uint32(time.Now().Unix()),
+				PayReason:  "奔驰宝马测试庄家赢钱",
+				Money:      money,
+				LockMoney:  lockMoney,
+				PreMoney:   preMoney,
+				Order:      order,
+				GameID:     conf.Server.GameID,
+				RoundID:    roundID,
+			},
+		},
+	}
+
+	c4c.sendMsg2Center(winSettleMsg)
+	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-banker-win-%+v", userID, order), callback)
+}
+
+func (c4c *Client4Center) BankerLoseScore(userID uint32, money, lockMoney, preMoney float64, order, roundID string, callback UserCallback) {
+	if !c4c.isServerLogin {
+		log.Debug("Game Server NOT Ready! Need login to Center Server!")
+		return
+	}
+
+	//log.Debug("UserLoseScore c4c.Token- %+v", c4c.token)
+
+	loseSettleMsg := SyncScoreReq{
+		Event: constant.CEventBankerLoseScore,
+		Data: SyncScoreReqData{
+			Auth: ServerAuth{
+				//Token:  c4c.token,
+				DevName: conf.Server.DevName,
+				DevKey:  conf.Server.DevKey,
+			},
+
+			Info: SyncScoreReqDataInfo{
+				UserID:     userID,
+				CreateTime: uint32(time.Now().Unix()),
+				PayReason:  "奔驰宝马测试庄家输钱",
+				Money:      money,
+				LockMoney:  lockMoney,
+				PreMoney:   preMoney,
+				Order:      order,
+				GameID:     conf.Server.GameID,
+				RoundID:    roundID,
+			},
+		},
+	}
+
+	c4c.sendMsg2Center(loseSettleMsg)
+	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-banker-lose-%+v", userID, order), callback)
 }
 
 // 向中心服发送消息的基础函数
