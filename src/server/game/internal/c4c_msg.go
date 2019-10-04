@@ -219,6 +219,24 @@ type BankerReqDataInfo struct {
 	RoundID    string  `json:"round_id"`
 }
 
+type BankerResp struct {
+	Event string         `json:"event"`
+	Data  BankerRespData `json:"data"`
+}
+
+type BankerRespData struct {
+	Code   int       `json:"code"`
+	Status string    `json:"status"`
+	Msg    BankerMsg `json:"msg"`
+}
+
+type BankerMsg struct {
+	ID            uint32  `json:"id"`
+	BankerBalance float64 `json:"banker_balance"`
+	Status        int     `json:"status"`
+	Reason        string  `json:"reason"`
+}
+
 /***************************************************
 
 	请求Token

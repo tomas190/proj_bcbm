@@ -18,6 +18,9 @@ func TestClient4Center_ServerLoginCenter(t *testing.T) {
 
 	// c.CronUpdateToken()
 
+	uuid := util.UUID{}
+	round := uuid.GenUUID()
+
 	for {
 		// 在没有收到服务器登陆成功返回之前不应该执行后续操作
 		userID := uint32(516499995)
@@ -28,7 +31,7 @@ func TestClient4Center_ServerLoginCenter(t *testing.T) {
 
 		time.Sleep(7 * time.Second)
 
-		c.UserLoseScore(userID, -5, 0, 0, "", "",
+		c.UserLoseScore(userID, -5, uuid.GenUUID(), round,
 			func(data *User) {
 				log.Debug("<----用户减钱回调---->%+v %+v %+v", data.Balance, data.NickName, data.Avatar)
 			})
@@ -57,13 +60,15 @@ func TestClient4Center_MinusMoney(t *testing.T) {
 	c.HeartBeatAndListen()
 	time.Sleep(1 * time.Second)
 
+	uuid := util.UUID{}
+	round := uuid.GenUUID()
 	c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", func(data *User) {
 		log.Debug("<----用户登录回调---->%+v %+v %+v", data.UserID, data.NickName, data.Balance)
 	})
 
 	time.Sleep(2 * time.Second)
 
-	c.UserLoseScore(userID, 1, -1000, 0, "", "",
+	c.UserLoseScore(userID, 0, uuid.GenUUID(), round,
 		func(data *User) {
 			log.Debug("<----用户减钱回调---->%+v %+v", data.UserID, data.Balance)
 		})
@@ -93,7 +98,7 @@ func TestClient4Center_AddMoney(t *testing.T) {
 
 		time.Sleep(1 * time.Second)
 
-		c.UserWinScore(userID, 20000, 0, 0, winOrder+"-add", round,
+		c.UserWinScore(userID, 20000, winOrder+"-add", round,
 			func(data *User) {
 				log.Debug("<----用户加钱回调---->%+v %+v", data.UserID, data.Balance)
 			})
@@ -120,16 +125,16 @@ func TestClient4Center_ChangeBankerStatus(t *testing.T) {
 	})
 
 	time.Sleep(1 * time.Second)
-
+	//
 	// 投注
-	c.UserLoseScore(userID, -100, 0, 0, uuid.GenUUID(), round, func(data *User) {
+	c.UserLoseScore(userID, -100, uuid.GenUUID(), round, func(data *User) {
 		fmt.Println("减钱完成")
 	})
 
 	time.Sleep(1 * time.Second)
 
 	// 申请上庄
-	c.ChangeBankerStatus(userID, constant.BSGrabbingBanker, 5000, 0, 0, uuid.GenUUID(), round, func(data *User) {
+	c.ChangeBankerStatus(userID, constant.BSGrabbingBanker, 5000, uuid.GenUUID(), round, func(data *User) {
 		fmt.Println("申请上庄")
 	})
 
@@ -152,7 +157,7 @@ func TestClient4Center_ChangeBankerStatus(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	// 下庄
-	c.ChangeBankerStatus(userID, constant.BSNotBanker, 5180, 0, 0, uuid.GenUUID(), round, func(data *User) {
+	c.ChangeBankerStatus(userID, constant.BSNotBanker, -5180, uuid.GenUUID(), round, func(data *User) {
 		fmt.Println("庄家下庄")
 	})
 
@@ -164,5 +169,4 @@ func TestClient4Center_ChangeBankerStatus(t *testing.T) {
 	})
 
 	time.Sleep(1 * time.Second)
-
 }

@@ -158,30 +158,26 @@ func (dl *Dealer) Settle() {
 			u := dl.Bankers[0].(User)
 			v, _ := dl.Users.Load(u.UserID)
 			up := v.(*User)
-			preBalance := up.Balance
+			preBankerBalance := up.BankerBalance
 			order := uuid.GenUUID()
 
 			if preBankerWin > 0 {
-				c4c.UserWinScore(u.UserID, preBankerWin, 0, 0, order+"-banker-win", dl.RoundID, func(data *User) {
+				c4c.BankerWinScore(u.UserID, preBankerWin, order+"-banker-win", dl.RoundID, func(data *User) {
 					up.BalanceLock.Lock()
 					up.Balance = data.Balance
 					up.BalanceLock.Unlock()
 
-					win, _ := decimal.NewFromFloat(data.Balance).Sub(decimal.NewFromFloat(preBalance)).Float64()
-
-					dl.bankerWin = win
-					dl.bankerMoney = dl.bankerMoney + dl.bankerWin
+					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
+					dl.bankerMoney = data.BankerBalance
 				})
 			} else {
-				c4c.UserLoseScore(u.UserID, preBankerWin, 0, 0, order+"-banker-lose", dl.RoundID, func(data *User) {
+				c4c.BankerLoseScore(u.UserID, preBankerWin, order+"-banker-lose", dl.RoundID, func(data *User) {
 					up.BalanceLock.Lock()
 					up.Balance = data.Balance
 					up.BalanceLock.Unlock()
 
-					win, _ := decimal.NewFromFloat(data.Balance).Sub(decimal.NewFromFloat(preBalance)).Float64()
-
-					dl.bankerWin = win
-					dl.bankerMoney = dl.bankerMoney + dl.bankerWin
+					dl.bankerWin, _ = decimal.NewFromFloat(data.Balance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
+					dl.bankerMoney = data.BankerBalance
 				})
 			}
 		}
@@ -231,7 +227,7 @@ func (dl *Dealer) playerSettle() {
 		var winFlag bool
 		if uWin > 0 {
 			winFlag = true
-			c4c.UserWinScore(user.UserID, uWin, 0, 0, order, dl.RoundID, func(data *User) {
+			c4c.UserWinScore(user.UserID, uWin, order, dl.RoundID, func(data *User) {
 				win, _ := decimal.NewFromFloat(data.Balance).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Sub(decimal.NewFromFloat(beforeBalance)).Float64()
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
@@ -292,25 +288,47 @@ func (dl *Dealer) ClearChip() {
 
 	// 庄家轮换
 	if dl.bankerRound >= constant.BankerMaxTimes || dl.bankerMoney < constant.BankerMinBar || dl.DownBanker == true {
+		// 加回玩家的钱
+		switch dl.Bankers[0].(type) {
+		case User:
+			uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
+			c4c.ChangeBankerStatus(uid, constant.BSNotBanker, dl.bankerMoney, func(data *User) {
+				log.Debug("<--- 玩家下庄 --->")
+			})
+
+			// todo 如果玩家不在线，登出
+			dl.Users.Range(func(key, value interface{}) bool {
+				return true
+			})
+		}
+
+		// 新庄家
 		if len(dl.Bankers) > 1 {
 			dl.Bankers = dl.Bankers[1:]
 			dl.bankerMoney = dl.Bankers[0].GetBankerBalance()
-		}
-
-		// 换一批机器人
-		dl.Bots = nil
-		dl.AddBots()
-
-		for _, b := range dl.Bots {
-			if b.botType == constant.BTNextBanker {
-				dl.Bankers = append(dl.Bankers, b)
+			switch dl.Bankers[0].(type) {
+			case User:
+				uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
+				c4c.ChangeBankerStatus(uid, constant.BSBeingBanker, 0, func(data *User) {
+					log.Debug("<--- 玩家上庄 --->")
+				})
 			}
-		}
 
-		bankerResp := converter.BBMsg(*dl)
-		dl.Broadcast(&bankerResp)
-		dl.bankerRound = 0
-		dl.DownBanker = false
+			// 换一批机器人
+			dl.Bots = nil
+			dl.AddBots()
+
+			for _, b := range dl.Bots {
+				if b.botType == constant.BTNextBanker {
+					dl.Bankers = append(dl.Bankers, b)
+				}
+			}
+
+			bankerResp := converter.BBMsg(*dl)
+			dl.Broadcast(&bankerResp)
+			dl.bankerRound = 0
+			dl.DownBanker = false
+		}
 	}
 
 	// 下一阶段

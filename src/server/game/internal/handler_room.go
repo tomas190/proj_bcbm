@@ -59,7 +59,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		delay := rd.RandInRange(0, 100)
 		time.Sleep(time.Millisecond * time.Duration(delay))
 		ca.Set(fmt.Sprintf("%+v-bet", au.UserID), order, cache.DefaultExpiration)
-		c4c.UserLoseScore(au.UserID, -cs, 0, 0, order, "", func(data *User) {
+		c4c.UserLoseScore(au.UserID, -cs, order, "", func(data *User) {
 			// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
 			au.BalanceLock.Lock()
 			au.Balance = data.Balance
@@ -129,7 +129,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 
 	uuid := util.UUID{}
 	order := uuid.GenUUID()
-	c4c.UserLoseScore(au.UserID, -csSum, 0, 0, order, dl.RoundID, func(data *User) {
+	c4c.UserLoseScore(au.UserID, -csSum, order, dl.RoundID, func(data *User) {
 		// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
 		au.Balance = data.Balance
 
@@ -165,32 +165,13 @@ func (dl *Dealer) handlePlayers(args []interface{}) {
 func (dl *Dealer) handleGrabBanker(args []interface{}) {
 	m := args[0].(*msg.GrabBanker)
 	a := args[1].(gate.Agent)
-
 	au := a.UserData().(*User)
+
+	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
 	// 取消上庄申请
 	if m.LockMoney == constant.CancelGrab {
-		for _, b := range dl.Bankers {
-			banker := b
-			userID, _, _, _ := banker.GetPlayerBasic()
-			if userID == au.UserID {
-				curBanker := dl.Bankers[0]
-				dl.Bankers = []Player{}
-				dl.Bankers = append(dl.Bankers, curBanker)
-				nextB := dl.NextBotBanker()
-				dl.Bankers = append(dl.Bankers, nextB)
-				dl.Bots = append(dl.Bots, &nextB)
-			}
-		}
-
-		resp := &msg.BankersB{
-			Banker:     dl.getBankerInfoResp(),
-			ServerTime: uint32(time.Now().Unix()),
-		}
-
-		log.Debug("<--- 庄家列表更新 --->")
-		dl.Broadcast(resp)
-
+		dl.cancelGrabBanker(au.UserID)
 		return
 	}
 
@@ -199,8 +180,6 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		dl.DownBanker = true
 		return
 	}
-
-	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
 	if m.LockMoney < constant.BankerMinBar || m.LockMoney > au.Balance {
 		errorResp(a, msg.ErrorCode_InsufficientBalanceGrabBanker, "上庄金币不足")
@@ -214,37 +193,34 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 	dl.Bankers = []Player{}
 	dl.Bankers = append(dl.Bankers, curBanker)
 
-	// 如果玩家不在列表中，将玩家排在最前面
-	flag := false
+	// 如果玩家已经在列表中，直接返回
 	for _, b := range dl.Bankers {
 		uID, _, _, _ := b.GetPlayerBasic()
 		if uID == au.UserID {
-			flag = true
+			return
 		}
 	}
 
-	bUser := User{
-		UserID:        au.UserID,
-		Balance:       au.Balance,
-		BankerBalance: m.LockMoney,
-		Avatar:        au.Avatar,
-		NickName:      au.NickName,
-	}
+	// 上庄
+	c4c.ChangeBankerStatus(au.UserID, constant.BSGrabbingBanker, m.LockMoney, func(data *User) {
+		bUser := User{
+			UserID:        au.UserID,
+			Balance:       au.Balance,
+			BankerBalance: m.LockMoney,
+			Avatar:        au.Avatar,
+			NickName:      au.NickName,
+		}
 
-	if flag == false {
 		dl.Bankers = append(dl.Bankers, bUser)
-	} else {
-		// errorResp(a, msg.ErrorCode, "已经在上庄队列")
-		return
-	}
 
-	resp := &msg.BankersB{
-		Banker:     dl.getBankerInfoResp(),
-		ServerTime: uint32(time.Now().Unix()),
-	}
+		resp := &msg.BankersB{
+			Banker:     dl.getBankerInfoResp(),
+			ServerTime: uint32(time.Now().Unix()),
+		}
 
-	log.Debug("<--- 庄家列表更新 --->")
-	dl.Broadcast(resp)
+		log.Debug("<--- 庄家列表更新 --->")
+		dl.Broadcast(resp)
+	})
 }
 
 func (dl *Dealer) handleLeaveRoom(args []interface{}) {
@@ -280,6 +256,29 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 	}
 
 	a.WriteMsg(resp)
+}
+
+func (dl *Dealer) cancelGrabBanker(userID uint32) {
+	for _, b := range dl.Bankers {
+		banker := b
+		userID, _, _, _ := banker.GetPlayerBasic()
+		if userID == userID {
+			curBanker := dl.Bankers[0]
+			dl.Bankers = []Player{}
+			dl.Bankers = append(dl.Bankers, curBanker)
+			nextB := dl.NextBotBanker()
+			dl.Bankers = append(dl.Bankers, nextB)
+			dl.Bots = append(dl.Bots, &nextB)
+		}
+	}
+
+	resp := &msg.BankersB{
+		Banker:     dl.getBankerInfoResp(),
+		ServerTime: uint32(time.Now().Unix()),
+	}
+
+	log.Debug("<--- 庄家列表更新 --->")
+	dl.Broadcast(resp)
 }
 
 // 玩家列表
