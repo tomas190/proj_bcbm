@@ -143,14 +143,14 @@ func TestClient4Center_ChangeBankerStatus(t *testing.T) {
 	// 坐庄
 
 	// 庄家输
-	c.BankerLoseScore(userID, -200, 0, 0, uuid.GenUUID(), round, func(data *User) {
+	c.BankerLoseScore(userID, -200, uuid.GenUUID(), round, func(data *User) {
 		fmt.Println("庄家输")
 	})
 
 	time.Sleep(1 * time.Second)
 
 	// 庄家赢
-	c.BankerWinScore(userID, 400, 0, 0, uuid.GenUUID(), round, func(data *User) {
+	c.BankerWinScore(userID, 400, uuid.GenUUID(), round, func(data *User) {
 		fmt.Println("庄家赢")
 	})
 
@@ -169,4 +169,44 @@ func TestClient4Center_ChangeBankerStatus(t *testing.T) {
 	})
 
 	time.Sleep(1 * time.Second)
+}
+
+// 还原所有玩家的上庄钱
+func TestClient4Center_ChangeBankerStatus2(t *testing.T) {
+	c := NewClient4Center()
+	// c.ReqToken()
+	c.HeartBeatAndListen()
+	time.Sleep(1 * time.Second)
+
+	uuid := util.UUID{}
+	round := uuid.GenUUID()
+	var userIDs = []uint32{194989239, 735835433, 990684188, 909098851, 612303604,
+		100148012, 139366987, 303586538, 828606651, 984968541,
+		678653255, 617222183, 415824137, 251735891, 243271456}
+	//var userIDs = []uint32{828606651}
+
+	tempBalance := 0.0
+	for _, userID := range userIDs {
+		// 登录检查余额
+		// 下庄
+		c.ChangeBankerStatus(userID, constant.BSBeingBanker, 1, uuid.GenUUID(), round, func(data *User) {
+			if data.BankerBalance != 0 {
+				tempBalance = data.BankerBalance
+				fmt.Println(tempBalance)
+			}
+			fmt.Println("庄家下庄")
+		})
+
+		time.Sleep(500 * time.Millisecond)
+
+		if tempBalance != 0 {
+			c.ChangeBankerStatus(userID, constant.BSNotBanker, -tempBalance-1, uuid.GenUUID(), round, func(data *User) {
+				fmt.Println("玩家数据已恢复")
+			})
+		}
+
+		time.Sleep(500 * time.Millisecond)
+
+		tempBalance = 0.0
+	}
 }

@@ -27,16 +27,17 @@ func (c *DTOConverter) U2Msg(p Player) msg.UserInfo {
 }
 
 func (c *DTOConverter) Banker2Msg(p Player) msg.UserInfo {
-	id, name, _, _ := p.GetPlayerBasic()
-	score := p.GetBankerBalance()
+	id, name, _, money := p.GetPlayerBasic()
+	bankerMoney := p.GetBankerBalance()
 	win, bet := p.GetPlayerAccount()
 	uMsg := msg.UserInfo{
-		UserID:    id,
-		NickName:  name,
-		Avatar:    "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png",
-		Money:     score,
-		WinCount:  win,
-		BetAmount: bet,
+		UserID:      id,
+		NickName:    name,
+		Avatar:      "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png",
+		Money:       money,
+		BankerMoney: bankerMoney,
+		WinCount:    win,
+		BetAmount:   bet,
 	}
 
 	return uMsg

@@ -10,8 +10,9 @@ import (
 // 根据盈余池开奖
 func (dl *Dealer) profitPoolLottery() uint32 {
 	// 盈余池 随机从10%到50%取一个值，算出一个预计赔付数
-	randomUtil := util.Random{}
-	profitPoolRatePercent := randomUtil.RandInRange(constant.ProfitPoolMinPercent, constant.ProfitPoolMaxPercent)
+	//randomUtil := util.Random{}
+	//profitPoolRatePercent := randomUtil.RandInRange(constant.ProfitPoolMinPercent, constant.ProfitPoolMaxPercent)
+	profitPoolRatePercent := 50
 	profitPoolRate := float64(profitPoolRatePercent) / 100.0
 	acceptableMaxLose := dl.profitPool() * profitPoolRate
 
@@ -85,5 +86,5 @@ func (dl *Dealer) profitPool() float64 {
 	// 需要数据库
 
 	pp := db.RProfitPool()
-	return pp.AllWin - pp.AllLost*(1+constant.HouseEdge) - float64(pp.PlayerNum*constant.GiftAmount)
+	return pp.PlayerAllLost - pp.PlayerAllWin*(1+constant.HouseEdge) - float64(pp.PlayerNum*constant.GiftAmount)
 }

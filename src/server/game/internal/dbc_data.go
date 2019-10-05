@@ -19,10 +19,13 @@ type UserDB struct {
 }
 
 type ProfitDB struct {
-	UpdateTime    time.Time `bson:"UpdateTime"`
-	UpdateTimeStr string    `bson:"UpdateTimeStr"`
-	AllWin        float64   `bson:"AllWin"`
-	AllLost       float64   `bson:"AllLost"`
-	Profit        float64   `bson:"Profit"`
-	PlayerNum     uint32    `bson:"PlayerNum"`
+	UpdateTime     time.Time `bson:"UpdateTime"`
+	UpdateTimeStr  string    `bson:"UpdateTimeStr"`
+	RoomID         uint32    `bson:"RoomID"`
+	PlayerThisWin  float64   `bson:"PlayerThisWin"`
+	PlayerThisLost float64   `bson:"PlayerThisLost"`
+	PlayerAllWin   float64   `bson:"PlayerAllWin"`
+	PlayerAllLost  float64   `bson:"PlayerAllLost"`
+	Profit         float64   `bson:"Profit"`
+	PlayerNum      uint32    `bson:"PlayerNum"`
 }

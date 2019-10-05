@@ -233,6 +233,7 @@ type BankerRespData struct {
 type BankerMsg struct {
 	ID            uint32  `json:"id"`
 	BankerBalance float64 `json:"banker_balance"`
+	Balance       float64 `json:"balance"`
 	Status        int     `json:"status"`
 	Reason        string  `json:"reason"`
 }

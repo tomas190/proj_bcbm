@@ -157,7 +157,7 @@ func (m *MgoC) RProfitPool() ProfitDB {
 	return lastProfit
 }
 
-func (m *MgoC) UProfitPool(lose, win float64) error {
+func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	collection := m.Database(constant.DBName).Collection("profits")
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
@@ -176,12 +176,15 @@ func (m *MgoC) UProfitPool(lose, win float64) error {
 	if err != nil {
 		log.Debug("未查找到盈余池数据 %+v", err)
 		var newProfit = ProfitDB{
-			UpdateTime:    time.Now(),
-			UpdateTimeStr: "",
-			AllWin:        win,
-			AllLost:       lose,
-			Profit:        lose - win,
-			PlayerNum:     uint32(userCount),
+			UpdateTime:     time.Now(),
+			UpdateTimeStr:  now.Format("2006-01-02T15:04:05"),
+			PlayerThisWin:  win,
+			PlayerThisLost: lose,
+			PlayerAllWin:   win,
+			PlayerAllLost:  lose,
+			RoomID:         rid,
+			Profit:         lose - win,
+			PlayerNum:      uint32(userCount),
 		}
 		res, err := collection.InsertOne(ctx, newProfit)
 		if err != nil {
@@ -191,18 +194,21 @@ func (m *MgoC) UProfitPool(lose, win float64) error {
 		log.Debug("插入第一条盈余数据 %+v", res)
 	}
 
-	newLost := lastProfit.AllLost + win
-	newWin := lastProfit.AllWin + lose
+	newLost := lastProfit.PlayerAllLost + lose
+	newWin := lastProfit.PlayerAllWin + win
 	newCount := userCount
-	newProfit := newWin - newLost
+	newProfit := newLost - newWin
 
 	newRecord := ProfitDB{
-		UpdateTime:    time.Now(),
-		UpdateTimeStr: now.Format("2006-01-02T15:04:05"),
-		AllWin:        newWin,
-		AllLost:       newLost,
-		Profit:        newProfit,
-		PlayerNum:     uint32(newCount),
+		UpdateTime:     time.Now(),
+		UpdateTimeStr:  now.Format("2006-01-02T15:04:05"),
+		PlayerThisLost: lose,
+		PlayerThisWin:  win,
+		PlayerAllWin:   newWin,
+		PlayerAllLost:  newLost,
+		Profit:         newProfit,
+		RoomID:         rid,
+		PlayerNum:      uint32(newCount),
 	}
 
 	res, err := collection.InsertOne(ctx, newRecord)

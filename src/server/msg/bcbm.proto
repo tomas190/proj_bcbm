@@ -67,6 +67,8 @@ message UserInfo {
     string NickName = 4;
     uint32 WinCount = 6; // 近20局获胜局数
     double BetAmount = 5; // 近20局下注金额
+    double BankerMoney = 7;
+
 }
 
 // 房间信息

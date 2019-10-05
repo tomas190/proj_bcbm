@@ -156,29 +156,36 @@ func (dl *Dealer) Settle() {
 	case User:
 		{
 			u := dl.Bankers[0].(User)
-			v, _ := dl.Users.Load(u.UserID)
-			up := v.(*User)
-			preBankerBalance := up.BankerBalance
+			// fixme 如果用户退出房间会崩溃, 因为房间用户记录中找不到用户
+			//v, _ := dl.Users.Load(u.UserID)
+			//up := v.(*User)
+			preBankerBalance := dl.bankerMoney
 			order := uuid.GenUUID()
 
 			if preBankerWin > 0 {
 				c4c.BankerWinScore(u.UserID, preBankerWin, order+"-banker-win", dl.RoundID, func(data *User) {
-					up.BalanceLock.Lock()
-					up.Balance = data.Balance
-					up.BalanceLock.Unlock()
+					//up.BalanceLock.Lock()
+					//up.Balance = data.Balance
+					//up.BalanceLock.Unlock()
 
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					dl.bankerMoney = data.BankerBalance
 				})
 			} else {
 				c4c.BankerLoseScore(u.UserID, preBankerWin, order+"-banker-lose", dl.RoundID, func(data *User) {
-					up.BalanceLock.Lock()
-					up.Balance = data.Balance
-					up.BalanceLock.Unlock()
+					//up.BalanceLock.Lock()
+					//up.Balance = data.Balance
+					//up.BalanceLock.Unlock()
 
 					dl.bankerWin, _ = decimal.NewFromFloat(data.Balance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					dl.bankerMoney = data.BankerBalance
 				})
+			}
+
+			// 玩家坐庄
+			err := db.UProfitPool(0, dl.bankerWin, dl.RoomID)
+			if err != nil {
+				log.Debug("更新盈余池失败 %+v", err)
 			}
 		}
 	default:
@@ -251,7 +258,7 @@ func (dl *Dealer) playerSettle() {
 				log.Debug("保存用户结算数据错误 %+v", err)
 			}
 
-			err = db.UProfitPool(uBet, uWin)
+			err = db.UProfitPool(uBet, uWin, dl.RoomID)
 			if err != nil {
 				log.Debug("更新盈余池失败 %+v", err)
 			}
@@ -274,6 +281,7 @@ func (dl *Dealer) ClearChip() {
 	dl.ClearData()
 
 	converter := DTOConverter{}
+	uuid := util.UUID{}
 
 	resp := converter.RSBMsg(0, 0, 0, *dl)
 	dl.Broadcast(&resp)
@@ -292,7 +300,7 @@ func (dl *Dealer) ClearChip() {
 		switch dl.Bankers[0].(type) {
 		case User:
 			uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
-			c4c.ChangeBankerStatus(uid, constant.BSNotBanker, dl.bankerMoney, func(data *User) {
+			c4c.ChangeBankerStatus(uid, constant.BSNotBanker, -dl.bankerMoney, fmt.Sprintf("%+v-notBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
 				log.Debug("<--- 玩家下庄 --->")
 			})
 
@@ -309,7 +317,8 @@ func (dl *Dealer) ClearChip() {
 			switch dl.Bankers[0].(type) {
 			case User:
 				uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
-				c4c.ChangeBankerStatus(uid, constant.BSBeingBanker, 0, func(data *User) {
+				c4c.ChangeBankerStatus(uid, constant.BSBeingBanker, 0, fmt.Sprintf("%+v-beBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
+					dl.bankerMoney = data.BankerBalance
 					log.Debug("<--- 玩家上庄 --->")
 				})
 			}

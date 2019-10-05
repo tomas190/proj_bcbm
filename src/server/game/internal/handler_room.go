@@ -201,12 +201,13 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		}
 	}
 
+	uuid := util.UUID{}
 	// 上庄
-	c4c.ChangeBankerStatus(au.UserID, constant.BSGrabbingBanker, m.LockMoney, func(data *User) {
+	c4c.ChangeBankerStatus(au.UserID, constant.BSGrabbingBanker, m.LockMoney, fmt.Sprintf("%+v-grabBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
 		bUser := User{
 			UserID:        au.UserID,
-			Balance:       au.Balance,
-			BankerBalance: m.LockMoney,
+			Balance:       data.Balance,
+			BankerBalance: data.BankerBalance,
 			Avatar:        au.Avatar,
 			NickName:      au.NickName,
 		}
@@ -220,6 +221,16 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 
 		log.Debug("<--- 庄家列表更新 --->")
 		dl.Broadcast(resp)
+
+		// 更新房间玩家列表中的玩家余额
+		dl.Users.Range(func(key, value interface{}) bool {
+			if key == au.UserID {
+				u := value.(*User)
+				u.BankerBalance = data.BankerBalance
+				u.Balance = data.Balance
+			}
+			return true
+		})
 	})
 }
 
@@ -261,24 +272,40 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 func (dl *Dealer) cancelGrabBanker(userID uint32) {
 	for _, b := range dl.Bankers {
 		banker := b
-		userID, _, _, _ := banker.GetPlayerBasic()
-		if userID == userID {
+		uID, _, _, _ := banker.GetPlayerBasic()
+		bankerBalance := banker.GetBankerBalance()
+		if userID == uID {
 			curBanker := dl.Bankers[0]
 			dl.Bankers = []Player{}
 			dl.Bankers = append(dl.Bankers, curBanker)
 			nextB := dl.NextBotBanker()
 			dl.Bankers = append(dl.Bankers, nextB)
 			dl.Bots = append(dl.Bots, &nextB)
+
+			uuid := util.UUID{}
+			// 玩家取消申请上庄
+			c4c.ChangeBankerStatus(userID, constant.BSNotBanker, -bankerBalance, fmt.Sprintf("%+v-cancelBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
+				// 更新房间玩家列表中的玩家余额
+				dl.Users.Range(func(key, value interface{}) bool {
+					if key == uID {
+						u := value.(*User)
+						u.BankerBalance = data.BankerBalance
+						u.Balance = data.Balance
+					}
+					return true
+				})
+				log.Debug("<---玩家取消申请上庄--->")
+
+				resp := &msg.BankersB{
+					Banker:     dl.getBankerInfoResp(),
+					ServerTime: uint32(time.Now().Unix()),
+				}
+
+				log.Debug("<--- 庄家列表更新 --->")
+				dl.Broadcast(resp)
+			})
 		}
 	}
-
-	resp := &msg.BankersB{
-		Banker:     dl.getBankerInfoResp(),
-		ServerTime: uint32(time.Now().Unix()),
-	}
-
-	log.Debug("<--- 庄家列表更新 --->")
-	dl.Broadcast(resp)
 }
 
 // 玩家列表
