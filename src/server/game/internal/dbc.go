@@ -42,9 +42,6 @@ func (m *MgoC) Init() error {
 		return err
 	}
 
-	u := UserDB{UserID: 100000001}
-	err = m.CUserInfo(u)
-
 	log.Debug("数据库连接成功...")
 	return nil
 }

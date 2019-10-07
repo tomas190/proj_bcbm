@@ -186,27 +186,58 @@ func TestClient4Center_ChangeBankerStatus2(t *testing.T) {
 	//var userIDs = []uint32{828606651}
 
 	tempBalance := 0.0
+	status := 0
 	for _, userID := range userIDs {
 		// 登录检查余额
 		// 下庄
-		c.ChangeBankerStatus(userID, constant.BSBeingBanker, 1, uuid.GenUUID(), round, func(data *User) {
-			if data.BankerBalance != 0 {
-				tempBalance = data.BankerBalance
-				fmt.Println(tempBalance)
-			}
-			fmt.Println("庄家下庄")
+		//c.ChangeBankerStatus(userID, constant.BSBeingBanker, 1, uuid.GenUUID(), round, func(data *User) {
+		//	if data.BankerBalance != 0 {
+		//		tempBalance = data.BankerBalance
+		//		fmt.Println(tempBalance)
+		//	}
+		//	fmt.Println("庄家下庄")
+		//})
+		//
+		//time.Sleep(500 * time.Millisecond)
+		//
+		//if tempBalance != 0 {
+		//	fmt.Println("********************************", tempBalance)
+		//	c.ChangeBankerStatus(userID, constant.BSNotBanker, -tempBalance-1, uuid.GenUUID(), round, func(data *User) {
+		//		fmt.Println("玩家数据已恢复")
+		//	})
+		//}
+		//
+		//time.Sleep(500 * time.Millisecond)
+		//
+		//tempBalance = 0.0
+		c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", func(data *User) {
+			tempBalance = data.BankerBalance
+			status = data.Status
+			fmt.Println("************************", tempBalance, data.Status)
 		})
 
 		time.Sleep(500 * time.Millisecond)
 
-		if tempBalance != 0 {
-			c.ChangeBankerStatus(userID, constant.BSNotBanker, -tempBalance-1, uuid.GenUUID(), round, func(data *User) {
-				fmt.Println("玩家数据已恢复")
+		if status != 0 {
+			c.ChangeBankerStatus(userID, constant.BSNotBanker, -tempBalance, uuid.GenUUID(), round, func(data *User) {
+				fmt.Println("玩家数据已恢复", data.UserID, data.Status)
 			})
 		}
 
 		time.Sleep(500 * time.Millisecond)
 
-		tempBalance = 0.0
+		c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", func(data *User) {
+			tempBalance = data.BankerBalance
+			status = data.Status
+			fmt.Println("************************", tempBalance, data.Status)
+		})
+
+		time.Sleep(500 * time.Millisecond)
+
+		c.UserLogoutCenter(userID, func(data *User) {
+			fmt.Println("玩家登出", data.UserID)
+		})
+
+		time.Sleep(500 * time.Millisecond)
 	}
 }

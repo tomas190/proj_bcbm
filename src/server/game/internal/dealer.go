@@ -286,14 +286,6 @@ func (dl *Dealer) ClearChip() {
 	resp := converter.RSBMsg(0, 0, 0, *dl)
 	dl.Broadcast(&resp)
 
-	// 玩家金币总数不足上庄金币数 移除金币不足的列表中玩家
-	for i, b := range dl.Bankers {
-		banker := b
-		if banker.GetBalance() < banker.GetBankerBalance() && i != 0 {
-			dl.Bankers = append(dl.Bankers[:i], dl.Bankers[i+1:]...)
-		}
-	}
-
 	// 庄家轮换
 	if dl.bankerRound >= constant.BankerMaxTimes || dl.bankerMoney < constant.BankerMinBar || dl.DownBanker == true {
 		// 加回玩家的钱
@@ -322,22 +314,23 @@ func (dl *Dealer) ClearChip() {
 					log.Debug("<--- 玩家上庄 --->")
 				})
 			}
-
-			// 换一批机器人
-			dl.Bots = nil
-			dl.AddBots()
-
-			for _, b := range dl.Bots {
-				if b.botType == constant.BTNextBanker {
-					dl.Bankers = append(dl.Bankers, b)
-				}
-			}
-
-			bankerResp := converter.BBMsg(*dl)
-			dl.Broadcast(&bankerResp)
-			dl.bankerRound = 0
-			dl.DownBanker = false
 		}
+
+		// 换一批机器人
+		dl.Bots = nil
+		dl.AddBots()
+
+		for _, b := range dl.Bots {
+			if b.botType == constant.BTNextBanker {
+				dl.Bankers = append(dl.Bankers, b)
+			}
+		}
+
+		bankerResp := converter.BBMsg(*dl)
+
+		dl.Broadcast(&bankerResp)
+		dl.bankerRound = 0
+		dl.DownBanker = false
 	}
 
 	// 下一阶段

@@ -199,10 +199,12 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-login", gameUser.UserID)); ok {
 			loginCallBack.(UserCallback)(&User{
-				UserID:   gameUser.UserID,
-				NickName: gameUser.GameNick,
-				Avatar:   gameUser.GameIMG,
-				Balance:  gameAccount.Balance,
+				UserID:        gameUser.UserID,
+				NickName:      gameUser.GameNick,
+				Avatar:        gameUser.GameIMG,
+				Balance:       gameAccount.Balance,
+				BankerBalance: gameAccount.BankerBalance,
+				Status:        gameAccount.Status,
 			})
 
 			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-login", gameUser.UserID))

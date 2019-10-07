@@ -12,6 +12,7 @@ type User struct {
 	BalanceLock   sync.RWMutex // 锁
 	BankerBalance float64      // 上庄金额
 	UserID        uint32       // 用户id
+	Status        int          // 上庄状态
 	NickName      string       // 用户昵称
 	Avatar        string       // 用户头像
 	ConnAgent     gate.Agent   // 网络连接代理
