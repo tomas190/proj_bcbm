@@ -11,7 +11,7 @@ const (
 // 时间间隔
 const (
 	BetTime    = 16 //16
-	SettleTime = 24 //24
+	SettleTime = 25 //24
 	ClearTime  = 3
 )
 

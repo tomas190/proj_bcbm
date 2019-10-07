@@ -233,10 +233,12 @@ func (c4c *Client4Center) onUserLogout(msg []byte) {
 
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-logout", gameUser.UserID)); ok {
 			loginCallBack.(UserCallback)(&User{
-				UserID:   gameUser.UserID,
-				NickName: gameUser.GameNick,
-				Avatar:   gameUser.GameIMG,
-				Balance:  gameAccount.Balance,
+				UserID:        gameUser.UserID,
+				NickName:      gameUser.GameNick,
+				Avatar:        gameUser.GameIMG,
+				Balance:       gameAccount.Balance,
+				BankerBalance: gameAccount.BankerBalance,
+				Status:        gameAccount.Status,
 			})
 
 			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-logout", gameUser.UserID))
@@ -328,7 +330,7 @@ func (c4c *Client4Center) onBankerLoseScore(msg []byte) {
 	if syncData.Code == constant.CRespStatusSuccess {
 
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-banker-lose-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
-			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, BankerBalance: syncData.Msg.BankerBalance})
+			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, BankerBalance: syncData.Msg.FinalBankerBalance})
 			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-banker-lose-%+v", syncData.Msg.ID, syncData.Msg.Order))
 			// log.Debug("用户回调已删除: %+v 回调队列 %+v", fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order), c4c.userWaitEvent)
 		} else {
@@ -351,7 +353,7 @@ func (c4c *Client4Center) onBankerWinScore(msg []byte) {
 	if syncData.Code == constant.CRespStatusSuccess {
 
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-banker-win-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
-			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, BankerBalance: syncData.Msg.BankerBalance})
+			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, BankerBalance: syncData.Msg.FinalBankerBalance})
 			// 回调成功之后要删除
 			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-banker-win-%+v", syncData.Msg.ID, syncData.Msg.Order))
 			// log.Debug("用户回调已删除: %+v, 回调队列 %+v", fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order), c4c.userWaitEvent)

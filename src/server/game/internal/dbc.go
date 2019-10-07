@@ -88,14 +88,6 @@ func (m *MgoC) RUserCount() (int64, error) {
 	return count, nil
 }
 
-func (m *MgoC) UUserInfo() {
-
-}
-
-func (m *MgoC) DUserInfo() {
-
-}
-
 func (m *MgoC) CUserSettle(bet interface{}) error {
 	collection := m.Database(constant.DBName).Collection("settles")
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
@@ -194,7 +186,7 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	newLost := lastProfit.PlayerAllLost + lose
 	newWin := lastProfit.PlayerAllWin + win
 	newCount := userCount
-	newProfit := newLost - newWin
+	newProfit := newLost - newWin*(1.0+constant.HouseEdge) - float64(userCount)*constant.GiftAmount
 
 	newRecord := ProfitDB{
 		UpdateTime:     time.Now(),

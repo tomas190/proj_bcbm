@@ -86,5 +86,5 @@ func (dl *Dealer) profitPool() float64 {
 	// 需要数据库
 
 	pp := db.RProfitPool()
-	return pp.PlayerAllLost - pp.PlayerAllWin*(1+constant.HouseEdge) - float64(pp.PlayerNum*constant.GiftAmount)
+	return pp.Profit
 }

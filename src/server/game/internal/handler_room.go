@@ -297,7 +297,11 @@ func (dl *Dealer) cancelGrabBanker(userID uint32) {
 				log.Debug("<---玩家取消申请上庄--->")
 
 				resp := &msg.BankersB{
-					Banker:     dl.getBankerInfoResp(),
+					Banker: dl.getBankerInfoResp(),
+					UpdateBanker: &msg.UserInfo{
+						Money:  data.Balance,
+						UserID: data.UserID,
+					},
 					ServerTime: uint32(time.Now().Unix()),
 				}
 

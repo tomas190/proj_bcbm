@@ -182,13 +182,14 @@ type SyncScoreRespData struct {
 }
 
 type SyncScoreMsg struct {
-	ID            uint32  `json:"id"`
-	Balance       float64 `json:"balance"`
-	FinalBalance  float64 `json:"final_balance"`
-	BankerBalance float64 `json:"banker_balance"`
-	Income        float64 `json:"income"`
-	Order         string  `json:"order"`
-	RoundID       string  `json:"round_id"`
+	ID                 uint32  `json:"id"`
+	Balance            float64 `json:"balance"`
+	FinalBalance       float64 `json:"final_balance"`
+	BankerBalance      float64 `json:"banker_balance"`
+	FinalBankerBalance float64 `json:"final_banker_balance"`
+	Income             float64 `json:"income"`
+	Order              string  `json:"order"`
+	RoundID            string  `json:"round_id"`
 }
 
 /***************************************************

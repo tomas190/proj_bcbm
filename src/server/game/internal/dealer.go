@@ -17,7 +17,6 @@ import (
 // Mgr <--> Dealer <--> C2C
 //            ^
 //            |
-//
 //           Bots
 
 type Dealer struct {
@@ -164,29 +163,29 @@ func (dl *Dealer) Settle() {
 
 			if preBankerWin > 0 {
 				c4c.BankerWinScore(u.UserID, preBankerWin, order+"-banker-win", dl.RoundID, func(data *User) {
-					//up.BalanceLock.Lock()
-					//up.Balance = data.Balance
-					//up.BalanceLock.Unlock()
-
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					dl.bankerMoney = data.BankerBalance
+
+					// 玩家坐庄盈余池更新
+					err := db.UProfitPool(0, dl.bankerWin, dl.RoomID)
+					if err != nil {
+						log.Debug("更新盈余池失败 %+v", err)
+					}
 				})
 			} else {
 				c4c.BankerLoseScore(u.UserID, preBankerWin, order+"-banker-lose", dl.RoundID, func(data *User) {
-					//up.BalanceLock.Lock()
-					//up.Balance = data.Balance
-					//up.BalanceLock.Unlock()
-
-					dl.bankerWin, _ = decimal.NewFromFloat(data.Balance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
+					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					dl.bankerMoney = data.BankerBalance
+
+					// 玩家坐庄盈余池更新
+					err := db.UProfitPool(0, dl.bankerWin, dl.RoomID)
+					if err != nil {
+						log.Debug("更新盈余池失败 %+v", err)
+					}
 				})
 			}
 
-			// 玩家坐庄
-			err := db.UProfitPool(0, dl.bankerWin, dl.RoomID)
-			if err != nil {
-				log.Debug("更新盈余池失败 %+v", err)
-			}
+			time.Sleep(200 * time.Millisecond)
 		}
 	default:
 		{
@@ -199,8 +198,6 @@ func (dl *Dealer) Settle() {
 			}
 		}
 	}
-
-	time.Sleep(500 * time.Millisecond)
 
 	// log.Debug("settle... %+v", dl.RoomID)
 	dl.playerSettle()
@@ -294,6 +291,16 @@ func (dl *Dealer) ClearChip() {
 			uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
 			c4c.ChangeBankerStatus(uid, constant.BSNotBanker, -dl.bankerMoney, fmt.Sprintf("%+v-notBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
 				log.Debug("<--- 玩家下庄 --->")
+				bankerResp := msg.BankersB{
+					Banker: dl.getBankerInfoResp(),
+					UpdateBanker: &msg.UserInfo{
+						UserID: data.UserID,
+						Money:  data.Balance,
+					},
+					ServerTime: uint32(time.Now().Unix()),
+				}
+
+				dl.Broadcast(&bankerResp)
 			})
 
 			// todo 如果玩家不在线，登出
@@ -326,7 +333,10 @@ func (dl *Dealer) ClearChip() {
 			}
 		}
 
-		bankerResp := converter.BBMsg(*dl)
+		bankerResp := msg.BankersB{
+			Banker:     dl.getBankerInfoResp(),
+			ServerTime: uint32(time.Now().Unix()),
+		}
 
 		dl.Broadcast(&bankerResp)
 		dl.bankerRound = 0

@@ -169,7 +169,8 @@ message BetInfoB {
 // 庄家广播，数组第一个为当前庄家，若变化，则为庄家轮换
 message BankersB {
     repeated UserInfo Banker = 1; // 庄家列表，0为当前庄家，其余为上庄列表
-    uint32 ServerTime = 2;        // 服务器时间
+    UserInfo UpdateBanker = 2;    // 补充数据
+    uint32 ServerTime = 3;        // 服务器时间
 }
 
 // 玩家列表请求

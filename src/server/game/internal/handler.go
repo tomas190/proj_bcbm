@@ -112,6 +112,10 @@ func handleLogin(args []interface{}) {
 				if errC != nil {
 					log.Debug("玩家信息保存错误 %+v", errC)
 				}
+				errP := db.UProfitPool(0, 0, 0)
+				if errP != nil {
+					log.Debug("玩家首次登录盈余池更新错误 %+v", errP)
+				}
 			}
 
 			Mgr.UserRecord.Store(u.UserID, u)
