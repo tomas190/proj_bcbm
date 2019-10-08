@@ -32,8 +32,8 @@
 ## 套件支持
 
 ```bazaar
-golang
-mongodb
+golang version go1.13 
+mongodb 建议版本 4.0
 ```
 
 ## 配置文件
