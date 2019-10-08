@@ -83,7 +83,7 @@ proj_bcbm/bin/bcbm.log
 git clone http://joel:20190506@git.0717996.com/Joel/proj_bcbm.git
 ```
 
-- cd 切换目录
+- cd 切换到工作目录
 
 ```
 cd proj_bcbm
@@ -105,7 +105,7 @@ sh run.sh
 - check 检查启动提示
 
 ```
-tail -f proj_bcbm/bin/bcbm.log
+tail -f bin/bcbm.log
 ```
 
 - 正确启动参考
