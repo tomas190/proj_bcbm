@@ -78,27 +78,37 @@ proj_bcbm/bin/bcbm.log
 ## 部署流程
 
 - clone 代码到对应目录（地址可能不同）
+
 ```
 git clone http://joel:20190506@git.0717996.com/Joel/proj_bcbm.git
 ```
 
-- build
+- cd 切换目录
 
-```bazaar
+```
+cd proj_bcbm
+```
+
+
+- build 编译
+
+```
 sh build.sh
 ```
 
-- run
+- run 启动
 
-```bazaar
+```
 sh run.sh
 ```
 
-- 检查启动提示
+- check 检查启动提示
 
-```bazaar
+```
 tail -f proj_bcbm/bin/nohup.out
 ```
+
+- 正确启动参考
 
 ```
 2019/09/11 16:33:09 [debug  ] 读取配置文件 conf/server.json...
