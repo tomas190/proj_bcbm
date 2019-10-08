@@ -1,27 +1,109 @@
-# 奔驰宝马游戏简介
+# 奔驰宝马游戏部署
 
-奔驰宝马是一款规则简单、快节奏的押分竞猜游戏，由于游戏中竞猜的对象是奔驰或宝马这类名车，顾而得名奔驰宝马。
+## 文件目录
 
-## 游戏类别：押注游戏
+```bazaar
+├─bin
+│  ├─conf
+│  ├─gamedata
+│  └─log
+├─pkg
+│  └─mod
+│      └─cache
+└─src
+    ├─client
+    │  ├─common
+    │  └─test
+    └─server
+        ├─base
+        ├─conf
+        ├─constant
+        ├─game
+        │  └─internal
+        ├─gamedata
+        ├─gate
+        │  └─internal
+        ├─login
+        │  └─internal
+        ├─msg
+        └─util
+```
 
-## 游戏规则
+## 套件支持
 
-1、奔驰宝马游戏中共有8个下注区域分别为： 大奔驰、小奔驰、大宝马、小宝马、大法拉利、小法拉利、大大众、小大众。
-不同的下注区域的赔率不同。
+```bazaar
+golang
+mongodb
+```
 
-大法拉利赔率40倍、大宝马赔率30倍、大奔驰赔率20、大大众赔率10、其他小车型的赔率都为5倍。
+## 配置文件
 
-2、玩家在进入奔驰宝马游戏后可以选择是否上庄，当有一名玩家选择成为庄家以后，其他玩家将可以根据自己的判断进行下注。玩家在对应的跑车身上压分，押注的跑车正确，就可以获得游戏中该跑车显示对应倍数。玩家选择“上庄”将会获得更多收益。
+### 位置 
 
-3、游戏中玩家下注的金额包括： 1、10、100、500、1000，玩家可根据自身所持金币情况下注。
+```proj_bcbm/bin/conf/server.json```
 
-## 游戏开发
-### 大厅
+### 内容
 
-- 进入游戏后有6个场次供选择，显示每个场次的
-- 当前状态：结算中、下注中等等
-- 历史记录：当前房间中的 40 个历史开奖结果
+```bazaar
+{
+	"LogLevel": "debug",
+	"LogPath": "",
+	"WSAddr": "0.0.0.0:1220",
+	"MaxConnNum": 20000,
 
-### 房间内
-- 开奖
-- 结算 加钱减钱
+	"TokenServer":"http://172.16.100.2:9502/Token/getToken",
+	"CenterServer": "http://172.16.100.2:9502",
+	"CenterServerPort": "9502",
+	"DevKey": "new_game_17",
+	"DevName": "新游戏开发",
+	"GameID": "5b1f3a3cb76a591e7f251716",
+	"MongoDB": "mongodb://bcbm:123456@172.16.100.5:27017"
+}
+
+```
+- ```TokenServer CenterServer CenterServerPort``` 中心服配置
+- ```DevKey DevName GameID``` 游戏配置
+- ```MongoDB``` MongoDB地址（包含用户名和密码）
+
+## 日志
+
+### 位置
+
+```proj_bcbm/bin/nohup.out```
+
+## 部署流程
+
+- clone 代码到对应目录（地址可能不同）
+```bazaar
+git clone http://joel:20190506@git.0717996.com/Joel/proj_bcbm.git
+```
+
+- build
+
+```bazaar
+sh build.sh
+```
+
+- run
+
+```bazaar
+sh run.sh
+```
+
+- 检查启动提示
+
+```bazaar
+tail -f proj_bcbm/bin/nohup.out
+```
+
+```
+2019/09/11 16:33:09 [debug  ] 读取配置文件 conf/server.json...
+2019/09/11 16:33:09 [release] Leaf 1.1.3 starting up
+2019/09/11 16:33:09 [debug  ] 连接中心服 ws://swoole.0717996.com
+2019/09/11 16:33:09 [debug  ] 请求Token http://swoole.0717996.com/Token/getToken?dev_key=new_game_17&dev_name=%E6%96%B0%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91
+2019/09/11 16:33:10 [debug  ] Msg to center {"event":"/GameServer/Login/login","data":{"host":"http://swoole.0717996.com","port":"9502","game_id":"5b1f3a3cb76a591e7f251716","token":"3e8324cbd454a7327702b21f66921d7d31f8550d","dev_key":"new_game_17"}}
+2019/09/11 16:33:10 [debug  ] 数据库客户端 mongodb://10.63.90.53:27917 创建成功...
+2019/09/11 16:33:10 [debug  ] 数据库连接成功...
+2019/09/11 16:33:10 [debug  ] Msg from center {"event":"\/GameServer\/Login\/login","data":{"status":"SUCCESS","code":200,"msg":{"platform_tax_percent":6}}}
+2019/09/11 16:33:10 [debug  ] 服务器登陆 SUCCESS 税率 %6 ...
+```
