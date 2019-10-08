@@ -72,7 +72,7 @@ proj_bcbm/bin/conf/server.json
 ### 位置
 
 ```
-proj_bcbm/bin/nohup.out
+proj_bcbm/bin/bcbm.log
 ```
 
 ## 部署流程
