@@ -40,11 +40,13 @@ mongodb
 
 ### 位置 
 
-```proj_bcbm/bin/conf/server.json```
+```
+proj_bcbm/bin/conf/server.json
+```
 
 ### 内容
 
-```bazaar
+```
 {
 	"LogLevel": "debug",
 	"LogPath": "",
@@ -69,12 +71,14 @@ mongodb
 
 ### 位置
 
-```proj_bcbm/bin/nohup.out```
+```
+proj_bcbm/bin/nohup.out
+```
 
 ## 部署流程
 
 - clone 代码到对应目录（地址可能不同）
-```bazaar
+```
 git clone http://joel:20190506@git.0717996.com/Joel/proj_bcbm.git
 ```
 
