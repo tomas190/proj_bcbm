@@ -105,7 +105,7 @@ sh run.sh
 - check 检查启动提示
 
 ```
-tail -f proj_bcbm/bin/nohup.out
+tail -f proj_bcbm/bin/bcbm.log
 ```
 
 - 正确启动参考
