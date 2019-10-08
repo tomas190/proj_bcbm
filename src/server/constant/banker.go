@@ -2,7 +2,7 @@ package constant
 
 // 庄家配置
 const (
-	BankerMinBar   = 50000
+	BankerMinBar   = 5000
 	BankerMaxTimes = 5
 	CancelGrab     = -1 // 取消申请上庄
 	DownBanker     = -2 // 申请下庄
