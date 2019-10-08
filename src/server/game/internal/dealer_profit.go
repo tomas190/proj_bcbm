@@ -12,7 +12,7 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 	// 盈余池 随机从10%到50%取一个值，算出一个预计赔付数
 	//randomUtil := util.Random{}
 	//profitPoolRatePercent := randomUtil.RandInRange(constant.ProfitPoolMinPercent, constant.ProfitPoolMaxPercent)
-	profitPoolRatePercent := 50
+	profitPoolRatePercent := constant.ProfitPoolMaxPercent
 	profitPoolRate := float64(profitPoolRatePercent) / 100.0
 	acceptableMaxLose := dl.profitPool() * profitPoolRate
 
