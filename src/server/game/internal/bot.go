@@ -30,15 +30,15 @@ func (dl *Dealer) BotsBet() {
 		area := uint32(rand.Intn(8) + 1)
 		var chip uint32
 
-		prob := ru.RandInRange(0, 10)
+		prob := ru.RandInRange(0, 100)
 
-		if prob >= 0 && prob <= 5 {
+		if prob >= 0 && prob <= 50 {
 			chip = 1
-		} else if prob > 5 && prob <= 7 {
+		} else if prob > 50 && prob <= 70 {
 			chip = 2
-		} else if prob > 7 && prob <= 8 {
+		} else if prob > 70 && prob <= 80 {
 			chip = 3
-		} else if prob > 8 && prob < 10 {
+		} else if prob > 80 && prob < 95 {
 			chip = 4
 		} else {
 			chip = 5
