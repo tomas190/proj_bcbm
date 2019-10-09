@@ -375,9 +375,12 @@ func (dl *Dealer) sumAreaExcept(area uint32) float64 {
 
 func (dl *Dealer) getBankerInfoResp() []*msg.UserInfo {
 	var bankerInfoResp []*msg.UserInfo
-	for _, b := range dl.Bankers {
+	for i, b := range dl.Bankers {
 		converter := DTOConverter{}
 		buInfo := converter.Banker2Msg(b)
+		if i == 0 {
+			buInfo.BankerMoney = dl.bankerMoney
+		}
 		bankerInfoResp = append(bankerInfoResp, &buInfo)
 	}
 
