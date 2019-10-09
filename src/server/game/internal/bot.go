@@ -23,35 +23,15 @@ func (dl *Dealer) AddBots() {
 // 机器人下注，随机下注后把结果赋值到下注结果列表中
 func (dl *Dealer) BotsBet() {
 	ru := util.Random{}
-	chipCount := ru.RandInRange(100, 150)
+	chipCount := ru.RandInRange(50, 70)
 	time.Sleep(time.Second * 1)
+	counter := 0
 	for i := 0; i < chipCount; i++ {
-		time.Sleep(time.Millisecond * time.Duration(rand.Intn(150)))
+		counter++
+		delay := (50 - counter) * (50 - counter)
+		time.Sleep(time.Millisecond * time.Duration(rand.Intn(delay)))
 
-		var chip uint32
-		var area uint32
-
-		areaProb := ru.RandInRange(0, 100)
-		if areaProb >= 0 && areaProb <= 90 {
-			area = uint32(ru.RandInRange(4, 8) + 1)
-		} else {
-			area = uint32(ru.RandInRange(0, 4) + 1)
-		}
-
-		chipProb := ru.RandInRange(0, 100)
-
-		if chipProb >= 0 && chipProb <= 50 {
-			chip = 1
-		} else if chipProb > 50 && chipProb <= 70 {
-			chip = 2
-		} else if chipProb > 70 && chipProb <= 80 {
-			chip = 3
-		} else if chipProb > 80 && chipProb < 95 {
-			chip = 4
-		} else {
-			chip = 5
-		}
-
+		chip, area := dl.randBet()
 		cs := constant.ChipSize[chip]
 
 		// 限红
@@ -71,6 +51,36 @@ func (dl *Dealer) BotsBet() {
 
 		dl.Broadcast(resp)
 	}
+}
+
+func (dl *Dealer) randBet() (uint32, uint32) {
+	var chip uint32
+	var area uint32
+
+	ru := util.Random{}
+
+	areaProb := ru.RandInRange(0, 100)
+	if areaProb >= 0 && areaProb <= 90 {
+		area = uint32(ru.RandInRange(4, 8) + 1)
+	} else {
+		area = uint32(ru.RandInRange(0, 4) + 1)
+	}
+
+	chipProb := ru.RandInRange(0, 100)
+
+	if chipProb >= 0 && chipProb <= 50 {
+		chip = 1
+	} else if chipProb > 50 && chipProb <= 70 {
+		chip = 2
+	} else if chipProb > 70 && chipProb <= 80 {
+		chip = 3
+	} else if chipProb > 80 && chipProb < 95 {
+		chip = 4
+	} else {
+		chip = 5
+	}
+
+	return chip, area
 }
 
 func (dl *Dealer) BetGod() Bot {
