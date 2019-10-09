@@ -27,18 +27,26 @@ func (dl *Dealer) BotsBet() {
 	time.Sleep(time.Second * 1)
 	for i := 0; i < chipCount; i++ {
 		time.Sleep(time.Millisecond * time.Duration(rand.Intn(150)))
-		area := uint32(rand.Intn(8) + 1)
+
 		var chip uint32
+		var area uint32
 
-		prob := ru.RandInRange(0, 100)
+		areaProb := ru.RandInRange(0, 100)
+		if areaProb >= 0 && areaProb <= 90 {
+			area = uint32(ru.RandInRange(4, 8) + 1)
+		} else {
+			area = uint32(ru.RandInRange(0, 4) + 1)
+		}
 
-		if prob >= 0 && prob <= 50 {
+		chipProb := ru.RandInRange(0, 100)
+
+		if chipProb >= 0 && chipProb <= 50 {
 			chip = 1
-		} else if prob > 50 && prob <= 70 {
+		} else if chipProb > 50 && chipProb <= 70 {
 			chip = 2
-		} else if prob > 70 && prob <= 80 {
+		} else if chipProb > 70 && chipProb <= 80 {
 			chip = 3
-		} else if prob > 80 && prob < 95 {
+		} else if chipProb > 80 && chipProb < 95 {
 			chip = 4
 		} else {
 			chip = 5
@@ -48,7 +56,7 @@ func (dl *Dealer) BotsBet() {
 
 		// 限红
 		if dl.roomBonusLimit(area) < cs || dl.dynamicBonusLimit(area) < cs {
-			return
+			continue
 		}
 		// 区域所有玩家投注总数
 		dl.AreaBets[area] = dl.AreaBets[area] + cs

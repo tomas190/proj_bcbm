@@ -178,7 +178,7 @@ func (dl *Dealer) Settle() {
 					dl.bankerMoney = data.BankerBalance
 
 					// 玩家坐庄盈余池更新
-					err := db.UProfitPool(0, dl.bankerWin, dl.RoomID)
+					err := db.UProfitPool(-dl.bankerWin, 0, dl.RoomID)
 					if err != nil {
 						log.Debug("更新盈余池失败 %+v", err)
 					}
