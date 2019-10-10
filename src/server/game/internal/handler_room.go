@@ -186,12 +186,21 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		return
 	}
 
-	// 当前庄家不变，其他机器人清空
-	curBanker := dl.Bankers[0]
+	var newBankers []Player
+	newBankers = append(newBankers, dl.Bankers[0])
 
-	// 清理机器人 fixme 只清理机器人
-	dl.Bankers = []Player{}
-	dl.Bankers = append(dl.Bankers, curBanker)
+	//fixme 只清理机器人 不清理真实玩家
+	for i := range dl.Bankers {
+		if i != 0 {
+			switch dl.Bankers[i].(type) {
+			case User:
+				newBankers = append(newBankers, dl.Bankers[i])
+			default:
+			}
+		}
+	}
+
+	dl.Bankers = newBankers
 
 	// 如果玩家已经在列表中，直接返回
 	for _, b := range dl.Bankers {
