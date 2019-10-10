@@ -279,17 +279,19 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 }
 
 func (dl *Dealer) cancelGrabBanker(userID uint32) {
-	for _, b := range dl.Bankers {
+	for i, b := range dl.Bankers {
 		banker := b
 		uID, _, _, _ := banker.GetPlayerBasic()
 		bankerBalance := banker.GetBankerBalance()
 		if userID == uID {
-			curBanker := dl.Bankers[0]
-			dl.Bankers = []Player{}
-			dl.Bankers = append(dl.Bankers, curBanker)
-			nextB := dl.NextBotBanker()
-			dl.Bankers = append(dl.Bankers, nextB)
-			dl.Bots = append(dl.Bots, &nextB)
+			// 移除玩家
+			dl.Bankers = append(dl.Bankers[:i], dl.Bankers[i+1:]...)
+
+			if len(dl.Bankers) < 2 {
+				nextB := dl.NextBotBanker()
+				dl.Bankers = append(dl.Bankers, nextB)
+				dl.Bots = append(dl.Bots, &nextB)
+			}
 
 			uuid := util.UUID{}
 			// 玩家取消申请上庄

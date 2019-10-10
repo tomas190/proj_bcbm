@@ -23,12 +23,12 @@ func (dl *Dealer) AddBots() {
 // 机器人下注，随机下注后把结果赋值到下注结果列表中
 func (dl *Dealer) BotsBet() {
 	ru := util.Random{}
-	chipCount := ru.RandInRange(60, 70)
+	chipCount := ru.RandInRange(55, 65)
 	time.Sleep(time.Second * 1)
 	counter := 0
 	for i := 0; i < chipCount; i++ {
 		counter++
-		delay := (32 - counter) * (32 - counter)
+		delay := (30 - counter/2) * (30 - counter/2)
 		time.Sleep(time.Millisecond * time.Duration(rand.Intn(delay+5)))
 
 		chip, area := dl.randBet()

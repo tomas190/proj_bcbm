@@ -248,7 +248,7 @@ func (dl *Dealer) playerSettle() {
 
 		// 玩家结算记录
 		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
-		if uBet > 0 {
+		if uBet > 0 && uWin >= 0 {
 			sdb := daoC.Settle2DB(*user, order, dl.RoundID, winFlag, uBet, uWin)
 			err := db.CUserSettle(sdb)
 			if err != nil {
@@ -303,10 +303,12 @@ func (dl *Dealer) ClearChip() {
 				dl.Broadcast(&bankerResp)
 			})
 
-			// todo 如果玩家不在线，登出
-			dl.Users.Range(func(key, value interface{}) bool {
-				return true
-			})
+			// 如果玩家不在线，登出
+			if _, ok := dl.Users.Load(uid); !ok {
+				c4c.UserLogoutCenter(uid, func(data *User) {
+					log.Debug("庄家已不在游戏中，下庄后自动登出 %+v", uid)
+				})
+			}
 		}
 
 		// 新庄家
@@ -317,8 +319,10 @@ func (dl *Dealer) ClearChip() {
 			case User:
 				uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
 				c4c.ChangeBankerStatus(uid, constant.BSBeingBanker, 0, fmt.Sprintf("%+v-beBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
-					dl.bankerMoney = data.BankerBalance
-					log.Debug("<--- 玩家上庄 --->")
+					dec := util.Math{}
+					var ok bool
+					dl.bankerMoney, ok = dec.AddFloat64(data.BankerBalance, 0.0).Float64()
+					log.Debug("<--- 玩家上庄，精度 %+v--->", ok)
 				})
 			}
 		}
