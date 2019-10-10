@@ -93,6 +93,7 @@ func (c *DTOConverter) RSBMsg(userWin float64, autoBetAmount, userBalance float6
 		AutoBetAmount: autoBetAmount, // 若不可续投则为0
 		PlayerMoney:   userBalance,
 		ServerTime:    uint32(time.Now().Unix()),
+		Position:      dl.pos,
 	}
 
 	return bMsg

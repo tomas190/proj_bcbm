@@ -154,6 +154,7 @@ message RoomStatusB {
     double PlayerMoney = 9;            // 玩家金币更新 总金币
     double AutoBetAmount = 8;          // 续投金额，若为0则置灰
     uint32 ServerTime = 10;             // 服务器时间
+    uint32 Position = 11;               // 位置 1-4
 }
 
 // 下注信息广播

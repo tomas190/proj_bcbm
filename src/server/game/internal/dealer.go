@@ -32,6 +32,7 @@ type Dealer struct {
 	RoundID string     // 轮次
 	Status  uint32     // 房间状态
 	res     uint32     // 最新开奖结果
+	pos     uint32     // 开奖位置
 	History []uint32   // 房间开奖历史
 	HRChan  chan HRMsg // 房间大厅通信
 
@@ -132,6 +133,9 @@ func (dl *Dealer) Bet() {
 func (dl *Dealer) Settle() {
 	res := dl.profitPoolLottery()
 	dl.res = res
+
+	ru := util.Random{}
+	dl.pos = uint32(ru.RandInRange(1, 5))
 
 	dl.Status = constant.RSSettle
 	dl.ddl = uint32(time.Now().Unix()) + con.SettleTime
