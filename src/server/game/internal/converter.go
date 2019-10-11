@@ -74,7 +74,7 @@ func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
 		EndTime:    dl.ddl,
 		ServerTime: uint32(time.Now().Unix()),
 		Status:     m.RoomStatus,
-		Counter:    0, // fixme
+		// Counter:    0,
 		Statistics: stat,
 	}
 
@@ -83,8 +83,8 @@ func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
 
 func (c *DTOConverter) RSBMsg(userWin float64, autoBetAmount, userBalance float64, dl Dealer) msg.RoomStatusB {
 	bMsg := msg.RoomStatusB{
-		Status:        dl.Status,
-		Counter:       0, // fixme
+		Status: dl.Status,
+		// Counter:       0,
 		EndTime:       dl.ddl,
 		Result:        dl.res,
 		BankerWin:     dl.bankerWin,

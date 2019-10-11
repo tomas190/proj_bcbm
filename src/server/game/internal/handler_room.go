@@ -189,7 +189,7 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 	var newBankers []Player
 	newBankers = append(newBankers, dl.Bankers[0])
 
-	//fixme 只清理机器人 不清理真实玩家
+	//只清理机器人 不清理真实玩家
 	for i := range dl.Bankers {
 		if i != 0 {
 			switch dl.Bankers[i].(type) {

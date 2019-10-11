@@ -159,9 +159,6 @@ func (dl *Dealer) Settle() {
 	case User:
 		{
 			u := dl.Bankers[0].(User)
-			// fixme 如果用户退出房间会崩溃, 因为房间用户记录中找不到用户
-			//v, _ := dl.Users.Load(u.UserID)
-			//up := v.(*User)
 			preBankerBalance := dl.bankerMoney
 			order := uuid.GenUUID()
 
