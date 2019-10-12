@@ -306,9 +306,6 @@ func (dl *Dealer) ClearChip() {
 
 			// 如果玩家不在线，登出
 			_, ok := dl.Users.Load(uid)
-			fmt.Println("****************************")
-			fmt.Println("玩家游戏状态", ok)
-			fmt.Println("****************************")
 			if !ok {
 				c4c.UserLogoutCenter(uid, func(data *User) {
 					log.Debug("庄家已不在游戏中，下庄后自动登出 %+v", uid)

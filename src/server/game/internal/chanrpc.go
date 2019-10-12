@@ -32,6 +32,10 @@ func rpcCloseAgent(args []interface{}) {
 		ca.Delete(fmt.Sprintf("%+v-winCount", au.UserID))
 
 		Mgr.UserRecord.Delete(au.UserID)
+		rid := Mgr.UserRoom[au.UserID]
+		v, _ := Mgr.RoomRecord.Load(rid)
+		dl := v.(*Dealer)
+		dl.Users.Delete(au.UserID)
 		c4c.UserLogoutCenter(au.UserID, func(data *User) {
 			Mgr.UserRecord.Delete(au.UserID)
 			resp := &msg.LogoutR{}
