@@ -209,6 +209,9 @@ func (dl *Dealer) Settle() {
 		_, ok := dl.Users.Load(userID)
 		if ok {
 			dl.Users.Delete(userID)
+			c4c.UserLogoutCenter(userID, func(data *User) {
+				log.Debug("投注后离开房间的玩家已登出")
+			})
 		}
 	}
 

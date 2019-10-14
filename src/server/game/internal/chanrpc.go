@@ -5,6 +5,7 @@ import (
 	"github.com/name5566/leaf/gate"
 	"github.com/name5566/leaf/log"
 	"proj_bcbm/src/server/msg"
+	"proj_bcbm/src/server/util"
 )
 
 func init() {
@@ -31,11 +32,22 @@ func rpcCloseAgent(args []interface{}) {
 		ca.Delete(fmt.Sprintf("%+v-betAmount", au.UserID))
 		ca.Delete(fmt.Sprintf("%+v-winCount", au.UserID))
 
-		Mgr.UserRecord.Delete(au.UserID)
 		rid := Mgr.UserRoom[au.UserID]
 		v, _ := Mgr.RoomRecord.Load(rid)
 		dl := v.(*Dealer)
-		dl.Users.Delete(au.UserID)
+
+		math := util.Math{}
+		uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64()
+		if uBets == 0 {
+			dl.Users.Delete(au.UserID)
+		} else {
+			dl.UserLeave = append(dl.UserLeave, au.UserID)
+		}
+
+		dl.AutoBetRecord[au.UserID] = nil
+		ca.Delete(fmt.Sprintf("%+v-betAmount", au.UserID))
+		ca.Delete(fmt.Sprintf("%+v-winCount", au.UserID))
+
 		c4c.UserLogoutCenter(au.UserID, func(data *User) {
 			Mgr.UserRecord.Delete(au.UserID)
 			resp := &msg.LogoutR{}
