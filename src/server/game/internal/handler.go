@@ -85,10 +85,10 @@ func handleLogin(args []interface{}) {
 		a.WriteMsg(resp)
 	} else if !Mgr.agentExist(a) { // 正常大多数情况
 		var token string
-		if m.Password == "" {
-			token = m.Token
-		} else if m.Token == "" {
+		if m.Token == "" {
 			token = m.Password
+		} else {
+			token = m.Token
 		}
 		c4c.UserLoginCenter(userID, token, func(u *User) {
 			resp := &msg.LoginR{
