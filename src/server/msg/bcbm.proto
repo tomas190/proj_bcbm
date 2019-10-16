@@ -88,6 +88,7 @@ message RoomInfo {
 message Login {
     uint32 UserID = 1;
     string Password = 2;
+    string Token = 3;
 }
 
 message LoginR {

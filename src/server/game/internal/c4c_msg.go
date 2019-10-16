@@ -54,6 +54,7 @@ type UserLoginReq struct {
 type UserLoginReqData struct {
 	UserID   uint32 `json:"id"`
 	Password string `json:"password"`
+	Token    string `json:"token"`
 	DevName  string `json:"dev_name"`
 	GameID   string `json:"game_id"`
 	DevKey   string `json:"dev_key"`

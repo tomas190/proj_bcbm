@@ -84,7 +84,7 @@ func handleLogin(args []interface{}) {
 		log.Debug("<----login 登录 resp---->%+v %+v", resp.User.UserID)
 		a.WriteMsg(resp)
 	} else if !Mgr.agentExist(a) { // 正常大多数情况
-		c4c.UserLoginCenter(userID, m.Password, func(u *User) {
+		c4c.UserLoginCenter(userID, m.Password, m.Token, func(u *User) {
 			resp := &msg.LoginR{
 				User: &msg.UserInfo{
 					UserID: u.UserID,

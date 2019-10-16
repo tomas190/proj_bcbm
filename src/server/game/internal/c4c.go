@@ -418,7 +418,7 @@ func (c4c *Client4Center) heartBeat() {
 // 操作用户数据一定要等中心服确认消息返回之后再进行展示或其他操作
 
 // UserLoginCenter 用户登录
-func (c4c *Client4Center) UserLoginCenter(userID uint32, password string, callback UserCallback) {
+func (c4c *Client4Center) UserLoginCenter(userID uint32, password, token string, callback UserCallback) {
 	if !c4c.isServerLogin {
 		log.Debug("Game Server NOT Ready! Need login to Center Server!")
 		return
@@ -431,6 +431,7 @@ func (c4c *Client4Center) UserLoginCenter(userID uint32, password string, callba
 		Data: UserLoginReqData{
 			UserID:   userID,
 			Password: password,
+			Token:    token,
 			DevName:  conf.Server.DevName,
 			GameID:   conf.Server.GameID,
 			DevKey:   conf.Server.DevKey,
