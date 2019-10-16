@@ -34,17 +34,20 @@ func rpcCloseAgent(args []interface{}) {
 
 		rid := Mgr.UserRoom[au.UserID]
 		v, _ := Mgr.RoomRecord.Load(rid)
-		dl := v.(*Dealer)
 
-		math := util.Math{}
-		uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64()
-		if uBets == 0 {
-			dl.Users.Delete(au.UserID)
-		} else {
-			dl.UserLeave = append(dl.UserLeave, au.UserID)
+		if v != nil {
+			dl := v.(*Dealer)
+			math := util.Math{}
+			uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64()
+			if uBets == 0 {
+				dl.Users.Delete(au.UserID)
+			} else {
+				dl.UserLeave = append(dl.UserLeave, au.UserID)
+			}
+
+			dl.AutoBetRecord[au.UserID] = nil
 		}
 
-		dl.AutoBetRecord[au.UserID] = nil
 		ca.Delete(fmt.Sprintf("%+v-betAmount", au.UserID))
 		ca.Delete(fmt.Sprintf("%+v-winCount", au.UserID))
 
