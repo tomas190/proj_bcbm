@@ -10,14 +10,13 @@ import (
 type DTOConverter struct{}
 
 func (c *DTOConverter) U2Msg(p Player) msg.UserInfo {
-	// id, name, img, score := p.GetPlayerBasic()
-	id, name, _, score := p.GetPlayerBasic()
+	id, name, img, score := p.GetPlayerBasic()
 
 	win, bet := p.GetPlayerAccount()
 	uMsg := msg.UserInfo{
 		UserID:    id,
 		NickName:  name,
-		Avatar:    "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png",
+		Avatar:    img,
 		Money:     score,
 		WinCount:  win,
 		BetAmount: bet,
@@ -27,13 +26,13 @@ func (c *DTOConverter) U2Msg(p Player) msg.UserInfo {
 }
 
 func (c *DTOConverter) Banker2Msg(p Player) msg.UserInfo {
-	id, name, _, money := p.GetPlayerBasic()
+	id, name, img, money := p.GetPlayerBasic()
 	bankerMoney := p.GetBankerBalance()
 	win, bet := p.GetPlayerAccount()
 	uMsg := msg.UserInfo{
 		UserID:      id,
 		NickName:    name,
-		Avatar:      "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png",
+		Avatar:      img,
 		Money:       money,
 		BankerMoney: bankerMoney,
 		WinCount:    win,

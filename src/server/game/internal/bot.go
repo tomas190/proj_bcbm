@@ -88,13 +88,13 @@ func (dl *Dealer) BetGod() Bot {
 	WinCount := uint32(r.RandInRange(4, 5))                                                   // 获胜局数
 	BetAmount := float64(r.RandInRange(800, 5000))                                            // 下注金额
 	Balance := float64(20000+r.RandInRange(0, 20000)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
-	UserID := uint32(1000000 + r.RandInRange(0, 2000000))                                     // 用户ID
-	Avatar := "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png"
+	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                                 // 用户ID
+	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
 
 	betGod := Bot{
-		UserID:    UserID,
-		NickName:  "betGod",
-		Avatar:    Avatar,
+		UserID: UserID,
+		// NickName:  "betGod",
+		Avatar:    avatar,
 		Balance:   Balance,
 		WinCount:  WinCount,
 		BetAmount: BetAmount,
@@ -109,13 +109,13 @@ func (dl *Dealer) RichMan() Bot {
 	WinCount := uint32(r.RandInRange(0, 3))                                                   // 获胜局数
 	BetAmount := float64(r.RandInRange(800, 5000))                                            // 下注金额
 	Balance := float64(20000+r.RandInRange(0, 20000)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
-	UserID := uint32(1000000 + r.RandInRange(0, 2000000))                                     // 用户ID
-	Avatar := "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png"
+	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                                 // 用户ID
+	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
 
 	richMan := Bot{
-		UserID:    UserID,
-		NickName:  "richMan",
-		Avatar:    Avatar,
+		UserID: UserID,
+		// NickName:  "richMan",
+		Avatar:    avatar,
 		Balance:   Balance,
 		WinCount:  WinCount,
 		BetAmount: BetAmount,
@@ -130,13 +130,13 @@ func (dl *Dealer) NextBotBanker() Bot {
 	WinCount := uint32(r.RandInRange(0, 3))                                                   // 获胜局数
 	BetAmount := float64(r.RandInRange(800, 5000))                                            // 下注金额
 	Balance := float64(50000+r.RandInRange(0, 20000)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
-	UserID := uint32(1000000 + r.RandInRange(0, 2000000))                                     // 用户ID
-	Avatar := "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png"
+	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                                 // 用户ID
+	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
 
 	nextBanker := Bot{
-		UserID:    UserID,
-		NickName:  "nextBanker" + fmt.Sprintf("%+v", UserID)[:2],
-		Avatar:    Avatar,
+		UserID: UserID,
+		// NickName:  "nextBanker" + fmt.Sprintf("%+v", UserID)[:2],
+		Avatar:    avatar,
 		Balance:   Balance,
 		WinCount:  WinCount,
 		BetAmount: BetAmount,

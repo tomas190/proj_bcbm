@@ -265,9 +265,8 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 
 	resp := &msg.LeaveRoomR{
 		User: &msg.UserInfo{
-			UserID: au.UserID,
-			// Avatar:   au.Avatar,
-			Avatar:   "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png",
+			UserID:   au.UserID,
+			Avatar:   au.Avatar,
 			NickName: au.NickName,
 			Money:    au.Balance,
 		},

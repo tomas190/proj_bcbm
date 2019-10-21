@@ -68,9 +68,8 @@ func handleLogin(args []interface{}) {
 
 		resp := &msg.LoginR{
 			User: &msg.UserInfo{
-				UserID: u.UserID,
-				// Avatar:   u.Avatar,
-				Avatar:   "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png",
+				UserID:   u.UserID,
+				Avatar:   u.Avatar,
 				Money:    u.Balance,
 				NickName: u.NickName,
 			},
@@ -84,18 +83,17 @@ func handleLogin(args []interface{}) {
 		log.Debug("<----login 登录 resp---->%+v %+v", resp.User.UserID)
 		a.WriteMsg(resp)
 	} else if !Mgr.agentExist(a) { // 正常大多数情况
-		var token string
-		if m.Token == "" {
-			token = m.Password
-		} else {
-			token = m.Token
-		}
-		c4c.UserLoginCenter(userID, token, func(u *User) {
+		//var token string
+		//if m.Token == "" {
+		//	token = m.Password
+		//} else {
+		//	token = m.Token
+		//}
+		c4c.UserLoginCenter(userID, m.Password, m.Token, func(u *User) {
 			resp := &msg.LoginR{
 				User: &msg.UserInfo{
-					UserID: u.UserID,
-					// Avatar:   u.Avatar,
-					Avatar:   "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png",
+					UserID:   u.UserID,
+					Avatar:   u.Avatar,
 					NickName: u.NickName,
 					Money:    u.Balance,
 				},
@@ -106,8 +104,6 @@ func handleLogin(args []interface{}) {
 
 			// 重新绑定信息
 			u.ConnAgent = a
-			// fixme
-			u.Avatar = "https://cdn1.iconfinder.com/data/icons/avatars-1-5/136/81-512.png"
 			a.SetUserData(u)
 
 			err := db.RUserInfo(u.UserID)
