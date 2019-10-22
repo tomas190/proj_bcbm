@@ -25,6 +25,7 @@ var Server struct {
 	DevName          string
 	GameID           string
 	MongoDB          string
+	LogServer        string
 }
 
 func init() {

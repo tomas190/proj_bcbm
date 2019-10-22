@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/name5566/leaf/gate"
-	"github.com/name5566/leaf/log"
+	log "github.com/name5566/leaf/log"
 	"github.com/patrickmn/go-cache"
 )
 

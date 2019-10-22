@@ -2,19 +2,24 @@ package main
 
 import (
 	"github.com/name5566/leaf"
-	lconf "github.com/name5566/leaf/conf"
+	leafConf "github.com/name5566/leaf/conf"
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/game"
 	"proj_bcbm/src/server/gate"
+	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/login"
 )
 
 func main() {
-	lconf.LogLevel = conf.Server.LogLevel
-	lconf.LogPath = conf.Server.LogPath
-	lconf.LogFlag = conf.LogFlag
-	lconf.ConsolePort = conf.Server.ConsolePort
-	lconf.ProfilePath = conf.Server.ProfilePath
+	logger, err := log.New(conf.Server.LogLevel, conf.Server.LogPath, conf.LogFlag, conf.Server.LogServer)
+	if err != nil {
+		panic(err)
+	}
+	log.Export(logger)
+	defer logger.Close()
+
+	leafConf.ConsolePort = conf.Server.ConsolePort
+	leafConf.ProfilePath = conf.Server.ProfilePath
 
 	leaf.Run(
 		game.Module,

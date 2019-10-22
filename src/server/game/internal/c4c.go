@@ -10,7 +10,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/name5566/leaf/log"
+	//"github.com/name5566/leaf/log"
+	"proj_bcbm/src/server/log"
 )
 
 type UserCallback func(data *User)
@@ -108,7 +109,7 @@ func NewClient4Center() *Client4Center {
 ******************************************/
 
 func (c4c *Client4Center) HeartBeatAndListen() {
-	ticker := time.NewTicker(time.Second * 5)
+	ticker := time.NewTicker(time.Second * 3)
 	go func() {
 		for {
 			<-ticker.C
@@ -121,8 +122,15 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 			msgType, message, err := c4c.conn.ReadMessage()
 			if err != nil {
 				log.Error("Read msg error %+v", err.Error())
-				c4c.isServerLogin = false
-				break
+
+				time.Sleep(10 * time.Second)
+				wsURL := "ws" + strings.TrimPrefix(conf.Server.CenterServer, "http")
+				c, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+				log.Debug("重新连接中心服 %+v", wsURL)
+				if err != nil {
+					log.Fatal("dial error %v", err)
+				}
+				c4c.conn = c
 			}
 
 			if msgType == websocket.TextMessage {
