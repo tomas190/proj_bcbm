@@ -83,12 +83,6 @@ func handleLogin(args []interface{}) {
 		log.Debug("<----login 登录 resp---->%+v %+v", resp.User.UserID)
 		a.WriteMsg(resp)
 	} else if !Mgr.agentExist(a) { // 正常大多数情况
-		//var token string
-		//if m.Token == "" {
-		//	token = m.Password
-		//} else {
-		//	token = m.Token
-		//}
 		c4c.UserLoginCenter(userID, m.Password, m.Token, func(u *User) {
 			resp := &msg.LoginR{
 				User: &msg.UserInfo{
@@ -106,19 +100,21 @@ func handleLogin(args []interface{}) {
 			u.ConnAgent = a
 			a.SetUserData(u)
 
-			err := db.RUserInfo(u.UserID)
-			if err != nil {
-				converter := DAOConverter{}
-				udb := converter.U2DB(*u)
-				errC := db.CUserInfo(udb)
-				if errC != nil {
-					log.Debug("玩家信息保存错误 %+v", errC)
+			go func() {
+				err := db.RUserInfo(u.UserID)
+				if err != nil {
+					converter := DAOConverter{}
+					udb := converter.U2DB(*u)
+					errC := db.CUserInfo(udb)
+					if errC != nil {
+						log.Error("玩家信息保存错误 %+v", errC)
+					}
+					errP := db.UProfitPool(0, 0, 0)
+					if errP != nil {
+						log.Error("玩家首次登录盈余池更新错误 %+v", errP)
+					}
 				}
-				errP := db.UProfitPool(0, 0, 0)
-				if errP != nil {
-					log.Debug("玩家首次登录盈余池更新错误 %+v", errP)
-				}
-			}
+			}()
 
 			Mgr.UserRecord.Store(u.UserID, u)
 			log.Debug("<----login 登录 resp---->%+v", resp.User.UserID)
