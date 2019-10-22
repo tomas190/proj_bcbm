@@ -1,155 +1,84 @@
 package log
 
 import (
-	"errors"
+	"bytes"
+	"encoding/json"
 	"fmt"
-	"log"
-	"os"
-	"path"
-	"strings"
+	"github.com/sirupsen/logrus"
+	"net/http"
+	"proj_bcbm/src/server/conf"
 	"time"
 )
 
-// levels
-const (
-	debugLevel   = 0
-	releaseLevel = 1
-	errorLevel   = 2
-	fatalLevel   = 3
-)
-
-const (
-	printDebugLevel   = "[debug  ] "
-	printReleaseLevel = "[release] "
-	printErrorLevel   = "[error  ] "
-	printFatalLevel   = "[fatal  ] "
-)
-
-type Logger struct {
-	level      int
-	baseLogger *log.Logger
-	baseFile   *os.File
-	server     string
+type PlainFormatter struct {
+	TimestampFormat string
+	LevelDesc       []string
 }
 
-func New(strLevel string, pathname string, flag int, s string) (*Logger, error) {
-	// level
-	var level int
-	switch strings.ToLower(strLevel) {
-	case "debug":
-		level = debugLevel
-	case "release":
-		level = releaseLevel
-	case "error":
-		level = errorLevel
-	case "fatal":
-		level = fatalLevel
-	default:
-		return nil, errors.New("unknown level: " + strLevel)
-	}
-
-	// logger
-	var baseLogger *log.Logger
-	var baseFile *os.File
-	if pathname != "" {
-		now := time.Now()
-
-		filename := fmt.Sprintf("%d%02d%02d_%02d_%02d_%02d.log",
-			now.Year(),
-			now.Month(),
-			now.Day(),
-			now.Hour(),
-			now.Minute(),
-			now.Second())
-
-		file, err := os.Create(path.Join(pathname, filename))
-		if err != nil {
-			return nil, err
-		}
-
-		baseLogger = log.New(file, "", flag)
-		baseFile = file
-	} else {
-		baseLogger = log.New(os.Stdout, "", flag)
-	}
-
-	// new
-	logger := new(Logger)
-	logger.level = level
-	logger.baseLogger = baseLogger
-	logger.baseFile = baseFile
-	logger.server = s
-
-	return logger, nil
+// LogCenter 日志中心数据结构
+type MsgLogServer struct {
+	Type     string `json:"type"`      //"LOG"|"ERR"|"DEG",
+	From     string `json:"from"`      //"game-server",
+	GameName string `json:"game_name"` // "lunpan"
+	Host     string `json:"host"`      //服务IP地址,
+	Msg      string `json:"msg"`
+	Time     string `json:"time"` // 时间(YYYY-MM-DD HH:II:SS),
 }
 
-// It's dangerous to call the method on logging
-func (logger *Logger) Close() {
-	if logger.baseFile != nil {
-		logger.baseFile.Close()
-	}
-
-	logger.baseLogger = nil
-	logger.baseFile = nil
+func (f *PlainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+	timestamp := fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
+	return []byte(fmt.Sprintf("%s %s %s\n", f.LevelDesc[entry.Level], timestamp, entry.Message)), nil
 }
 
-func (logger *Logger) doPrintf(level int, printLevel string, format string, a ...interface{}) {
-	if level < logger.level {
-		return
-	}
-	if logger.baseLogger == nil {
-		panic("logger closed")
-	}
-
-	format = printLevel + format
-	logger.baseLogger.Output(3, fmt.Sprintf(format, a...))
-
-	if level == fatalLevel {
-		os.Exit(1)
-	}
+func init() {
+	plainFormatter := new(PlainFormatter)
+	plainFormatter.TimestampFormat = "2006-01-02 15:04:05"
+	plainFormatter.LevelDesc = []string{"PANC", "FATL", "ERRO", "WARN", "INFO", "DEBG"}
+	log.SetFormatter(plainFormatter)
+	log.SetLevel(logrus.DebugLevel)
 }
 
-func (logger *Logger) Debug(format string, a ...interface{}) {
-	logger.doPrintf(debugLevel, printDebugLevel, format, a...)
-}
-
-func (logger *Logger) Release(format string, a ...interface{}) {
-	logger.doPrintf(releaseLevel, printReleaseLevel, format, a...)
-}
-
-func (logger *Logger) Error(format string, a ...interface{}) {
-	logger.doPrintf(errorLevel, printErrorLevel, format, a...)
-}
-
-func (logger *Logger) Fatal(format string, a ...interface{}) {
-	logger.doPrintf(fatalLevel, printFatalLevel, format, a...)
-}
-
-var gLogger, _ = New("debug", "", log.LstdFlags, "")
-
-// It's dangerous to call the method on logging
-func Export(logger *Logger) {
-	if logger != nil {
-		gLogger = logger
-	}
-}
+var log = logrus.New()
 
 func Debug(format string, a ...interface{}) {
-	gLogger.doPrintf(debugLevel, printDebugLevel, format, a...)
-}
-
-func Release(format string, a ...interface{}) {
-	gLogger.doPrintf(releaseLevel, printReleaseLevel, format, a...)
+	log.Debugf(format, a...)
+	go SendToLogServer("DEG", fmt.Sprintf(format, a...), time.Now().Format("2006-01-02 15:04:05"))
 }
 
 func Error(format string, a ...interface{}) {
-	gLogger.doPrintf(errorLevel, printErrorLevel, format, a...)
+	log.Errorf(format, a...)
+	go SendToLogServer("ERR", fmt.Sprintf(format, a...), time.Now().Format("2006-01-02 15:04:05"))
 }
 
 func Fatal(format string, a ...interface{}) {
-	gLogger.doPrintf(fatalLevel, printFatalLevel, format, a...)
+	log.Fatalf(format, a...)
+	go SendToLogServer("ERR", fmt.Sprintf(format, a...), time.Now().Format("2006-01-02 15:04:05"))
+
 }
 
-func Close() {
-	gLogger.Close()
+func SendToLogServer(t string, msg string, timeStr string) {
+	url := conf.Server.LogServer
+
+	logMsg := MsgLogServer{
+		Type:     t,
+		From:     "game-server",
+		GameName: "benchibaoma",
+		Host:     "",
+		Msg:      msg,
+		Time:     timeStr,
+	}
+
+	logMsgStr, err := json.Marshal(&logMsg)
+	if err != nil {
+		fmt.Println("log msg marshal error")
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(logMsgStr))
+	req.Header.Set("Content-Type", "application/json")
+	client := http.Client{}
+	resp, err := client.Do(req)
+
+	if resp != nil && resp.StatusCode != 200 {
+	} else {
+		fmt.Println("日志提交失败")
+	}
 }
