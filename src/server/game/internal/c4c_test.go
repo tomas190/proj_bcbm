@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/name5566/leaf/log"
+	"proj_bcbm/src/server/log"
 )
 
 func TestClient4Center_ServerLoginCenter(t *testing.T) {

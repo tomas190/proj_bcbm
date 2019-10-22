@@ -2,7 +2,7 @@ package internal
 
 import (
 	"fmt"
-	"github.com/name5566/leaf/log"
+	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/util"
 	"testing"
 	"time"

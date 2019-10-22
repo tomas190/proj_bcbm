@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/name5566/leaf/gate"
-	log "github.com/name5566/leaf/log"
 	"github.com/patrickmn/go-cache"
+	"proj_bcbm/src/server/log"
 )
 
 func (dl *Dealer) handleBet(args []interface{}) {

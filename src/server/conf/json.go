@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/name5566/leaf/log"
+	"proj_bcbm/src/server/log"
 )
 
 var Server struct {

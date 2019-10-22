@@ -3,7 +3,7 @@ package internal
 import (
 	"fmt"
 	"github.com/name5566/leaf/gate"
-	"github.com/name5566/leaf/log"
+	"proj_bcbm/src/server/log"
 	"sync"
 )
 

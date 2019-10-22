@@ -1,8 +1,8 @@
 package internal
 
 import (
-	"github.com/name5566/leaf/log"
 	"proj_bcbm/src/server/conf"
+	"proj_bcbm/src/server/log"
 	"testing"
 )
 
