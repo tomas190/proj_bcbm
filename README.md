@@ -59,13 +59,15 @@ proj_bcbm/bin/conf/server.json
 	"DevKey": "new_game_17",
 	"DevName": "新游戏开发",
 	"GameID": "5b1f3a3cb76a591e7f251716",
-	"MongoDB": "mongodb://bcbm:123456@172.16.100.5:27017"
+	"MongoDB": "mongodb://bcbm:123456@172.16.100.5:27017",
+    "LogServer": "http://172.16.100.7:4151/pub?topic=game-server"
 }
 
 ```
 - ```TokenServer CenterServer CenterServerPort``` 中心服配置
 - ```DevKey DevName GameID``` 游戏配置
 - ```MongoDB``` MongoDB地址（包含用户名和密码）
+- ```LogServer``` 日志服务器地址
 
 ## 日志
 
