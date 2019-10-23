@@ -79,7 +79,6 @@ func SendToLogServer(t string, msg string, timeStr string) {
 	resp, err := client.Do(req)
 
 	if resp == nil || resp.StatusCode != 200 {
-	} else {
 		bs, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Fatal("响应体读取失败", err)
