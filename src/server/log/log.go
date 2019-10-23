@@ -79,6 +79,6 @@ func SendToLogServer(t string, msg string, timeStr string) {
 
 	if resp != nil && resp.StatusCode != 200 {
 	} else {
-		fmt.Println("日志提交失败")
+		fmt.Printf("日志提交失败 %+v\n", resp.StatusCode)
 	}
 }
