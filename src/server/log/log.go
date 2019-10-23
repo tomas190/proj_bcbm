@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"io/ioutil"
 	"net/http"
 	"proj_bcbm/src/server/conf"
 	"time"
@@ -79,6 +80,11 @@ func SendToLogServer(t string, msg string, timeStr string) {
 
 	if resp != nil && resp.StatusCode != 200 {
 	} else {
-		fmt.Printf("日志提交失败 %+v\n", resp.StatusCode)
+		bs, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal("响应体读取失败", err)
+		}
+
+		fmt.Println(string(bs))
 	}
 }
