@@ -381,7 +381,7 @@ func (c4c *Client4Center) onError(msg []byte) {
 	}
 
 	errData := centerErr.Data
-	// todo 重试机制
+
 	if errData.Code == constant.CRespTokenError {
 		time.Sleep(30 * time.Second)
 		//c4c.ReqToken()
