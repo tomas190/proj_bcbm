@@ -31,15 +31,16 @@ func (f *PlainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	return []byte(fmt.Sprintf("%s %s %s\n", f.LevelDesc[entry.Level], timestamp, entry.Message)), nil
 }
 
+var log *logrus.Logger
+
 func init() {
+	log = logrus.New()
 	plainFormatter := new(PlainFormatter)
 	plainFormatter.TimestampFormat = "2006-01-02 15:04:05"
 	plainFormatter.LevelDesc = []string{"PANC", "FATL", "ERRO", "WARN", "INFO", "DEBG"}
 	log.SetFormatter(plainFormatter)
 	log.SetLevel(logrus.DebugLevel)
 }
-
-var log = logrus.New()
 
 func Debug(format string, a ...interface{}) {
 	log.Debugf(format, a...)
@@ -71,19 +72,32 @@ func SendToLogServer(t string, msg string, timeStr string) {
 
 	logMsgStr, err := json.Marshal(&logMsg)
 	if err != nil {
-		fmt.Println("log msg marshal error")
+		fmt.Println("[SendToLogServer] log msg marshal error")
+		return
 	}
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(logMsgStr))
-	req.Header.Set("Content-Type", "application/json")
-	client := http.Client{}
-	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("[SendToLogServer] req 错误")
+	} else {
+		req.Header.Set("Content-Type", "application/json")
+		client := http.Client{}
+		resp, err := client.Do(req)
 
-	if resp == nil || resp.StatusCode != 200 {
-		bs, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Fatal("响应体读取失败", err)
+			fmt.Println("[SendToLogServer] client 请求错误")
 		}
 
-		fmt.Println(string(bs))
+		if resp == nil {
+			fmt.Println("[SendToLogServer] resp为空")
+			return
+		} else if resp.StatusCode != 200 {
+			bs, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Println("[SendToLogServer]")
+			}
+
+			fmt.Println("[SendToLogServer]" + string(bs))
+			return
+		}
 	}
 }
