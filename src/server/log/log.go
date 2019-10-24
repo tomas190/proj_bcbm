@@ -28,7 +28,7 @@ type MsgLogServer struct {
 
 func (f *PlainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	timestamp := fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
-	return []byte(fmt.Sprintf("%s %s %s\n", f.LevelDesc[entry.Level], timestamp, entry.Message)), nil
+	return []byte(fmt.Sprintf("%s %s %s\n", timestamp, f.LevelDesc[entry.Level], entry.Message)), nil
 }
 
 var log *logrus.Logger
@@ -36,8 +36,8 @@ var log *logrus.Logger
 func init() {
 	log = logrus.New()
 	plainFormatter := new(PlainFormatter)
-	plainFormatter.TimestampFormat = "2006-01-02 15:04:05"
-	plainFormatter.LevelDesc = []string{"PANC", "FATL", "ERRO", "WARN", "INFO", "DEBG"}
+	plainFormatter.TimestampFormat = "2006/01/02 15:04:05"
+	plainFormatter.LevelDesc = []string{"[panic  ]", "[fetal  ]", "[error  ]", "[warn   ]", "[info   ]", "[debug  ]"}
 	log.SetFormatter(plainFormatter)
 	log.SetLevel(logrus.DebugLevel)
 }
