@@ -129,13 +129,14 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 				if err != nil {
 					log.Fatal("dial error %v", err)
 				}
+
+				// 替换连接并重新登录服务器
 				c4c.conn = c
+				c4c.ServerLoginCenter()
 			}
 
 			if msgType == websocket.TextMessage {
 				log.Debug("Msg from center %v", string(message))
-
-				// todo message写入数据库
 
 				var msg Server2CenterMsg
 				err = json.Unmarshal(message, &msg)
