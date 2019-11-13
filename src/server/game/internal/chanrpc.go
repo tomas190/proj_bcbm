@@ -27,7 +27,7 @@ func rpcCloseAgent(args []interface{}) {
 	a := args[0].(gate.Agent)
 	au, ok := a.UserData().(*User)
 
-	if ok {
+	if ok && au.ConnAgent == a {
 		log.Debug("玩家 %+v 主动断开连接...", au.UserID)
 		ca.Delete(fmt.Sprintf("%+v-betAmount", au.UserID))
 		ca.Delete(fmt.Sprintf("%+v-winCount", au.UserID))
