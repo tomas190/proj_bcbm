@@ -18,12 +18,12 @@ type PlainFormatter struct {
 
 // LogCenter 日志中心数据结构
 type MsgLogServer struct {
-	Type     string `json:"type"`      //"LOG"|"ERR"|"DEG",
-	From     string `json:"from"`      //"game-server",
-	GameName string `json:"game_name"` // "lunpan"
-	Host     string `json:"host"`      //服务IP地址,
-	Msg      string `json:"msg"`
-	Time     string `json:"time"` // 时间(YYYY-MM-DD HH:II:SS),
+	Type     string `json:"type"`      // "LOG"|"ERR"|"DEG",
+	From     string `json:"from"`      // "game-server",
+	GameName string `json:"game_name"` // "game-name"
+	Host     string `json:"host"`      // 服务IP地址,
+	Msg      string `json:"msg"`       // 消息内容
+	Time     string `json:"time"`      // 时间(YYYY-MM-DD HH:II:SS),
 }
 
 func (f *PlainFormatter) Format(entry *logrus.Entry) ([]byte, error) {

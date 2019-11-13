@@ -9,6 +9,7 @@ const (
 	CEventChangeBankerStatus string = "/GameServer/GameUser/changeAccountBankerAndStatus"
 	CEventBankerWinScore     string = "/GameServer/GameUser/bankerWinSettlement"
 	CEventBankerLoseScore    string = "/GameServer/GameUser/bankerLoseSettlement"
+	CEventNotice             string = "/GameServer/Notice/notice"
 
 	CEventError string = "error"
 

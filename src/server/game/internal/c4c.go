@@ -28,7 +28,7 @@ func NewClient4Center() *Client4Center {
 	c, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	log.Debug("连接中心服 %+v", wsURL)
 	if err != nil {
-		log.Fatal("dial error %v", err)
+		log.Error("dial error %v", err)
 	}
 
 	return &Client4Center{
@@ -127,12 +127,12 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 				c, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 				log.Debug("重新连接中心服 %+v", wsURL)
 				if err != nil {
-					log.Fatal("dial error %v", err)
+					log.Error("dial error %v", err)
+				} else {
+					// 替换连接并重新登录服务器
+					c4c.conn = c
+					c4c.ServerLoginCenter()
 				}
-
-				// 替换连接并重新登录服务器
-				c4c.conn = c
-				c4c.ServerLoginCenter()
 			}
 
 			if msgType == websocket.TextMessage {
@@ -160,6 +160,8 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 					c4c.onBankerLoseScore(message)
 				case constant.CEventBankerWinScore:
 					c4c.onBankerWinScore(message)
+				case constant.CEventNotice:
+					c4c.onNotice(message)
 				case constant.CEventError:
 					c4c.onError(message)
 				default:
@@ -373,6 +375,11 @@ func (c4c *Client4Center) onBankerWinScore(msg []byte) {
 	}
 }
 
+// todo
+func (c4c *Client4Center) onNotice(msg []byte) {
+
+}
+
 func (c4c *Client4Center) onError(msg []byte) {
 	centerErr := CenterErrorResp{}
 	err := json.Unmarshal(msg, &centerErr)
@@ -494,7 +501,7 @@ func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order, roun
 			Info: SyncScoreReqDataInfo{
 				UserID:     userID,
 				CreateTime: uint32(time.Now().Unix()),
-				PayReason:  "奔驰宝马测试赢钱",
+				PayReason:  "玩家赢钱",
 				Money:      money,
 				Order:      order,
 				GameID:     conf.Server.GameID,
@@ -527,7 +534,7 @@ func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, order, rou
 			Info: SyncScoreReqDataInfo{
 				UserID:     userID,
 				CreateTime: uint32(time.Now().Unix()),
-				PayReason:  "奔驰宝马测试输钱",
+				PayReason:  "玩家输钱",
 				Money:      money,
 				Order:      order,
 				GameID:     conf.Server.GameID,
@@ -559,7 +566,7 @@ func (c4c *Client4Center) ChangeBankerStatus(userID uint32, status int, money fl
 				UserID:     userID,
 				Status:     status,
 				CreateTime: uint32(time.Now().Unix()),
-				PayReason:  "奔驰宝马测试庄家状态",
+				PayReason:  "玩家上下庄", // todo 上下庄分开？
 				Order:      order,
 				RoundID:    round,
 				Money:      money,
@@ -592,7 +599,7 @@ func (c4c *Client4Center) BankerWinScore(userID uint32, money float64, order, ro
 			Info: SyncScoreReqDataInfo{
 				UserID:     userID,
 				CreateTime: uint32(time.Now().Unix()),
-				PayReason:  "奔驰宝马测试庄家赢钱",
+				PayReason:  "庄家赢钱",
 				Money:      money,
 				Order:      order,
 				GameID:     conf.Server.GameID,
@@ -625,7 +632,7 @@ func (c4c *Client4Center) BankerLoseScore(userID uint32, money float64, order, r
 			Info: SyncScoreReqDataInfo{
 				UserID:     userID,
 				CreateTime: uint32(time.Now().Unix()),
-				PayReason:  "奔驰宝马测试庄家输钱",
+				PayReason:  "庄家输钱",
 				Money:      money,
 				Order:      order,
 				GameID:     conf.Server.GameID,
@@ -636,6 +643,11 @@ func (c4c *Client4Center) BankerLoseScore(userID uint32, money float64, order, r
 
 	c4c.sendMsg2Center(loseSettleMsg)
 	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-banker-lose-%+v", userID, order), callback)
+}
+
+// todo
+func (c4c *Client4Center) PromoNotice() {
+
 }
 
 // 向中心服发送消息的基础函数

@@ -25,7 +25,7 @@ func TestClient4Center_ServerLoginCenter(t *testing.T) {
 		// 在没有收到服务器登陆成功返回之前不应该执行后续操作
 		userID := uint32(516499995)
 
-		c.UserLoginCenter(userID, "123456", func(data *User) {
+		c.UserLoginCenter(userID, "123456", "", func(data *User) {
 			log.Debug("<----用户登录回调---->%+v %+v %+v", data.Balance, data.NickName, data.Avatar)
 		})
 
@@ -43,7 +43,7 @@ func TestClient4Center_ServerLoginCenter(t *testing.T) {
 
 		time.Sleep(7 * time.Second)
 
-		c.UserLoginCenter(userID, "123456", func(data *User) {
+		c.UserLoginCenter(userID, "123456", "", func(data *User) {
 			log.Debug("<----用户登录回调---->%+v %+v %+v", data.Balance, data.NickName, data.Avatar)
 		})
 
@@ -62,7 +62,7 @@ func TestClient4Center_MinusMoney(t *testing.T) {
 
 	uuid := util.UUID{}
 	round := uuid.GenUUID()
-	c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", func(data *User) {
+	c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", "", func(data *User) {
 		log.Debug("<----用户登录回调---->%+v %+v %+v", data.UserID, data.NickName, data.Balance)
 	})
 
@@ -92,7 +92,7 @@ func TestClient4Center_AddMoney(t *testing.T) {
 	for _, uid := range userIDs {
 		winOrder := uuid.GenUUID()
 		userID := uid
-		c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", func(data *User) {
+		c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", "", func(data *User) {
 			log.Debug("<----用户登录回调---->%+v %+v", data.UserID, data.Balance)
 		})
 
@@ -120,7 +120,7 @@ func TestClient4Center_ChangeBankerStatus(t *testing.T) {
 	round := uuid.GenUUID()
 	userID := uint32(194989239)
 	// 登录
-	c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", func(data *User) {
+	c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", "", func(data *User) {
 		log.Debug("<----用户登录回调---->%+v %+v", data.UserID, data.Balance)
 	})
 
@@ -210,7 +210,7 @@ func TestClient4Center_ChangeBankerStatus2(t *testing.T) {
 		//time.Sleep(500 * time.Millisecond)
 		//
 		//tempBalance = 0.0
-		c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", func(data *User) {
+		c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", "", func(data *User) {
 			tempBalance = data.BankerBalance
 			status = data.Status
 			fmt.Println("************************", tempBalance, data.Status)
@@ -226,7 +226,7 @@ func TestClient4Center_ChangeBankerStatus2(t *testing.T) {
 
 		time.Sleep(500 * time.Millisecond)
 
-		c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", func(data *User) {
+		c.UserLoginCenter(userID, "e10adc3949ba59abbe56e057f20f883e", "", func(data *User) {
 			tempBalance = data.BankerBalance
 			status = data.Status
 			fmt.Println("************************", tempBalance, data.Status)
