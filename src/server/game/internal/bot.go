@@ -86,7 +86,7 @@ func (dl *Dealer) randBet() (uint32, uint32) {
 func (dl *Dealer) BetGod() Bot {
 	r := util.Random{}
 	WinCount := uint32(r.RandInRange(4, 5))                                                   // 获胜局数
-	BetAmount := float64(r.RandInRange(800, 450))                                             // 下注金额
+	BetAmount := float64(r.RandInRange(80, 450))                                             // 下注金额
 	Balance := float64(0+r.RandInRange(200, 1888)) + float64(r.RandInRange(50, 100))/100.0    // 金币数
 	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                                 // 用户ID
 	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
@@ -107,7 +107,7 @@ func (dl *Dealer) BetGod() Bot {
 func (dl *Dealer) RichMan() Bot {
 	r := util.Random{}
 	WinCount := uint32(r.RandInRange(0, 3))                                                   // 获胜局数
-	BetAmount := float64(r.RandInRange(800, 450))                                             // 下注金额
+	BetAmount := float64(r.RandInRange(80, 450))                                             // 下注金额
 	Balance := float64(0+r.RandInRange(200, 1888)) + float64(r.RandInRange(50, 100))/100.0    // 金币数
 	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                                 // 用户ID
 	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
@@ -128,7 +128,7 @@ func (dl *Dealer) RichMan() Bot {
 func (dl *Dealer) NextBotBanker() Bot {
 	r := util.Random{}
 	WinCount := uint32(r.RandInRange(0, 3))                                                   // 获胜局数
-	BetAmount := float64(r.RandInRange(800, 450))                                             // 下注金额
+	BetAmount := float64(r.RandInRange(80, 450))                                             // 下注金额
 	Balance := float64(0+r.RandInRange(6000, 10000)) + float64(r.RandInRange(50, 100))/100.0  // 金币数
 	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                                 // 用户ID
 	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
