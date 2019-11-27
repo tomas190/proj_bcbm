@@ -244,15 +244,34 @@ type BankerMsg struct {
 
 /***************************************************
 
-	请求Token
+	跑马灯显示
 
 ****************************************************/
 
-//type TokenResp struct {
-//	StatusCode int      `json:"code"`
-//	TokenMsg   tokenMsg `json:"msg"`
-//}
-//
-//type tokenMsg struct {
-//	Token string `json:"token"`
-//}
+var PaoMaDeng float64 = 100
+
+type NoticeReq struct {
+	Event string        `json:"event"`
+	Data  NoticeReqData `json:"data"`
+}
+
+type NoticeReqData struct {
+	DevName string `json:"dev_name"`
+	DevKey  string `json:"dev_key"`
+	ID      uint32 `json:"id"`
+	GameId  string `json:"game_id"`
+	Type    int32  `json:"type"`
+	Message string `json:"message"`
+	Topic   string `json:"topic"`
+}
+
+type NoticeResp struct {
+	Event string        `json:"event"`
+	Data  NoticeRespData `json:"data"`
+}
+
+type NoticeRespData struct {
+	Code   int    `json:"code"`
+	Status string `json:"status"`
+	Msg    string `json:"msg"`
+}

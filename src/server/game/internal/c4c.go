@@ -375,9 +375,18 @@ func (c4c *Client4Center) onBankerWinScore(msg []byte) {
 	}
 }
 
-// todo
-func (c4c *Client4Center) onNotice(msg []byte) {
 
+func (c4c *Client4Center) onNotice(msg []byte) {
+	notice := NoticeResp{}
+	err := json.Unmarshal(msg, &notice)
+	if err != nil {
+		log.Error("跑马灯显示错误", err)
+	}
+
+	paomadeng := notice.Data
+	if paomadeng.Code == constant.CRespStatusSuccess {
+		log.Debug("<-------- onWinMoreThanNotice success~!!! -------->")
+	}
 }
 
 func (c4c *Client4Center) onError(msg []byte) {
@@ -663,4 +672,22 @@ func (c4c *Client4Center) sendMsg2Center(data interface{}) {
 	if err != nil {
 		log.Fatal("发送数据失败", err)
 	}
+}
+
+func (c4c *Client4Center) NoticeWinMoreThan(playerId uint32, playerName string, winGold float64) {
+	log.Debug("<-------- NoticeWinMoreThan  -------->")
+	msg := fmt.Sprintf("<size=20><color=YELLOW>恭喜!</color><color=orange>%s</color><color=YELLOW>在</color></><color=WHITE><b><size=25>奔驰宝马</color></b></><color=YELLOW><size=20>中一把赢了</color></><color=YELLOW><b><size=35>%.2f</color></b></><color=YELLOW><size=20>金币！</color></>", playerName, winGold)
+
+	base := &NoticeReq{}
+	base.Event = constant.CEventNotice
+	base.Data = NoticeReqData{
+		DevName: conf.Server.DevName,
+		DevKey:  conf.Server.DevKey,
+		ID:      playerId,
+		GameId:  conf.Server.GameID,
+		Type:    2000,
+		Message: msg,
+		Topic:   "系统提示",
+	}
+	c4c.sendMsg2Center(base)
 }

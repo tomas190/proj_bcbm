@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"github.com/patrickmn/go-cache"
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
@@ -163,6 +162,9 @@ func (dl *Dealer) Settle() {
 			order := uuid.GenUUID()
 
 			if preBankerWin > 0 {
+				if preBankerWin > PaoMaDeng {
+					c4c.NoticeWinMoreThan(u.UserID, u.NickName, preBankerWin)
+				}
 				c4c.BankerWinScore(u.UserID, preBankerWin, order+"-banker-win", dl.RoundID, func(data *User) {
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					dl.bankerMoney = data.BankerBalance
@@ -234,6 +236,9 @@ func (dl *Dealer) playerSettle() {
 		order := uuid.GenUUID()
 		var winFlag bool
 		if uWin > 0 {
+			if uWin > PaoMaDeng{
+				c4c.NoticeWinMoreThan(user.UserID, user.NickName, uWin)
+			}
 			winFlag = true
 			c4c.UserWinScore(user.UserID, uWin, order, dl.RoundID, func(data *User) {
 				win, _ := decimal.NewFromFloat(data.Balance).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Sub(decimal.NewFromFloat(beforeBalance)).Float64()
