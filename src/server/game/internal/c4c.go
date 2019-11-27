@@ -376,16 +376,7 @@ func (c4c *Client4Center) onBankerWinScore(msg []byte) {
 
 
 func (c4c *Client4Center) onNotice(msg []byte) {
-	notice := NoticeResp{}
-	err := json.Unmarshal(msg, &notice)
-	if err != nil {
-		log.Error("跑马灯显示错误", err)
-	}
-
-	paomadeng := notice.Data
-	if paomadeng.Code == constant.CRespStatusSuccess {
 		log.Debug("<-------- onWinMoreThanNotice success~!!! -------->")
-	}
 }
 
 func (c4c *Client4Center) onError(msg []byte) {
