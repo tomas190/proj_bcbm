@@ -7,6 +7,7 @@ import (
 	"proj_bcbm/src/server/util"
 	"reflect"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/name5566/leaf/gate"
@@ -288,6 +289,10 @@ func (dl *Dealer) cancelGrabBanker(userID uint32) {
 
 			if len(dl.Bankers) < 2 {
 				nextB := dl.NextBotBanker()
+				//todo
+				format := "%." + strconv.Itoa(0) + "f"
+				nextB.Balance, _ = strconv.ParseFloat(fmt.Sprintf(format, nextB.Balance), 64)
+
 				dl.Bankers = append(dl.Bankers, nextB)
 				dl.Bots = append(dl.Bots, &nextB)
 			}

@@ -9,6 +9,7 @@ import (
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -34,7 +35,7 @@ type Dealer struct {
 	pos       uint32     // 开奖位置
 	History   []uint32   // 房间开奖历史
 	HRChan    chan HRMsg // 房间大厅通信
-	IsDownBet bool       //判断机器人是否继续下注
+	IsDownBet bool       // 设置机器人下注状态
 
 	Users          sync.Map             // 房间用户-不包括机器人
 	UserLeave      []uint32             // 用户是否在房间
@@ -79,8 +80,10 @@ func (dl *Dealer) ClockReset(duration uint32, next func()) {
 			// log.Debug("ticker：%v", t)
 			_ = t
 			dl.counter++
-			if duration == dl.counter {
+			if duration-1 == dl.counter {
 				dl.IsDownBet = false
+			}
+			if duration == dl.counter {
 				next()
 				break
 			}
@@ -346,6 +349,10 @@ func (dl *Dealer) ClearChip() {
 
 		for _, b := range dl.Bots {
 			if b.botType == constant.BTNextBanker {
+				//todo
+				format := "%." + strconv.Itoa(0) + "f"
+				b.Balance, _ = strconv.ParseFloat(fmt.Sprintf(format, b.Balance), 64)
+				
 				dl.Bankers = append(dl.Bankers, b)
 			}
 		}
