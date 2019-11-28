@@ -2,6 +2,8 @@ package internal
 
 import (
 	"fmt"
+	"github.com/patrickmn/go-cache"
+	"github.com/shopspring/decimal"
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
@@ -9,8 +11,6 @@ import (
 	"proj_bcbm/src/server/util"
 	"sync"
 	"time"
-	"github.com/shopspring/decimal"
-	"github.com/patrickmn/go-cache"
 )
 
 // Mgr <--> Dealer <--> C2C
@@ -28,12 +28,13 @@ type Dealer struct {
 	ddl         uint32
 	bankerRound uint32 // 庄家做了多少轮
 
-	RoundID string     // 轮次
-	Status  uint32     // 房间状态
-	res     uint32     // 最新开奖结果
-	pos     uint32     // 开奖位置
-	History []uint32   // 房间开奖历史
-	HRChan  chan HRMsg // 房间大厅通信
+	RoundID   string     // 轮次
+	Status    uint32     // 房间状态
+	res       uint32     // 最新开奖结果
+	pos       uint32     // 开奖位置
+	History   []uint32   // 房间开奖历史
+	HRChan    chan HRMsg // 房间大厅通信
+	IsDownBet bool       //判断机器人是否继续下注
 
 	Users          sync.Map             // 房间用户-不包括机器人
 	UserLeave      []uint32             // 用户是否在房间
@@ -56,6 +57,7 @@ func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 		Room:           NewRoom(rID, con.RL1MinBet, con.RL1MaxBet, con.RL1MinLimit),
 		clock:          time.NewTicker(time.Second),
 		HRChan:         hr,
+		IsDownBet:      false,
 		UserAutoBet:    map[uint32]bool{},
 		UserBets:       map[uint32][]float64{},
 		UserBetsDetail: map[uint32][]msg.Bet{},
@@ -78,6 +80,7 @@ func (dl *Dealer) ClockReset(duration uint32, next func()) {
 			_ = t
 			dl.counter++
 			if duration == dl.counter {
+				dl.IsDownBet = false
 				next()
 				break
 			}
@@ -236,7 +239,7 @@ func (dl *Dealer) playerSettle() {
 		order := uuid.GenUUID()
 		var winFlag bool
 		if uWin > 0 {
-			if uWin > PaoMaDeng{
+			if uWin > PaoMaDeng {
 				c4c.NoticeWinMoreThan(user.UserID, user.NickName, uWin)
 			}
 			winFlag = true

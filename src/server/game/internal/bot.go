@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"proj_bcbm/src/server/constant"
+	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
 	"time"
@@ -22,20 +23,29 @@ func (dl *Dealer) AddBots() {
 
 // 机器人下注，随机下注后把结果赋值到下注结果列表中
 func (dl *Dealer) BotsBet() {
-	ru := util.Random{}
-	chipCount := ru.RandInRange(85, 95)
+	//ru := util.Random{}
+	//chipCount := ru.RandInRange(55, 65)
 	time.Sleep(time.Second * 1)
-	counter := 0
-	for i := 0; i < chipCount; i++ {
-		counter++
-		delay := (30 - counter/2) * (30 - counter/2)
-		time.Sleep(time.Millisecond * time.Duration(rand.Intn(delay+5)))
+	//counter := 0
+	dl.IsDownBet = true
+	for i := 0; i < 100; i++ {
+		if dl.IsDownBet == false {
+			return
+		}
+		//counter++
+		//delay := (30 - counter/2) * (30 - counter/2)
+		//time.Sleep(time.Millisecond * time.Duration(rand.Intn(delay+5)))
+		timerSlice := []int32{50, 150, 20, 300, 800, 30, 500}
+		rand.Seed(int64(time.Now().UnixNano()))
+		num2 := rand.Intn(len(timerSlice))
+		time.Sleep(time.Millisecond * time.Duration(timerSlice[num2]))
 
 		chip, area := dl.randBet()
 		cs := constant.ChipSize[chip]
 
 		// 限红
 		if dl.roomBonusLimit(area) < cs || dl.dynamicBonusLimit(area) < cs {
+			log.Debug("<<===== 机器人下注结束 =====>>")
 			continue
 		}
 		// 区域所有玩家投注总数
@@ -86,10 +96,10 @@ func (dl *Dealer) randBet() (uint32, uint32) {
 
 func (dl *Dealer) BetGod() Bot {
 	r := util.Random{}
-	WinCount := uint32(r.RandInRange(4, 5))                                                   // 获胜局数
-	BetAmount := float64(r.RandInRange(80, 450))                                             // 下注金额
-	Balance := float64(0+r.RandInRange(200, 1888)) + float64(r.RandInRange(50, 100))/100.0    // 金币数
-	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                                 // 用户ID
+	WinCount := uint32(r.RandInRange(4, 5))                                                // 获胜局数
+	BetAmount := float64(r.RandInRange(80, 450))                                           // 下注金额
+	Balance := float64(0+r.RandInRange(200, 1888)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
+	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                              // 用户ID
 	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
 
 	betGod := Bot{
@@ -107,10 +117,10 @@ func (dl *Dealer) BetGod() Bot {
 
 func (dl *Dealer) RichMan() Bot {
 	r := util.Random{}
-	WinCount := uint32(r.RandInRange(0, 3))                                                   // 获胜局数
-	BetAmount := float64(r.RandInRange(80, 450))                                             // 下注金额
-	Balance := float64(0+r.RandInRange(200, 1888)) + float64(r.RandInRange(50, 100))/100.0    // 金币数
-	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                                 // 用户ID
+	WinCount := uint32(r.RandInRange(0, 3))                                                // 获胜局数
+	BetAmount := float64(r.RandInRange(80, 450))                                           // 下注金额
+	Balance := float64(0+r.RandInRange(200, 1888)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
+	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                              // 用户ID
 	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
 
 	richMan := Bot{
@@ -128,10 +138,10 @@ func (dl *Dealer) RichMan() Bot {
 
 func (dl *Dealer) NextBotBanker() Bot {
 	r := util.Random{}
-	WinCount := uint32(r.RandInRange(0, 3))                                                   // 获胜局数
+	WinCount := uint32(r.RandInRange(0, 3))                                                  // 获胜局数
 	BetAmount := float64(r.RandInRange(80, 450))                                             // 下注金额
-	Balance := float64(0+r.RandInRange(6000, 10000)) + float64(r.RandInRange(50, 100))/100.0  // 金币数
-	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                                 // 用户ID
+	Balance := float64(0+r.RandInRange(6000, 10000)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
+	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                                // 用户ID
 	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
 
 	nextBanker := Bot{
