@@ -349,10 +349,6 @@ func (dl *Dealer) ClearChip() {
 
 		for _, b := range dl.Bots {
 			if b.botType == constant.BTNextBanker {
-				//todo
-				format := "%." + strconv.Itoa(0) + "f"
-				b.Balance, _ = strconv.ParseFloat(fmt.Sprintf(format, b.Balance), 64)
-				
 				dl.Bankers = append(dl.Bankers, b)
 			}
 		}

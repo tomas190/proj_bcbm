@@ -140,7 +140,7 @@ func (dl *Dealer) NextBotBanker() Bot {
 	r := util.Random{}
 	WinCount := uint32(r.RandInRange(0, 3))                                                  // 获胜局数
 	BetAmount := float64(r.RandInRange(80, 450))                                             // 下注金额
-	Balance := float64(0+r.RandInRange(6000, 10000)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
+	Balance := float64(0+r.RandInRange(6000, 10000)) 										 // 金币数
 	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                                // 用户ID
 	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
 
