@@ -23,7 +23,7 @@ func (dl *Dealer) AddBots() {
 // 机器人下注，随机下注后把结果赋值到下注结果列表中
 func (dl *Dealer) BotsBet() {
 	ru := util.Random{}
-	chipCount := ru.RandInRange(55, 65)
+	chipCount := ru.RandInRange(85, 95)
 	time.Sleep(time.Second * 1)
 	counter := 0
 	for i := 0; i < chipCount; i++ {
@@ -66,6 +66,7 @@ func (dl *Dealer) randBet() (uint32, uint32) {
 		area = uint32(ru.RandInRange(0, 4) + 1)
 	}
 
+	//获取一个随机数值，然后根据随机数值的区间来进行随机下注筹码
 	chipProb := ru.RandInRange(0, 100)
 
 	if chipProb >= 0 && chipProb <= 50 {
