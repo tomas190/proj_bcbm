@@ -70,7 +70,7 @@ func (dl *Dealer) randBet() (uint32, uint32) {
 	ru := util.Random{}
 
 	areaProb := ru.RandInRange(0, 100)
-	if areaProb >= 0 && areaProb <= 90 {
+	if areaProb >= 0 && areaProb <= 80 {
 		area = uint32(ru.RandInRange(4, 8) + 1)
 	} else {
 		area = uint32(ru.RandInRange(0, 4) + 1)
@@ -86,9 +86,9 @@ func (dl *Dealer) randBet() (uint32, uint32) {
 	} else if chipProb > 70 && chipProb <= 80 {
 		chip = 3
 	} else if chipProb > 80 && chipProb < 95 {
-		chip = 4
+		chip = 2
 	} else {
-		chip = 5
+		chip = 3
 	}
 
 	return chip, area

@@ -30,8 +30,8 @@ var ChipSize = map[uint32]float64{
 	1: 1,
 	2: 10,
 	3: 100,
-	4: 10,
-	5: 100,
+	4: 500,
+	5: 1000,
 }
 
 var AreaX = map[uint32]float64{
