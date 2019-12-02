@@ -47,6 +47,8 @@ type Dealer struct {
 	AutoBetRecord  map[uint32][]msg.Bet // 续投记录
 	AreaBets       []float64            // 每个区域玩家投注总数
 	AreaBotBets    []float64            // 每个区域机器人投注总数
+
+	DownBetTotal uint32 //玩家总下注
 }
 
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
@@ -64,6 +66,7 @@ func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 		AutoBetRecord:  map[uint32][]msg.Bet{},
 		AreaBets:       []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 		AreaBotBets:    []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
+		DownBetTotal:   0,
 	}
 }
 
@@ -240,8 +243,17 @@ func (dl *Dealer) playerSettle() {
 		// 前端显示的输赢 精度问题
 		uDisplayWin, _ := math.MultiFloat64(dl.UserBets[user.UserID][dl.res], constant.AreaX[dl.res]).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Float64()
 		beforeBalance := user.Balance
-
 		order := uuid.GenUUID()
+
+		if dl.DownBetTotal > 0 {
+			c4c.UserLoseScore(user.UserID, float64(dl.DownBetTotal), order, "", func(data *User) {
+				// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
+				user.BalanceLock.Lock()
+				user.Balance = data.Balance
+				user.BalanceLock.Unlock()
+			})
+		}
+
 		var winFlag bool
 		if uWin > 0 {
 			log.Debug("玩家结算金额1: %v", uWin)

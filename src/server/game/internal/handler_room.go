@@ -58,30 +58,26 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		delay := rd.RandInRange(0, 100)
 		time.Sleep(time.Millisecond * time.Duration(delay))
 		ca.Set(fmt.Sprintf("%+v-bet", au.UserID), order, cache.DefaultExpiration)
-		c4c.UserLoseScore(au.UserID, -cs, order, "", func(data *User) {
-			// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
-			log.Debug("111111111111111111111111111")
-			au.BalanceLock.Lock()
-			au.Balance = data.Balance
-			au.BalanceLock.Unlock()
 
-			// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
-			dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
-			// 当前用户在该区域的历史投注+当前用户投注
-			dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
-			// 用户具体投注信息
-			dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], *m)
+		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
+		dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
+		// 当前用户在该区域的历史投注+当前用户投注
+		dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
+		// 用户具体投注信息
+		dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], *m)
 
-			resp := &msg.BetInfoB{
-				Area:        m.Area,
-				Chip:        m.Chip,
-				AreaTotal:   dl.AreaBets[m.Area],
-				PlayerTotal: dl.UserBets[au.UserID][m.Area],
-				PlayerID:    au.UserID,
-				Money:       au.Balance,
-			}
-			dl.Broadcast(resp)
-		})
+		dl.DownBetTotal += m.Chip
+
+		resp := &msg.BetInfoB{
+			Area:        m.Area,
+			Chip:        m.Chip,
+			AreaTotal:   dl.AreaBets[m.Area],
+			PlayerTotal: dl.UserBets[au.UserID][m.Area],
+			PlayerID:    au.UserID,
+			Money:       au.Balance,
+		}
+		dl.Broadcast(resp)
+
 		// fixme 暂时延迟处理
 		time.Sleep(6 * time.Millisecond)
 		ca.Delete(fmt.Sprintf("%+v-bet", au.UserID))
