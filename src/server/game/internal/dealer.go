@@ -159,7 +159,6 @@ func (dl *Dealer) Settle() {
 	math := util.Math{}
 	// 税前庄家输赢
 	preBankerWin, _ := math.SumSliceFloat64(dl.AreaBets).Sub(math.MultiFloat64(con.AreaX[dl.res], dl.AreaBets[dl.res])).Float64()
-	log.Debug("玩家的当局总下注: %v", dl.AreaBets)
 
 	switch dl.Bankers[0].(type) {
 	case User:
@@ -169,8 +168,10 @@ func (dl *Dealer) Settle() {
 			order := uuid.GenUUID()
 
 			if preBankerWin > 0 {
+				log.Debug("玩家的当局总下注1: %v", preBankerWin)
 				c4c.BankerWinScore(u.UserID, preBankerWin, order+"-banker-win", dl.RoundID, func(data *User) {
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
+					log.Debug("玩家的当局总下注2: %v", dl.bankerWin)
 					//庄家跑马灯
 					if dl.bankerWin > PaoMaDeng {
 						c4c.NoticeWinMoreThan(u.UserID, u.NickName, dl.bankerWin)
@@ -243,9 +244,11 @@ func (dl *Dealer) playerSettle() {
 		order := uuid.GenUUID()
 		var winFlag bool
 		if uWin > 0 {
+			log.Debug("玩家结算金额1: %v", uWin)
 			winFlag = true
 			c4c.UserWinScore(user.UserID, uWin, order, dl.RoundID, func(data *User) {
 				win, _ := decimal.NewFromFloat(data.Balance).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Sub(decimal.NewFromFloat(beforeBalance)).Float64()
+				log.Debug("玩家结算金额2: %v", win)
 				if win > PaoMaDeng {
 					c4c.NoticeWinMoreThan(user.UserID, user.NickName, win)
 				}
