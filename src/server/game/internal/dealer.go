@@ -159,6 +159,8 @@ func (dl *Dealer) Settle() {
 	math := util.Math{}
 	// 税前庄家输赢
 	preBankerWin, _ := math.SumSliceFloat64(dl.AreaBets).Sub(math.MultiFloat64(con.AreaX[dl.res], dl.AreaBets[dl.res])).Float64()
+	log.Debug("玩家的当局总下注: %v", dl.AreaBets)
+
 	switch dl.Bankers[0].(type) {
 	case User:
 		{
@@ -167,13 +169,13 @@ func (dl *Dealer) Settle() {
 			order := uuid.GenUUID()
 
 			if preBankerWin > 0 {
-				if preBankerWin > PaoMaDeng {
-					c4c.NoticeWinMoreThan(u.UserID, u.NickName, preBankerWin)
-				}
 				c4c.BankerWinScore(u.UserID, preBankerWin, order+"-banker-win", dl.RoundID, func(data *User) {
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
+					//庄家跑马灯
+					if dl.bankerWin > PaoMaDeng {
+						c4c.NoticeWinMoreThan(u.UserID, u.NickName, dl.bankerWin)
+					}
 					dl.bankerMoney = data.BankerBalance
-
 					// 玩家坐庄盈余池更新
 					err := db.UProfitPool(0, dl.bankerWin, dl.RoomID)
 					if err != nil {
@@ -241,18 +243,20 @@ func (dl *Dealer) playerSettle() {
 		order := uuid.GenUUID()
 		var winFlag bool
 		if uWin > 0 {
-			if uWin > PaoMaDeng {
-				c4c.NoticeWinMoreThan(user.UserID, user.NickName, uWin)
-			}
 			winFlag = true
 			c4c.UserWinScore(user.UserID, uWin, order, dl.RoundID, func(data *User) {
 				win, _ := decimal.NewFromFloat(data.Balance).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Sub(decimal.NewFromFloat(beforeBalance)).Float64()
+				if win > PaoMaDeng {
+					c4c.NoticeWinMoreThan(user.UserID, user.NickName, win)
+				}
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
+
 				user.BalanceLock.Unlock()
 				resp := dtoC.RSBMsg(win, 0, data.Balance, *dl)
 				user.ConnAgent.WriteMsg(&resp)
+				log.Debug("结算前端显示输赢的结果222:%v", win) //todo win税后
 			})
 		} else {
 			winFlag = false
