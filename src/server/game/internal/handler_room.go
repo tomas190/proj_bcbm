@@ -2,15 +2,15 @@ package internal
 
 import (
 	"fmt"
+	"github.com/name5566/leaf/gate"
+	"github.com/patrickmn/go-cache"
 	"proj_bcbm/src/server/constant"
+	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
 	"reflect"
 	"sort"
 	"time"
-	"github.com/name5566/leaf/gate"
-	"github.com/patrickmn/go-cache"
-	"proj_bcbm/src/server/log"
 )
 
 func (dl *Dealer) handleBet(args []interface{}) {
@@ -67,6 +67,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], *m)
 
 		dl.DownBetTotal += m.Chip
+		log.Debug("11111111111111 玩家总下注: %v", dl.DownBetTotal)
 
 		resp := &msg.BetInfoB{
 			Area:        m.Area,

@@ -247,7 +247,8 @@ func (dl *Dealer) playerSettle() {
 
 		if dl.DownBetTotal > 0 {
 			c4c.UserLoseScore(user.UserID, float64(dl.DownBetTotal), order, "", func(data *User) {
-				// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
+				log.Debug("玩家输钱结算: %v", dl.DownBetTotal)
+				//log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
