@@ -60,6 +60,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		ca.Set(fmt.Sprintf("%+v-bet", au.UserID), order, cache.DefaultExpiration)
 		c4c.UserLoseScore(au.UserID, -cs, order, "", func(data *User) {
 			// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
+			log.Debug("111111111111111111111111111")
 			au.BalanceLock.Lock()
 			au.Balance = data.Balance
 			au.BalanceLock.Unlock()
@@ -130,6 +131,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 	order := uuid.GenUUID()
 	c4c.UserLoseScore(au.UserID, -csSum, order, dl.RoundID, func(data *User) {
 		// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
+		log.Debug("222222222222222222222")
 		au.Balance = data.Balance
 
 		resp := &msg.AutoBetB{
