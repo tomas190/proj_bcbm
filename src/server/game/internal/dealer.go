@@ -243,18 +243,8 @@ func (dl *Dealer) playerSettle() {
 		// 前端显示的输赢 精度问题
 		uDisplayWin, _ := math.MultiFloat64(dl.UserBets[user.UserID][dl.res], constant.AreaX[dl.res]).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Float64()
 		beforeBalance := user.Balance
+
 		order := uuid.GenUUID()
-
-		if dl.DownBetTotal > 0 {
-			c4c.UserLoseScore(user.UserID, -dl.DownBetTotal, order, "", func(data *User) {
-				log.Debug("玩家输钱结算: %v", dl.DownBetTotal)
-				//log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
-				user.BalanceLock.Lock()
-				user.Balance = data.Balance
-				user.BalanceLock.Unlock()
-			})
-		}
-
 		var winFlag bool
 		if uWin > 0 {
 			log.Debug("玩家结算金额1: %v", uWin)
@@ -278,6 +268,16 @@ func (dl *Dealer) playerSettle() {
 			winFlag = false
 			resp := dtoC.RSBMsg(uDisplayWin, 0, user.Balance, *dl)
 			user.ConnAgent.WriteMsg(&resp)
+		}
+
+		if dl.DownBetTotal > 0 {
+			c4c.UserLoseScore(user.UserID, -dl.DownBetTotal, order, "", func(data *User) {
+				log.Debug("玩家输钱结算: %v", dl.DownBetTotal)
+				//log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
+				user.BalanceLock.Lock()
+				user.Balance = data.Balance
+				user.BalanceLock.Unlock()
+			})
 		}
 
 		// 玩家结算记录
