@@ -66,7 +66,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		// 用户具体投注信息
 		dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], *m)
 
-		dl.DownBetTotal += m.Chip
+		dl.DownBetTotal += constant.ChipSize[m.Chip]
 		log.Debug("11111111111111 玩家总下注: %v", dl.DownBetTotal)
 
 		resp := &msg.BetInfoB{

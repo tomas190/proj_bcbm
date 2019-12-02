@@ -48,7 +48,7 @@ type Dealer struct {
 	AreaBets       []float64            // 每个区域玩家投注总数
 	AreaBotBets    []float64            // 每个区域机器人投注总数
 
-	DownBetTotal uint32 //玩家总下注
+	DownBetTotal float64 //玩家总下注
 }
 
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
@@ -246,7 +246,7 @@ func (dl *Dealer) playerSettle() {
 		order := uuid.GenUUID()
 
 		if dl.DownBetTotal > 0 {
-			c4c.UserLoseScore(user.UserID, float64(dl.DownBetTotal), order, "", func(data *User) {
+			c4c.UserLoseScore(user.UserID, -dl.DownBetTotal, order, "", func(data *User) {
 				log.Debug("玩家输钱结算: %v", dl.DownBetTotal)
 				//log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
 				user.BalanceLock.Lock()
