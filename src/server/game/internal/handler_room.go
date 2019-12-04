@@ -128,7 +128,6 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 	order := uuid.GenUUID()
 	c4c.UserLoseScore(au.UserID, -csSum, order, dl.RoundID, func(data *User) {
 		// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
-		log.Debug("222222222222222222222")
 		au.Balance = data.Balance
 
 		resp := &msg.AutoBetB{
@@ -210,6 +209,7 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 
 	uuid := util.UUID{}
 	// 上庄
+	log.Debug("<<===== 上庄金额: %v =====>>",m.LockMoney)
 	c4c.ChangeBankerStatus(au.UserID, constant.BSGrabbingBanker, m.LockMoney, fmt.Sprintf("%+v-grabBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
 		bUser := User{
 			UserID:        au.UserID,

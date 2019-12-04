@@ -205,6 +205,11 @@ func (dl *Dealer) Settle() {
 		{
 			if preBankerWin > 0 {
 				dl.bankerWin = preBankerWin * 0.95
+				//机器人跑马灯
+				u := dl.Bankers[0].(User)
+				if dl.bankerWin > PaoMaDeng {
+					c4c.NoticeWinMoreThan(u.UserID, u.NickName, dl.bankerWin)
+				}
 				dl.bankerMoney = dl.bankerMoney + dl.bankerWin
 			} else {
 				dl.bankerWin = preBankerWin
@@ -251,7 +256,6 @@ func (dl *Dealer) playerSettle() {
 			winFlag = true
 			c4c.UserWinScore(user.UserID, uWin, order, dl.RoundID, func(data *User) {
 				win, _ := decimal.NewFromFloat(data.Balance).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Sub(decimal.NewFromFloat(beforeBalance)).Float64()
-				log.Debug("玩家结算金额2: %v", win)
 				if win > PaoMaDeng {
 					c4c.NoticeWinMoreThan(user.UserID, user.NickName, win)
 				}
@@ -303,6 +307,7 @@ func (dl *Dealer) playerSettle() {
 func (dl *Dealer) ClearChip() {
 	dl.Status = constant.RSClear
 	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime
+	dl.DownBetTotal = 0
 
 	// log.Debug("clear chip... %+v", dl.RoomID)
 

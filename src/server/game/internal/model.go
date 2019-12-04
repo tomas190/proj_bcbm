@@ -160,7 +160,7 @@ func (h *Hall) GetRoomsInfoResp() []*msg.RoomInfo {
 	return roomsInfoResp
 }
 
-// 替换用户连接
+// 替换用户连接  todo 替换用户链接
 func (h *Hall) ReplaceUserAgent(userID uint32, agent gate.Agent) error {
 	log.Debug("用户重连或顶替，正在替换agent %+v", userID)
 	// tip 这里会拷贝一份数据，需要替换的是记录中的，而非拷贝数据中的，还要注意替换连接之后要把数据绑定到新连接上
