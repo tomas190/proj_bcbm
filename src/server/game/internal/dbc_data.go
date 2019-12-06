@@ -32,12 +32,12 @@ type ProfitDB struct {
 
 // 玩家的记录
 type PlayerDownBetRecode struct {
-	Id          string               `json:"id" bson:"id"`                       // 玩家Id
-	RandId      string               `json:"rand_id" bson:"rand_id"`             // 随机Id
-	RoomId      string               `json:"room_id" bson:"room_id"`             // 所在房间
-	DownBetInfo map[uint32][]float64 `json:"down_bet_info" bson:"down_bet_info"` // 8个注池个下注金额
-	DownBetTime int64                `json:"down_bet_time" bson:"down_bet_time"` // 下注时间
-	CardResult  uint32               `json:"card_result" bson:"card_result"`     // 当局开牌结果
-	ResultMoney float64              `json:"result_money" bson:"result_money"`   // 当局输赢结果(税后)
-	TaxRate     float64              `json:"tax_rate" bson:"tax_rate"`           // 税率
+	Id          string      `json:"id" bson:"id"`                       // 玩家Id
+	RandId      string      `json:"rand_id" bson:"rand_id"`             // 随机Id
+	RoomId      string      `json:"room_id" bson:"room_id"`             // 所在房间
+	DownBetInfo []float64 `json:"down_bet_info" bson:"down_bet_info"`   // 8个注池个下注金额
+	DownBetTime int64       `json:"down_bet_time" bson:"down_bet_time"` // 下注时间
+	CardResult  uint32      `json:"card_result" bson:"card_result"`     // 当局开牌结果
+	ResultMoney float64     `json:"result_money" bson:"result_money"`   // 当局输赢结果(税后)
+	TaxRate     float64     `json:"tax_rate" bson:"tax_rate"`           // 税率
 }

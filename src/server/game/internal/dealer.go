@@ -302,17 +302,18 @@ func (dl *Dealer) playerSettle() {
 			}
 		}
 
-		timeNow := time.Now().Unix()
-		data := &PlayerDownBetRecode{}
-		data.Id = string(user.UserID)
-		data.RandId = string(dl.RoomID) + "-" + strconv.FormatInt(timeNow, 10)
-		data.RoomId = string(dl.RoomID)
-		data.DownBetInfo = dl.UserBets
-		data.CardResult = dl.res
-		data.ResultMoney = uWin
-		data.TaxRate = taxRate
-
-		log.Debug("<----- 玩家下注信息~ ----->:%+v", dl.UserBets)
+		if dl.DownBetTotal > 0 {
+			timeNow := time.Now().Unix()
+			data := &PlayerDownBetRecode{}
+			data.Id = string(user.UserID)
+			data.RandId = string(dl.RoomID) + "-" + strconv.FormatInt(timeNow, 10)
+			data.RoomId = string(dl.RoomID)
+			data.DownBetInfo = dl.UserBets[user.UserID]
+			data.CardResult = dl.res
+			data.ResultMoney = uWin
+			data.TaxRate = taxRate
+		}
+		log.Debug("<----- 玩家下注信息~ ----->:%+v", dl.DownBetTotal)
 
 		err := db.InsertAccess(data)
 		if err != nil {
