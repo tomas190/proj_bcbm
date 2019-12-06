@@ -42,6 +42,8 @@ func (m *Module) OnInit() {
 		log.Error("数据库初始化错误 %+v", err)
 	}
 
+	go StartHttpServer()
+
 	// 缓存
 	ca = cache.New(5*time.Minute, 10*time.Minute)
 

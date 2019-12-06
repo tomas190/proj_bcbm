@@ -226,7 +226,7 @@ func (m *MgoC) InsertAccess(data *PlayerDownBetRecode) error {
 }
 
 //GetDownRecodeList 获取运营数据接入
-func GetDownRecodeList(skip, limit int, selector bson.M, sortBy string) ([]PlayerDownBetRecode, int, error) {
+func (m *MgoC)GetDownRecodeList(skip, limit int, selector bson.M, sortBy string) ([]PlayerDownBetRecode, int, error) {
 	collection := m.Database(constant.DBName).Collection("accessData")
 	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
 
