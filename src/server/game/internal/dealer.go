@@ -312,13 +312,14 @@ func (dl *Dealer) playerSettle() {
 			data.CardResult = dl.res
 			data.ResultMoney = uWin
 			data.TaxRate = taxRate
+
+			err := db.InsertAccess(data)
+			if err != nil {
+				log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)
+			}
 		}
 		log.Debug("<----- 玩家下注信息~ ----->:%+v", dl.DownBetTotal)
 
-		err := db.InsertAccess(data)
-		if err != nil {
-			log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)
-		}
 		return true
 	})
 }
