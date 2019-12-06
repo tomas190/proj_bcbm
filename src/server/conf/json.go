@@ -16,6 +16,7 @@ var Server struct {
 	MaxConnNum  int
 	ConsolePort int
 	ProfilePath string
+	HTTPPort string
 
 	TokenServer      string
 	CenterServer     string

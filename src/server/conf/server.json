@@ -1,15 +1,17 @@
 {
-	"LogLevel": "debug",
-	"LogPath": "",
-	"WSAddr": "0.0.0.0:1220",
-	"MaxConnNum": 20000,
+  "LogLevel": "debug",
+  "LogPath": "",
+  "WSAddr": "0.0.0.0:1220",
+  "MaxConnNum": 20000,
+  
+  "HTTPPort": 1237,
 
-	"TokenServer":"http://172.16.100.2:9502/Token/getToken",
-	"CenterServer": "http://172.16.100.2:9502",
-	"CenterServerPort": "9502",
-	"DevKey": "new_game_17",
-	"DevName": "新游戏开发",
-	"GameID": "5b1f3a3cb76a591e7f251716",
-	"MongoDB": "mongodb://172.16.100.5:27017",
-	"LogServer": "http://172.16.100.7:4151/pub?topic=game-server"
+  "TokenServer": "http://172.16.100.2:9502/Token/getToken",
+  "CenterServer": "http://172.16.100.2:9502",
+  "CenterServerPort": "9502",
+  "DevKey": "new_game_17",
+  "DevName": "新游戏开发",
+  "GameID": "5b1f3a3cb76a591e7f251716",
+  "MongoDB": "mongodb://172.16.100.5:27017",
+  "LogServer": "http://172.16.100.7:4151/pub?topic=game-server"
 }
