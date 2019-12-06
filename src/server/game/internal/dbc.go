@@ -208,3 +208,37 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 
 	return nil
 }
+
+//InsertAccessData 插入运营数据接入
+func (m *MgoC) InsertAccess(data *PlayerDownBetRecode) error {
+	collection := m.Database(constant.DBName).Collection("accessData")
+	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+
+	res, err := collection.InsertOne(ctx, data)
+	if err != nil {
+		log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)
+		return err
+	}
+
+	log.Debug("运营接入数据插入成功: %+v", res)
+
+	return nil
+}
+
+//GetDownRecodeList 获取运营数据接入
+func GetDownRecodeList(skip, limit int, selector bson.M, sortBy string) ([]PlayerDownBetRecode, int, error) {
+	collection := m.Database(constant.DBName).Collection("accessData")
+	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+
+	var wts []PlayerDownBetRecode
+
+	n, err := collection.Find(ctx, selector).Count()
+	if err != nil {
+		return nil, 0, err
+	}
+	err = collection.Find(selector).Sort(sortBy).Skip(skip).Limit(limit).All(&wts)
+	if err != nil {
+		return nil, 0, err
+	}
+	return wts, n, nil
+}

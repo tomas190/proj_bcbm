@@ -9,6 +9,7 @@ import (
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -50,6 +51,8 @@ type Dealer struct {
 
 	DownBetTotal float64 //玩家总下注
 }
+
+const taxRate = 0.05
 
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 	return &Dealer{
@@ -299,6 +302,20 @@ func (dl *Dealer) playerSettle() {
 			}
 		}
 
+		timeNow := time.Now().Unix()
+		data := &PlayerDownBetRecode{}
+		data.Id = string(user.UserID)
+		data.RandId = string(dl.RoomID) + "-" + strconv.FormatInt(timeNow, 10)
+		data.RoomId = string(dl.RoomID)
+		data.DownBetInfo = dl.UserBets
+		data.CardResult = dl.res
+		data.ResultMoney = uWin
+		data.TaxRate = taxRate
+
+		err := db.InsertAccess(data)
+		if err != nil {
+			log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)
+		}
 		return true
 	})
 }

@@ -26,6 +26,7 @@ const (
 	RL1MinLimit = 50
 )
 
+
 var ChipSize = map[uint32]float64{
 	1: 1,
 	2: 10,
