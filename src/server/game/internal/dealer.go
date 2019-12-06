@@ -312,6 +312,8 @@ func (dl *Dealer) playerSettle() {
 		data.ResultMoney = uWin
 		data.TaxRate = taxRate
 
+		log.Debug("<----- 玩家下注信息~ ----->:%+v", dl.UserBets)
+
 		err := db.InsertAccess(data)
 		if err != nil {
 			log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)

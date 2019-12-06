@@ -11,6 +11,6 @@
   "DevKey": "new_game_17",
   "DevName": "新游戏开发",
   "GameID": "5b1f3a3cb76a591e7f251716",
-  "MongoDB": "mongodb://172.16.100.5:27017",
+  "MongoDB": "mongodb://bcbm:123456@172.16.100.5:27017",
   "LogServer": "http://172.16.100.7:4151/pub?topic=game-server"
 }

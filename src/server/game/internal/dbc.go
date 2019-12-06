@@ -72,7 +72,6 @@ func (m *MgoC) RUserInfo(userID uint32) error {
 	if err != nil {
 		log.Debug("查找用户信息错误 %+v", err)
 	}
-
 	return err
 }
 

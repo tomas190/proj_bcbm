@@ -81,7 +81,7 @@ func (u User) GetPlayerAccount() (uint32, float64) {
 			log.Debug("转换投注数错误 error")
 		}
 	} else {
-		log.Debug("查找投注数错误 error")
+		//log.Debug("查找投注数错误 error") todo
 	}
 
 	if v2, exist2 := ca.Get(fmt.Sprintf("%+v-winCount", u.UserID)); exist2 {
@@ -91,7 +91,7 @@ func (u User) GetPlayerAccount() (uint32, float64) {
 			log.Debug("转换胜场数错误 error")
 		}
 	} else {
-		log.Debug("查找胜场数错误 error")
+		//log.Debug("查找胜场数错误 error")
 	}
 	return winCount, betAmount
 }
