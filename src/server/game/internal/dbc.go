@@ -225,19 +225,31 @@ func (m *MgoC) InsertAccess(data *PlayerDownBetRecode) error {
 }
 
 //GetDownRecodeList 获取运营数据接入
-func (m *MgoC)GetDownRecodeList(skip, limit int, selector bson.M, sortBy string) ([]PlayerDownBetRecode, int, error) {
+func (m *MgoC) GetDownRecodeList(Id string) ([]PlayerDownBetRecode, int, error) {
 	collection := m.Database(constant.DBName).Collection("accessData")
 	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
 
+	filter := bson.M{"id": Id}
+	opt := options.Find()
+	opt.SetLimit(20)
+
+	cur, err := collection.Find(ctx, filter, opt)
+
 	var wts []PlayerDownBetRecode
 
-	n, err := collection.Find(ctx, selector).Count()
-	if err != nil {
-		return nil, 0, err
+	for cur.Next(ctx) {
+		var PRecode PlayerDownBetRecode
+		err := cur.Decode(&PRecode)
+		if err != nil {
+			log.Debug("数据库数据解码错误 %+v", err)
+		}
+		wts = append(wts, PRecode)
 	}
-	err = collection.Find(selector).Sort(sortBy).Skip(skip).Limit(limit).All(&wts)
+
+	count, err := collection.CountDocuments(ctx, filter)
 	if err != nil {
-		return nil, 0, err
+		log.Debug("获取用户数量错误 %+v", err)
 	}
-	return wts, n, nil
+
+	return wts, count, nil
 }
