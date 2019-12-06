@@ -156,6 +156,5 @@ func (dl *Dealer) NextBotBanker() Bot {
 		botType:   constant.BTNextBanker,
 	}
 
-	log.Debug("<<===== 机器人庄家: %v =====>>", nextBanker)
 	return nextBanker
 }
