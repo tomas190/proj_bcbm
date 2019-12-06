@@ -3,8 +3,7 @@
   "LogPath": "",
   "WSAddr": "0.0.0.0:1220",
   "MaxConnNum": 20000,
-
-  "HTTPPort": 1237,
+  "HTTPPort": "1237",
 
   "TokenServer": "http://172.16.100.2:9502/Token/getToken",
   "CenterServer": "http://172.16.100.2:9502",

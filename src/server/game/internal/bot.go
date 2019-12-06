@@ -103,8 +103,8 @@ func (dl *Dealer) BetGod() Bot {
 	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
 
 	betGod := Bot{
-		UserID: UserID,
-		// NickName:  "betGod",
+		UserID:    UserID,
+		NickName:  string(UserID),
 		Avatar:    avatar,
 		Balance:   Balance,
 		WinCount:  WinCount,
@@ -154,5 +154,6 @@ func (dl *Dealer) NextBotBanker() Bot {
 		botType:   constant.BTNextBanker,
 	}
 
+	log.Debug("<<===== 机器人庄家: %v =====>>", nextBanker)
 	return nextBanker
 }
