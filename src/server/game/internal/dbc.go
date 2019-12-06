@@ -251,5 +251,5 @@ func (m *MgoC) GetDownRecodeList(Id string) ([]PlayerDownBetRecode, int, error) 
 		log.Debug("获取用户数量错误 %+v", err)
 	}
 
-	return wts, count, nil
+	return wts, int(count), nil
 }
