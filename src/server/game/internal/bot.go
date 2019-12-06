@@ -101,10 +101,11 @@ func (dl *Dealer) BetGod() Bot {
 	Balance := float64(0+r.RandInRange(200, 1888)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
 	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                              // 用户ID
 	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
+	randNum := fmt.Sprintf("%06v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000000000))
 
 	betGod := Bot{
 		UserID:    UserID,
-		NickName:  string(UserID),
+		NickName:  randNum,
 		Avatar:    avatar,
 		Balance:   Balance,
 		WinCount:  WinCount,
@@ -143,10 +144,11 @@ func (dl *Dealer) NextBotBanker() Bot {
 	Balance := float64(0 + r.RandInRange(6000, 10000))        // 金币数
 	UserID := uint32(100000000 + r.RandInRange(0, 200000000)) // 用户ID
 	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
+	randNum := fmt.Sprintf("%06v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000000000))
 
 	nextBanker := Bot{
 		UserID:    UserID,
-		NickName:  string(UserID),
+		NickName:  randNum,
 		Avatar:    avatar,
 		Balance:   Balance,
 		WinCount:  WinCount,
