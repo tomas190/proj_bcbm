@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"gopkg.in/mgo.v2/bson"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -235,7 +234,7 @@ func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string
 
 	var wts []PlayerDownBetRecode
 
-	cur, err := collection.Find(ctx, selector, opt).Skip(skip).Limit(limit).All(&wts)
+	cur, err := collection.Find(ctx, selector, opt).Skip(skip).Limit(limit)
 
 	for cur.Next(ctx) {
 		var PRecode PlayerDownBetRecode
