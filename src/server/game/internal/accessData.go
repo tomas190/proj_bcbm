@@ -28,9 +28,9 @@ type ApiResp struct {
 type GameData struct {
 	Time       int64       `json:"time"`
 	TimeFmt    string      `json:"time_fmt"`
-	PlayerId   string      `json:"player_id"`
-	RoundId    string      `json:"round_id"`
-	RoomId     string      `json:"room_id"`
+	PlayerId   uint32      `json:"player_id"`
+	RoundId    uint32      `json:"round_id"`
+	RoomId     uint32      `json:"room_id"`
 	TaxRate    float64     `json:"tax_rate"`
 	Card       interface{} `json:"card"`       // 开牌信息
 	BetInfo    interface{} `json:"bet_info"`   // 玩家下注信息  //todo  betinfo
