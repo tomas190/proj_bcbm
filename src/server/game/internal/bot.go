@@ -45,7 +45,7 @@ func (dl *Dealer) BotsBet() {
 
 		// 限红
 		if dl.roomBonusLimit(area) < cs || dl.dynamicBonusLimit(area) < cs {
-			log.Debug("<<===== 机器人下注结束 =====>>")
+			//log.Debug("<<===== 机器人下注结束 =====>>")
 			continue
 		}
 		// 区域所有玩家投注总数

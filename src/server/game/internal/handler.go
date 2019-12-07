@@ -178,7 +178,7 @@ func handleRoomEvent(args []interface{}) {
 	u, ok := a.UserData().(*User)
 	_, logged := Mgr.UserRecord.Load(u.UserID)
 	_, inRoom := Mgr.UserRoom[u.UserID]
-	log.Debug("<----game 房间事件 %v %v %v---->", u.UserID, reflect.TypeOf(args[0]), args[0])
+	//log.Debug("<----game 房间事件 %v %v %v---->", u.UserID, reflect.TypeOf(args[0]), args[0])
 
 	if ok && logged && inRoom {
 		// 找到玩家房间
@@ -187,7 +187,7 @@ func handleRoomEvent(args []interface{}) {
 		if ok {
 			v, _ := Mgr.RoomRecord.Load(roomID)
 			dealer := v.(*Dealer)
-			log.Debug("当前房间状态 %v", dealer.Status)
+			//log.Debug("当前房间状态 %v", dealer.Status)
 			switch t := args[0].(type) {
 			case *msg.Bet:
 				dealer.handleBet(args)

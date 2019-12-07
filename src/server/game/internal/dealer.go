@@ -9,7 +9,6 @@ import (
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -253,6 +252,7 @@ func (dl *Dealer) playerSettle() {
 		beforeBalance := user.Balance
 
 		order := uuid.GenUUID()
+		var ResultMoney float64
 		var winFlag bool
 		if uWin > 0 {
 			log.Debug("玩家结算金额1: %v", uWin)
@@ -262,6 +262,7 @@ func (dl *Dealer) playerSettle() {
 				if win > PaoMaDeng {
 					c4c.NoticeWinMoreThan(user.UserID, user.NickName, win)
 				}
+				ResultMoney = win
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
@@ -269,9 +270,10 @@ func (dl *Dealer) playerSettle() {
 				user.BalanceLock.Unlock()
 				resp := dtoC.RSBMsg(win, 0, data.Balance, *dl)
 				user.ConnAgent.WriteMsg(&resp)
-				log.Debug("结算前端显示输赢的结果222:%v", win) //todo win税后
 			})
 		} else {
+			ResultMoney -= dl.DownBetTotal
+			log.Debug("玩家结算金额2: %v", uWin)
 			winFlag = false
 			resp := dtoC.RSBMsg(uDisplayWin, 0, user.Balance, *dl)
 			user.ConnAgent.WriteMsg(&resp)
@@ -305,12 +307,13 @@ func (dl *Dealer) playerSettle() {
 		if dl.DownBetTotal > 0 {
 			timeNow := time.Now().Unix()
 			data := &PlayerDownBetRecode{}
-			data.Id = string(user.UserID)
-			data.RandId = string(dl.RoomID) + "-" + strconv.FormatInt(timeNow, 10)
-			data.RoomId = string(dl.RoomID)
+			data.Id = user.UserID
+			data.RandId = dl.RoomID + - +uint32(timeNow)
+			data.RoomId = dl.RoomID
 			data.DownBetInfo = dl.UserBets[user.UserID]
+			data.DownBetTime = timeNow
 			data.CardResult = dl.res
-			data.ResultMoney = uWin
+			data.ResultMoney = ResultMoney
 			data.TaxRate = taxRate
 
 			err := db.InsertAccess(data)
