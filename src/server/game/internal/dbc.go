@@ -234,7 +234,7 @@ func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string
 
 	var wts []PlayerDownBetRecode
 
-	cur, err := collection.Find(ctx, selector, opt).Skip(skip).Limit(limit)
+	cur, err := collection.Find(ctx, selector, opt)
 
 	for cur.Next(ctx) {
 		var PRecode PlayerDownBetRecode

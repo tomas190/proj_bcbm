@@ -40,7 +40,7 @@ type Dealer struct {
 	UserLeave      []uint32             // 用户是否在房间
 	Bots           []*Bot               // 房间机器人
 	Bankers        []Player             // 上庄玩家榜单
-	DownBanker     bool                 // 手动下庄
+	DownBanker     bool                 // 手动下
 	UserBets       map[uint32][]float64 // 用户投注信息，在8个区域分别投了多少
 	UserBetsDetail map[uint32][]msg.Bet // 用户具体投注
 	UserAutoBet    map[uint32]bool      // 本局投注记录

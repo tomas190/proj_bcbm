@@ -247,6 +247,22 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 
 	au := a.UserData().(*User)
 
+	if dl.DownBetTotal > 0 {  // todo
+		resp := &msg.LeaveRoomR{
+			User: &msg.UserInfo{
+				UserID:   au.UserID,
+				Avatar:   au.Avatar,
+				NickName: au.NickName,
+				Money:    au.Balance,
+			},
+			Rooms:      Mgr.GetRoomsInfoResp(),
+			ServerTime: uint32(time.Now().Unix()),
+		}
+
+		a.WriteMsg(resp)
+		return
+	}
+
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
 	math := util.Math{}
