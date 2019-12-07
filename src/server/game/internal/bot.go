@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"proj_bcbm/src/server/constant"
-	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
 	"time"

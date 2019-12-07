@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"fmt"
+	"gopkg.in/mgo.v2/bson"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -225,17 +226,16 @@ func (m *MgoC) InsertAccess(data *PlayerDownBetRecode) error {
 }
 
 //GetDownRecodeList 获取运营数据接入
-func (m *MgoC) GetDownRecodeList(Id string) ([]PlayerDownBetRecode, int, error) {
+func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string) ([]PlayerDownBetRecode, int, error) {
 	collection := m.Database(constant.DBName).Collection("accessData")
 	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
 
-	filter := bson.M{"id": Id}
 	opt := options.Find()
 	opt.SetLimit(20)
 
-	cur, err := collection.Find(ctx, filter, opt)
-
 	var wts []PlayerDownBetRecode
+
+	cur, err := collection.Find(ctx, selector, opt).Skip(skip).Limit(limit).All(&wts)
 
 	for cur.Next(ctx) {
 		var PRecode PlayerDownBetRecode
@@ -246,10 +246,11 @@ func (m *MgoC) GetDownRecodeList(Id string) ([]PlayerDownBetRecode, int, error) 
 		wts = append(wts, PRecode)
 	}
 
-	count, err := collection.CountDocuments(ctx, filter)
+	count, err := collection.CountDocuments(ctx, selector)
 	if err != nil {
 		log.Debug("获取用户数量错误 %+v", err)
 	}
+	log.Debug("获取用户数量 %+v", count)
 
 	return wts, int(count), nil
 }
