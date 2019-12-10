@@ -67,6 +67,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], *m)
 
 		dl.DownBetTotal += constant.ChipSize[m.Chip]
+		au.Balance -= constant.ChipSize[m.Chip]
 		//log.Debug("11111111111111 玩家总下注: %v", dl.DownBetTotal)
 
 		resp := &msg.BetInfoB{
@@ -79,7 +80,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		}
 		dl.Broadcast(resp)
 
-		log.Debug("<<=====>>玩家金额: %v",  au.Balance)
+		log.Debug("<<=====>>玩家金额: %v", au.Balance)
 		// fixme 暂时延迟处理
 		time.Sleep(6 * time.Millisecond)
 		ca.Delete(fmt.Sprintf("%+v-bet", au.UserID))
@@ -123,24 +124,19 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 
 		autoBetAmounts[bet.Area] += cs
 		csSum += cs
+		dl.DownBetTotal += cs
+		au.Balance -= cs
 	}
 
-	uuid := util.UUID{}
-	order := uuid.GenUUID()
-	c4c.UserLoseScore(au.UserID, -csSum, order, dl.RoundID, func(data *User) {
-		// log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
-		au.Balance = data.Balance
+	resp := &msg.AutoBetB{
+		UserID:      au.UserID,
+		Amounts:     autoBetAmounts,
+		AreaTotal:   dl.AreaBets,
+		PlayerTotal: dl.UserBets[au.UserID],
+		Money:       au.Balance,
+	}
 
-		resp := &msg.AutoBetB{
-			UserID:      au.UserID,
-			Amounts:     autoBetAmounts,
-			AreaTotal:   dl.AreaBets,
-			PlayerTotal: dl.UserBets[au.UserID],
-			Money:       au.Balance,
-		}
-
-		dl.Broadcast(resp)
-	})
+	dl.Broadcast(resp)
 
 	dl.UserAutoBet[au.UserID] = true
 }
@@ -210,7 +206,7 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 
 	uuid := util.UUID{}
 	// 上庄
-	log.Debug("<<===== 上庄金额: %v =====>>",m.LockMoney)
+	log.Debug("<<===== 上庄金额: %v =====>>", m.LockMoney)
 	c4c.ChangeBankerStatus(au.UserID, constant.BSGrabbingBanker, m.LockMoney, fmt.Sprintf("%+v-grabBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
 		bUser := User{
 			UserID:        au.UserID,
@@ -248,7 +244,7 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 
 	au := a.UserData().(*User)
 
-	if dl.DownBetTotal > 0 {  // todo
+	if dl.DownBetTotal > 0 { // todo
 		resp := &msg.LeaveRoomR{
 			User: &msg.UserInfo{
 				UserID:   au.UserID,

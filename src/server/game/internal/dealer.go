@@ -259,9 +259,6 @@ func (dl *Dealer) playerSettle() {
 			winFlag = true
 			c4c.UserWinScore(user.UserID, uWin, order, dl.RoundID, func(data *User) {
 				win, _ := decimal.NewFromFloat(data.Balance).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Sub(decimal.NewFromFloat(beforeBalance)).Float64()
-				if win > PaoMaDeng {
-					c4c.NoticeWinMoreThan(user.UserID, user.NickName, win)
-				}
 				ResultMoney = win
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
@@ -292,6 +289,10 @@ func (dl *Dealer) playerSettle() {
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
 			})
+		}
+
+		if ResultMoney > PaoMaDeng {
+			c4c.NoticeWinMoreThan(user.UserID, user.NickName, ResultMoney)
 		}
 
 		// 玩家结算记录
