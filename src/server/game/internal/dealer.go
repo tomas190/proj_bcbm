@@ -248,7 +248,6 @@ func (dl *Dealer) playerSettle() {
 		// 中心服需要结算的输赢
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
 		// 前端显示的输赢 精度问题
-		uDisplayWin, _ := math.MultiFloat64(dl.UserBets[user.UserID][dl.res], constant.AreaX[dl.res]).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Float64()
 		beforeBalance := user.Balance
 
 		order := uuid.GenUUID()
@@ -265,8 +264,6 @@ func (dl *Dealer) playerSettle() {
 				user.Balance = data.Balance
 
 				user.BalanceLock.Unlock()
-				resp := dtoC.RSBMsg(win, 0, data.Balance, *dl)
-				user.ConnAgent.WriteMsg(&resp)
 			})
 		} else {
 			ResultMoney -= dl.DownBetTotal
@@ -280,15 +277,15 @@ func (dl *Dealer) playerSettle() {
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
-
-				resp := dtoC.RSBMsg(uDisplayWin, 0, user.Balance, *dl)
-				user.ConnAgent.WriteMsg(&resp)
 			})
 		}
 
 		if ResultMoney > PaoMaDeng {
 			c4c.NoticeWinMoreThan(user.UserID, user.NickName, ResultMoney)
 		}
+
+		resp := dtoC.RSBMsg(ResultMoney, 0, user.Balance, *dl)
+		user.ConnAgent.WriteMsg(&resp)
 
 		// 玩家结算记录
 		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
