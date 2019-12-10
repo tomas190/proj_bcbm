@@ -248,6 +248,8 @@ func (dl *Dealer) playerSettle() {
 		// 中心服需要结算的输赢
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
 		// 前端显示的输赢 精度问题
+		uDisplayWin, _ := math.MultiFloat64(dl.UserBets[user.UserID][dl.res], constant.AreaX[dl.res]).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Float64()
+		log.Debug("前端显示的输赢金额：%v",uDisplayWin)
 		beforeBalance := user.Balance
 
 		order := uuid.GenUUID()
