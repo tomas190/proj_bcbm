@@ -266,8 +266,8 @@ func (dl *Dealer) playerSettle() {
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
-				user.BalanceLock.Unlock()
 
+				user.BalanceLock.Unlock()
 				resp := dtoC.RSBMsg(win, 0, data.Balance, *dl)
 				user.ConnAgent.WriteMsg(&resp)
 			})
@@ -275,10 +275,13 @@ func (dl *Dealer) playerSettle() {
 			ResultMoney -= dl.DownBetTotal
 			log.Debug("玩家结算金额2: %v", uWin)
 			winFlag = false
+			resp := dtoC.RSBMsg(uDisplayWin, 0, user.Balance, *dl)
+			user.ConnAgent.WriteMsg(&resp)
 		}
 
 		if dl.DownBetTotal > 0 {
 			c4c.UserLoseScore(user.UserID, -dl.DownBetTotal, order, "", func(data *User) {
+
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
@@ -288,9 +291,6 @@ func (dl *Dealer) playerSettle() {
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
-
-				resp := dtoC.RSBMsg(uDisplayWin, 0, user.Balance, *dl)
-				user.ConnAgent.WriteMsg(&resp)
 			})
 		}
 
