@@ -272,22 +272,17 @@ func (dl *Dealer) playerSettle() {
 			ResultMoney -= dl.DownBetTotal
 			log.Debug("玩家结算金额2: %v", uWin)
 			winFlag = false
-			resp := dtoC.RSBMsg(uDisplayWin, 0, user.Balance, *dl)
-			user.ConnAgent.WriteMsg(&resp)
 		}
 
 		if dl.DownBetTotal > 0 {
 			c4c.UserLoseScore(user.UserID, -dl.DownBetTotal, order, "", func(data *User) {
-
-				user.BalanceLock.Lock()
-				user.Balance = data.Balance
-				user.BalanceLock.Unlock()
-
 				log.Debug("玩家输钱结算: %v", dl.DownBetTotal)
-				//log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
+
+				resp := dtoC.RSBMsg(uDisplayWin, 0, user.Balance, *dl)
+				user.ConnAgent.WriteMsg(&resp)
 			})
 		}
 
