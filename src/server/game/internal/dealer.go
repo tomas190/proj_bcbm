@@ -249,7 +249,7 @@ func (dl *Dealer) playerSettle() {
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
 		// 前端显示的输赢 精度问题
 		uDisplayWin, _ := math.MultiFloat64(dl.UserBets[user.UserID][dl.res], constant.AreaX[dl.res]).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Float64()
-		log.Debug("前端显示的输赢金额：%v",uDisplayWin)
+		log.Debug("前端显示的输赢金额：%v", uDisplayWin)
 		beforeBalance := user.Balance
 
 		order := uuid.GenUUID()
@@ -264,12 +264,15 @@ func (dl *Dealer) playerSettle() {
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
-
 				user.BalanceLock.Unlock()
+				resp := dtoC.RSBMsg(ResultMoney-dl.DownBetTotal, 0, user.Balance, *dl)
+				user.ConnAgent.WriteMsg(&resp)
 			})
 		} else {
 			log.Debug("玩家结算金额2: %v", uWin)
 			winFlag = false
+			resp := dtoC.RSBMsg(ResultMoney-dl.DownBetTotal, 0, user.Balance, *dl)
+			user.ConnAgent.WriteMsg(&resp)
 		}
 
 		if dl.DownBetTotal > 0 {
@@ -280,10 +283,6 @@ func (dl *Dealer) playerSettle() {
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
 			})
-		}
-
-		if ResultMoney > PaoMaDeng {
-			c4c.NoticeWinMoreThan(user.UserID, user.NickName, ResultMoney)
 		}
 
 		resp := dtoC.RSBMsg(ResultMoney, 0, user.Balance, *dl)
