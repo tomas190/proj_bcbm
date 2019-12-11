@@ -265,7 +265,7 @@ func (dl *Dealer) playerSettle() {
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
-				resp := dtoC.RSBMsg(ResultMoney-dl.DownBetTotal, 0, user.Balance, *dl)
+				resp := dtoC.RSBMsg(ResultMoney-dl.DownBetTotal, 0, data.Balance, *dl)
 				user.ConnAgent.WriteMsg(&resp)
 			})
 		} else {
@@ -285,8 +285,9 @@ func (dl *Dealer) playerSettle() {
 			})
 		}
 
-		resp := dtoC.RSBMsg(ResultMoney, 0, user.Balance, *dl)
-		user.ConnAgent.WriteMsg(&resp)
+		if ResultMoney > PaoMaDeng {
+			c4c.NoticeWinMoreThan(user.UserID, user.NickName, ResultMoney)
+		}
 
 		// 玩家结算记录
 		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
