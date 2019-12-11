@@ -135,7 +135,7 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 			}
 
 			if msgType == websocket.TextMessage {
-				log.Debug("Msg from center %v", string(message))
+				//log.Debug("Msg from center %v", string(message))
 
 				var msg Server2CenterMsg
 				err = json.Unmarshal(message, &msg)
@@ -203,6 +203,8 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 
 	code := userData.Code
 	if code == constant.CRespStatusSuccess {
+		log.Debug("onUserLogin SUCCESS :%v",loginResp)
+
 		gameUser := userData.Msg.GameUser
 		gameAccount := userData.Msg.GameAccount
 
@@ -237,6 +239,8 @@ func (c4c *Client4Center) onUserLogout(msg []byte) {
 
 	code := userData.Code
 	if code == constant.CRespStatusSuccess {
+		log.Debug("onUserLogout SUCCESS :%v",logoutResp)
+
 		gameUser := userData.Msg.GameUser
 		gameAccount := userData.Msg.GameAccount
 
@@ -269,6 +273,7 @@ func (c4c *Client4Center) onUserWinScore(msg []byte) {
 
 	syncData := winResp.Data
 	if syncData.Code == constant.CRespStatusSuccess {
+		log.Debug("onUserWinScore SUCCESS :%v",winResp)
 
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
 			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})
@@ -292,6 +297,7 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 
 	syncData := loseResp.Data
 	if syncData.Code == constant.CRespStatusSuccess {
+		log.Debug("onUserLoseScore SUCCESS :%v",loseResp)
 
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
 			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})
@@ -315,6 +321,8 @@ func (c4c *Client4Center) onChangeBankerStatus(msg []byte) {
 
 	syncData := bankerResp.Data
 	if syncData.Code == constant.CRespStatusSuccess {
+		log.Debug("onChangeBankerStatus SUCCESS :%v",bankerResp)
+
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-banker-status-%+v", syncData.Msg.ID, syncData.Msg.Status)); ok {
 			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, BankerBalance: syncData.Msg.BankerBalance, Balance: syncData.Msg.Balance})
 			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-banker-status-%+v", syncData.Msg.ID, syncData.Msg.Status))
@@ -337,6 +345,7 @@ func (c4c *Client4Center) onBankerLoseScore(msg []byte) {
 
 	syncData := loseResp.Data
 	if syncData.Code == constant.CRespStatusSuccess {
+		log.Debug("onBankerLoseScore SUCCESS :%v",loseResp)
 
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-banker-lose-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
 			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, BankerBalance: syncData.Msg.FinalBankerBalance})
@@ -360,6 +369,7 @@ func (c4c *Client4Center) onBankerWinScore(msg []byte) {
 
 	syncData := winResp.Data
 	if syncData.Code == constant.CRespStatusSuccess {
+		log.Debug("onBankerWinScore SUCCESS :%v",winResp)
 
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-banker-win-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
 			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, BankerBalance: syncData.Msg.FinalBankerBalance})
@@ -376,7 +386,7 @@ func (c4c *Client4Center) onBankerWinScore(msg []byte) {
 
 
 func (c4c *Client4Center) onNotice(msg []byte) {
-		log.Debug("<-------- onWinMoreThanNotice success~!!! -------->")
+		log.Debug("<-------- onWinMoreThanNotice SUCCESS~!!! -------->")
 }
 
 func (c4c *Client4Center) onError(msg []byte) {

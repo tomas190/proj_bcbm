@@ -94,7 +94,7 @@ func handleLogin(args []interface{}) {
 				Rooms:      Mgr.GetRoomsInfoResp(),
 				ServerTime: uint32(time.Now().Unix()),
 			}
-			log.Debug("<----login 登录 resp---->%+v", resp)
+			//log.Debug("<----login 登录 resp---->%+v", resp)
 
 			// 重新绑定信息
 			u.ConnAgent = a
