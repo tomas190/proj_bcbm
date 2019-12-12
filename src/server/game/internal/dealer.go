@@ -257,7 +257,6 @@ func (dl *Dealer) playerSettle() {
 			winFlag = true
 			uWin = uWin - dl.UserBets[user.UserID][dl.res]
 			ResultMoney += uWin - (uWin * taxRate)
-			log.Debug("ResultMoney1 : %v", ResultMoney)
 
 			winOrder := strconv.Itoa(int(user.UserID))+"-"+time.Now().Format("2006-01-02 15:04:05")+"win"
 			c4c.UserWinScore(user.UserID, uWin, winOrder, dl.RoundID, func(data *User) {
@@ -265,8 +264,6 @@ func (dl *Dealer) playerSettle() {
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
-				log.Debug("玩家金币结算1 ：%v", user.Balance)
-				log.Debug("玩家金币结算2 ：%v", data.Balance)
 			})
 		} else {
 			winFlag = false
@@ -275,42 +272,30 @@ func (dl *Dealer) playerSettle() {
 		loseOrder := strconv.Itoa(int(user.UserID))+"-"+time.Now().Format("2006-01-02 15:04:05")+"lose"
 		if dl.DownBetTotal > 0 {
 			if uWin > 0 {
-				log.Debug("ResultMoney2 : %v", ResultMoney)
 				ResultMoney -= dl.DownBetTotal - dl.UserBets[user.UserID][dl.res]
-				log.Debug("ResultMoney3 : %v", ResultMoney)
 				result := -dl.DownBetTotal + dl.UserBets[user.UserID][dl.res]
 				c4c.UserLoseScore(user.UserID, result, loseOrder, "", func(data *User) {
 					user.BalanceLock.Lock()
 					user.Balance = data.Balance
 					user.BalanceLock.Unlock()
-					log.Debug("玩家金币结算3 ：%v", user.Balance)
-					log.Debug("玩家金币结算4 ：%v", data.Balance)
 				})
 			} else {
-				log.Debug("ResultMoney4 : %v", ResultMoney)
 				ResultMoney -= dl.DownBetTotal
-				log.Debug("ResultMoney5 : %v", ResultMoney)
 				c4c.UserLoseScore(user.UserID, -dl.DownBetTotal, loseOrder, "", func(data *User) {
 					user.BalanceLock.Lock()
 					user.Balance = data.Balance
 					user.BalanceLock.Unlock()
-					log.Debug("玩家金币结算5 ：%v", user.Balance)
-					log.Debug("玩家金币结算5 ：%v", data.Balance)
 				})
 			}
 		}
-
-		log.Debug("玩家返回金额 ：%v", user.Balance)
 
 		if ResultMoney > 0 {
 			user.Balance += dl.DownBetTotal + ResultMoney
 		}
 
 		resp := dtoC.RSBMsg(ResultMoney, 0, user.Balance, *dl)
-		log.Debug("user.Balance 金额：%v", user.Balance)
 		user.ConnAgent.WriteMsg(&resp)
 
-		log.Debug("玩家ResultMoney金额: %v", ResultMoney)
 		if ResultMoney > PaoMaDeng {
 			c4c.NoticeWinMoreThan(user.UserID, user.NickName, ResultMoney)
 		}
@@ -318,6 +303,7 @@ func (dl *Dealer) playerSettle() {
 		// 玩家结算记录
 		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
 		if uBet > 0 && uWin >= 0 {
+			order := strconv.Itoa(int(user.UserID))+"-"+time.Now().Format("2006-01-02 15:04:05")
 			sdb := daoC.Settle2DB(*user, order, dl.RoundID, winFlag, uBet, uWin)
 			err := db.CUserSettle(sdb)
 			if err != nil {
@@ -347,7 +333,6 @@ func (dl *Dealer) playerSettle() {
 				log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)
 			}
 		}
-		log.Debug("<----- 玩家下注信息~ ----->:%+v", dl.DownBetTotal)
 
 		return true
 	})
