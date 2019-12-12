@@ -485,12 +485,6 @@ func (c4c *Client4Center) UserLogoutCenter(userID uint32, callback UserCallback)
 		},
 	}
 
-	v, ok := Mgr.RoomRecord.Load(userID)
-	if ok {
-		p := v.(*User)
-		log.Debug("退出大厅，玩家金额为:%v", p)
-	}
-
 	c4c.sendMsg2Center(logoutMsg)
 	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-logout", userID), callback)
 }

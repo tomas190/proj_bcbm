@@ -9,6 +9,7 @@ import (
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -28,7 +29,6 @@ type Dealer struct {
 	ddl         uint32
 	bankerRound uint32 // 庄家做了多少轮
 
-	RoundID   string     // 轮次
 	Status    uint32     // 房间状态
 	res       uint32     // 最新开奖结果
 	pos       uint32     // 开奖位置
@@ -105,9 +105,6 @@ func (dl *Dealer) StartGame() {
 // 下注
 func (dl *Dealer) Bet() {
 	// 时间戳+随机数，每局一个
-	uid := util.UUID{}
-	dl.RoundID = fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
-
 	dl.Status = constant.RSBetting
 	dl.ddl = uint32(time.Now().Unix()) + con.BetTime
 
@@ -174,7 +171,9 @@ func (dl *Dealer) Settle() {
 
 			if preBankerWin > 0 {
 				log.Debug("玩家的当局总下注1: %v", preBankerWin)
-				c4c.BankerWinScore(u.UserID, preBankerWin, order+"-banker-win", dl.RoundID, func(data *User) {
+				timeStr := time.Now().Format("2006-01-02_15:04:05")
+				roundId := strconv.Itoa(int(u.UserID)) + "_" + timeStr + "_bankerWin"
+				c4c.BankerWinScore(u.UserID, preBankerWin, order+"-banker-win", roundId, func(data *User) {
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					log.Debug("玩家的当局总下注2: %v", dl.bankerWin)
 					//////庄家跑马灯
@@ -189,7 +188,9 @@ func (dl *Dealer) Settle() {
 					}
 				})
 			} else {
-				c4c.BankerLoseScore(u.UserID, preBankerWin, order+"-banker-lose", dl.RoundID, func(data *User) {
+				timeStr := time.Now().Format("2006-01-02_15:04:05")
+				roundId := strconv.Itoa(int(u.UserID)) + "_" + timeStr + "_bankerLose"
+				c4c.BankerLoseScore(u.UserID, preBankerWin, order+"-banker-lose", roundId, func(data *User) {
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					dl.bankerMoney = data.BankerBalance
 
@@ -259,7 +260,9 @@ func (dl *Dealer) playerSettle() {
 			ResultMoney += uWin - (uWin * taxRate)
 			log.Debug("ResultMoney1 : %v", ResultMoney)
 
-			c4c.UserWinScore(user.UserID, uWin, order, dl.RoundID, func(data *User) {
+			timeStr := time.Now().Format("2006-01-02_15:04:05")
+			roundId := strconv.Itoa(int(user.UserID)) + "_" + timeStr + "_userWin"
+			c4c.UserWinScore(user.UserID, uWin, order,roundId, func(data *User) {
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
@@ -298,6 +301,8 @@ func (dl *Dealer) playerSettle() {
 			}
 		}
 
+		log.Debug("玩家返回金额 ：%v", user.Balance)
+
 		if ResultMoney > 0 {
 			user.Balance += dl.DownBetTotal + ResultMoney
 		}
@@ -314,7 +319,9 @@ func (dl *Dealer) playerSettle() {
 		// 玩家结算记录
 		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
 		if uBet > 0 && uWin >= 0 {
-			sdb := daoC.Settle2DB(*user, order, dl.RoundID, winFlag, uBet, uWin)
+			timeStr := time.Now().Format("2006-01-02_15:04:05")
+			roundId := strconv.Itoa(int(user.UserID)) + "_" + timeStr
+			sdb := daoC.Settle2DB(*user, order, roundId, winFlag, uBet, uWin)
 			err := db.CUserSettle(sdb)
 			if err != nil {
 				log.Debug("保存用户结算数据错误 %+v", err)
@@ -374,7 +381,9 @@ func (dl *Dealer) ClearChip() {
 		switch dl.Bankers[0].(type) {
 		case User:
 			uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
-			c4c.ChangeBankerStatus(uid, constant.BSNotBanker, -dl.bankerMoney, fmt.Sprintf("%+v-notBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
+			timeStr := time.Now().Format("2006-01-02_15:04:05")
+			roundId := strconv.Itoa(int(uid)) + "_" + timeStr + "_bankerStatus"
+			c4c.ChangeBankerStatus(uid, constant.BSNotBanker, -dl.bankerMoney, fmt.Sprintf("%+v-notBanker", uuid.GenUUID()), roundId, func(data *User) {
 				log.Debug("<--- 玩家下庄 --->")
 				bankerResp := msg.BankersB{
 					Banker: dl.getBankerInfoResp(),
@@ -404,7 +413,9 @@ func (dl *Dealer) ClearChip() {
 			switch dl.Bankers[0].(type) {
 			case User:
 				uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
-				c4c.ChangeBankerStatus(uid, constant.BSBeingBanker, 0, fmt.Sprintf("%+v-beBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
+				timeStr := time.Now().Format("2006-01-02_15:04:05")
+				roundId := strconv.Itoa(int(uid)) + "_" + timeStr + "_bankerStatus"
+				c4c.ChangeBankerStatus(uid, constant.BSBeingBanker, 0, fmt.Sprintf("%+v-beBanker", uuid.GenUUID()), roundId, func(data *User) {
 					dec := util.Math{}
 					var ok bool
 					dl.bankerMoney, ok = dec.AddFloat64(data.BankerBalance, 0.0).Float64()

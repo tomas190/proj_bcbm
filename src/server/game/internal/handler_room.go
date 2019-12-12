@@ -10,6 +10,7 @@ import (
 	"proj_bcbm/src/server/util"
 	"reflect"
 	"sort"
+	"strconv"
 	"time"
 )
 
@@ -207,7 +208,9 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 	uuid := util.UUID{}
 	// 上庄
 	log.Debug("<<===== 上庄金额: %v =====>>", m.LockMoney)
-	c4c.ChangeBankerStatus(au.UserID, constant.BSGrabbingBanker, m.LockMoney, fmt.Sprintf("%+v-grabBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
+	timeStr := time.Now().Format("2006-01-02_15:04:05")
+	roundId := strconv.Itoa(int(au.UserID)) + "_" + timeStr + "_bankerStatus"
+	c4c.ChangeBankerStatus(au.UserID, constant.BSGrabbingBanker, m.LockMoney, fmt.Sprintf("%+v-grabBanker", uuid.GenUUID()),roundId, func(data *User) {
 		bUser := User{
 			UserID:        au.UserID,
 			Balance:       data.Balance,
@@ -305,7 +308,9 @@ func (dl *Dealer) cancelGrabBanker(userID uint32) {
 
 			uuid := util.UUID{}
 			// 玩家取消申请上庄
-			c4c.ChangeBankerStatus(userID, constant.BSNotBanker, -bankerBalance, fmt.Sprintf("%+v-cancelBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
+			timeStr := time.Now().Format("2006-01-02_15:04:05")
+			roundId := strconv.Itoa(int(userID)) + "_" + timeStr + "_bankerStatus"
+			c4c.ChangeBankerStatus(userID, constant.BSNotBanker, -bankerBalance, fmt.Sprintf("%+v-cancelBanker", uuid.GenUUID()), roundId, func(data *User) {
 				// 更新房间玩家列表中的玩家余额
 				dl.Users.Range(func(key, value interface{}) bool {
 					if key == uID {
