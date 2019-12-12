@@ -274,6 +274,17 @@ func (c4c *Client4Center) onUserWinScore(msg []byte) {
 	syncData := winResp.Data
 	if syncData.Code == constant.CRespStatusSuccess {
 		log.Debug("onUserWinScore SUCCESS :%v", winResp)
+
+		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
+			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})
+			// 回调成功之后要删除
+			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order))
+			// log.Debug("用户回调已删除: %+v, 回调队列 %+v", fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order), c4c.userWaitEvent)
+		} else {
+			log.Error("找不到用户回调")
+		}
+	} else {
+		log.Error("中心服务器状态码 %+v", syncData.Code)
 	}
 }
 
@@ -287,6 +298,17 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 	syncData := loseResp.Data
 	if syncData.Code == constant.CRespStatusSuccess {
 		log.Debug("onUserLoseScore SUCCESS :%v", loseResp)
+
+		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
+			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})
+			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order))
+			// log.Debug("用户回调已删除: %+v 回调队列 %+v", fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order), c4c.userWaitEvent)
+		} else {
+			log.Error("找不到用户回调")
+		}
+
+	} else {
+		log.Error("中心服务器状态码 %+v", syncData.Code)
 	}
 }
 
@@ -463,11 +485,17 @@ func (c4c *Client4Center) UserLogoutCenter(userID uint32, callback UserCallback)
 		},
 	}
 
+	v, ok := Mgr.RoomRecord.Load(userID)
+	if ok {
+		p := v.(*User)
+		log.Debug("退出大厅，玩家金额为:%v", p)
+	}
+
 	c4c.sendMsg2Center(logoutMsg)
 	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-logout", userID), callback)
 }
 
-func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order, roundID string) {
+func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order, roundID string, callback UserCallback) {
 	if !c4c.isServerLogin {
 		log.Debug("Game Server NOT Ready! Need login to Center Server!")
 		return
@@ -497,9 +525,10 @@ func (c4c *Client4Center) UserWinScore(userID uint32, money float64, order, roun
 	}
 
 	c4c.sendMsg2Center(winSettleMsg)
+	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-win-%+v", userID, order), callback)
 }
 
-func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, order, roundID string) {
+func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, order, roundID string, callback UserCallback) {
 	if !c4c.isServerLogin {
 		log.Debug("Game Server NOT Ready! Need login to Center Server!")
 		return
@@ -529,6 +558,7 @@ func (c4c *Client4Center) UserLoseScore(userID uint32, money float64, order, rou
 	}
 
 	c4c.sendMsg2Center(loseSettleMsg)
+	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-lose-%+v", userID, order), callback)
 }
 
 func (c4c *Client4Center) ChangeBankerStatus(userID uint32, status int, money float64, order, round string, callback UserCallback) {
