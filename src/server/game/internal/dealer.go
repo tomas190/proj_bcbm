@@ -258,6 +258,7 @@ func (dl *Dealer) playerSettle() {
 			winFlag = true
 			c4c.UserWinScore(user.UserID, uWin, order, dl.RoundID, func(data *User) {
 				win, _ := decimal.NewFromFloat(data.Balance).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Sub(decimal.NewFromFloat(beforeBalance)).Float64()
+				log.Debug("玩家结算金额2: %v", win)
 				if win > PaoMaDeng {
 					c4c.NoticeWinMoreThan(user.UserID, user.NickName, win)
 				}
