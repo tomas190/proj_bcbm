@@ -243,48 +243,52 @@ func (dl *Dealer) playerSettle() {
 	daoC := DAOConverter{}
 	math := util.Math{}
 	uuid := util.UUID{}
+
+	var ResultMoney float64
 	dl.Users.Range(func(key, value interface{}) bool {
 		user := value.(*User)
 		// 中心服需要结算的输赢
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
-		// 前端显示的输赢 精度问题
-		uDisplayWin, _ := math.MultiFloat64(dl.UserBets[user.UserID][dl.res], constant.AreaX[dl.res]).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Float64()
-		beforeBalance := user.Balance
 
 		order := uuid.GenUUID()
 		var winFlag bool
 		if uWin > 0 {
-			log.Debug("玩家结算金额1: %v", uWin)
 			winFlag = true
-			c4c.UserWinScore(user.UserID, uWin, order, dl.RoundID, func(data *User) {
-				win, _ := decimal.NewFromFloat(data.Balance).Sub(math.SumSliceFloat64(dl.UserBets[user.UserID])).Sub(decimal.NewFromFloat(beforeBalance)).Float64()
-				log.Debug("玩家结算金额2: %v", win)
-				if win > PaoMaDeng {
-					c4c.NoticeWinMoreThan(user.UserID, user.NickName, win)
-				}
-				// 赢钱之后更新余额
-				user.BalanceLock.Lock()
-				user.Balance = data.Balance
+			uWin = uWin - dl.UserBets[user.UserID][dl.res]
+			ResultMoney += uWin - (uWin * taxRate)
+			log.Debug("ResultMoney1 : %v", ResultMoney)
 
-				user.BalanceLock.Unlock()
-				resp := dtoC.RSBMsg(win, 0, data.Balance, *dl)
-				user.ConnAgent.WriteMsg(&resp)
-				log.Debug("结算前端显示输赢的结果222:%v", win) //todo win税后
-			})
+			c4c.UserWinScore(user.UserID, uWin, order, dl.RoundID)
+			// 赢钱之后更新余额
+			log.Debug("玩家金币结算1 ：%v", user.Balance)
 		} else {
 			winFlag = false
-			resp := dtoC.RSBMsg(uDisplayWin, 0, user.Balance, *dl)
-			user.ConnAgent.WriteMsg(&resp)
 		}
 
 		if dl.DownBetTotal > 0 {
-			c4c.UserLoseScore(user.UserID, -dl.DownBetTotal, order, "", func(data *User) {
-				log.Debug("玩家输钱结算: %v", dl.DownBetTotal)
-				//log.Debug("用户 %+v 下注后余额 %+v", data.UserID, data.Balance)
-				user.BalanceLock.Lock()
-				user.Balance = data.Balance
-				user.BalanceLock.Unlock()
-			})
+			if uWin > 0 {
+				log.Debug("ResultMoney2 : %v", ResultMoney)
+				ResultMoney -= dl.DownBetTotal - dl.UserBets[user.UserID][dl.res]
+				log.Debug("ResultMoney3 : %v", ResultMoney)
+				result := -dl.DownBetTotal + dl.UserBets[user.UserID][dl.res]
+				c4c.UserLoseScore(user.UserID, result, order, "")
+				log.Debug("玩家金币结算3 ：%v", user.Balance)
+			} else {
+				log.Debug("ResultMoney4 : %v", ResultMoney)
+				ResultMoney -= dl.DownBetTotal
+				log.Debug("ResultMoney5 : %v", ResultMoney)
+				c4c.UserLoseScore(user.UserID, -dl.DownBetTotal, order, "")
+				log.Debug("玩家金币结算5 ：%v", user.Balance)
+			}
+		}
+
+		resp := dtoC.RSBMsg(ResultMoney, 0, user.Balance, *dl)
+		log.Debug("user.Balance 金额：%v", user.Balance)
+		user.ConnAgent.WriteMsg(&resp)
+
+		log.Debug("玩家ResultMoney金额: %v", ResultMoney)
+		if ResultMoney > PaoMaDeng {
+			c4c.NoticeWinMoreThan(user.UserID, user.NickName, ResultMoney)
 		}
 
 		// 玩家结算记录
@@ -301,6 +305,25 @@ func (dl *Dealer) playerSettle() {
 				log.Debug("更新盈余池失败 %+v", err)
 			}
 		}
+
+		if dl.DownBetTotal > 0 {
+			timeNow := time.Now().Unix()
+			data := &PlayerDownBetRecode{}
+			data.Id = user.UserID
+			data.RandId = dl.RoomID + - +uint32(timeNow)
+			data.RoomId = dl.RoomID
+			data.DownBetInfo = dl.UserBets[user.UserID]
+			data.DownBetTime = timeNow
+			data.CardResult = dl.res
+			data.ResultMoney = ResultMoney
+			data.TaxRate = taxRate
+
+			err := db.InsertAccess(data)
+			if err != nil {
+				log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)
+			}
+		}
+		log.Debug("<----- 玩家下注信息~ ----->:%+v", dl.DownBetTotal)
 
 		return true
 	})
