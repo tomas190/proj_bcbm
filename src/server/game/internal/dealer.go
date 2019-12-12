@@ -254,6 +254,34 @@ func (dl *Dealer) playerSettle() {
 
 		order := uuid.GenUUID()
 		var winFlag bool
+
+		if dl.DownBetTotal > 0 {
+			if uWin > 0 {
+				log.Debug("ResultMoney2 : %v", ResultMoney)
+				ResultMoney -= dl.DownBetTotal - dl.UserBets[user.UserID][dl.res]
+				log.Debug("ResultMoney3 : %v", ResultMoney)
+				result := -dl.DownBetTotal + dl.UserBets[user.UserID][dl.res]
+				c4c.UserLoseScore(user.UserID, result, order, "", func(data *User) {
+					user.BalanceLock.Lock()
+					user.Balance = data.Balance
+					user.BalanceLock.Unlock()
+					log.Debug("玩家金币结算3 ：%v", user.Balance)
+					log.Debug("玩家金币结算4 ：%v", data.Balance)
+				})
+			} else {
+				log.Debug("ResultMoney4 : %v", ResultMoney)
+				ResultMoney -= dl.DownBetTotal
+				log.Debug("ResultMoney5 : %v", ResultMoney)
+				c4c.UserLoseScore(user.UserID, -dl.DownBetTotal, order, "", func(data *User) {
+					user.BalanceLock.Lock()
+					user.Balance = data.Balance
+					user.BalanceLock.Unlock()
+					log.Debug("玩家金币结算5 ：%v", user.Balance)
+					log.Debug("玩家金币结算6 ：%v", data.Balance)
+				})
+			}
+		}
+
 		if uWin > 0 {
 			winFlag = true
 			uWin = uWin - dl.UserBets[user.UserID][dl.res]
@@ -266,38 +294,15 @@ func (dl *Dealer) playerSettle() {
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
 				log.Debug("玩家金币结算1 ：%v", user.Balance)
+				log.Debug("玩家金币结算2 ：%v", data.Balance)
 			})
 		} else {
 			winFlag = false
 		}
 
-		if dl.DownBetTotal > 0 {
-			if uWin > 0 {
-				log.Debug("ResultMoney2 : %v", ResultMoney)
-				ResultMoney = ResultMoney - (dl.DownBetTotal - dl.UserBets[user.UserID][dl.res])
-				log.Debug("ResultMoney3 : %v", ResultMoney)
-				result := -dl.DownBetTotal + dl.UserBets[user.UserID][dl.res]
-				c4c.UserLoseScore(user.UserID, result, order, "", func(data *User) {
-					user.BalanceLock.Lock()
-					user.Balance = data.Balance
-					user.BalanceLock.Unlock()
-					log.Debug("玩家金币结算2 ：%v", user.Balance)
-				})
-			} else {
-				log.Debug("ResultMoney4 : %v", ResultMoney)
-				ResultMoney -= dl.DownBetTotal
-				log.Debug("ResultMoney5 : %v", ResultMoney)
-				c4c.UserLoseScore(user.UserID, -dl.DownBetTotal, order, "", func(data *User) {
-					user.BalanceLock.Lock()
-					user.Balance = data.Balance
-					user.BalanceLock.Unlock()
-					log.Debug("玩家金币结算3 ：%v", user.Balance)
-				})
-			}
-		}
 
-		result := dl.DownBetTotal - dl.UserBets[user.UserID][dl.res]
-		resp := dtoC.RSBMsg(ResultMoney-result, 0, user.Balance, *dl)
+
+		resp := dtoC.RSBMsg(ResultMoney, 0, user.Balance, *dl)
 		log.Debug("user.Balance 金额：%v", user.Balance)
 		user.ConnAgent.WriteMsg(&resp)
 
