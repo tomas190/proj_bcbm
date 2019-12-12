@@ -266,12 +266,14 @@ func (dl *Dealer) playerSettle() {
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
 				resp := dtoC.RSBMsg(ResultMoney-dl.DownBetTotal, 0, data.Balance, *dl)
+				log.Debug("用户金额为1 :%v",data.Balance)
 				user.ConnAgent.WriteMsg(&resp)
 			})
 		} else {
 			log.Debug("玩家结算金额2: %v", uWin)
 			winFlag = false
 			resp := dtoC.RSBMsg(ResultMoney-dl.DownBetTotal, 0, user.Balance, *dl)
+			log.Debug("用户金额为2 :%v",user.Balance)
 			user.ConnAgent.WriteMsg(&resp)
 		}
 
