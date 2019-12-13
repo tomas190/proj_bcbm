@@ -18,6 +18,8 @@ type User struct {
 	ConnAgent     gate.Agent   // 网络连接代理
 }
 
+var bankerStatus int
+
 type Bot struct {
 	UserID        uint32
 	NickName      string

@@ -364,6 +364,9 @@ func (dl *Dealer) ClearChip() {
 			uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
 			c4c.ChangeBankerStatus(uid, constant.BSNotBanker, -dl.bankerMoney, fmt.Sprintf("%+v-notBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
 				data.Status = constant.BSNotBanker
+				bankerStatus = constant.BSNotBanker
+				log.Debug("玩家状态 :%v", data.Status)
+
 				log.Debug("<--- 玩家下庄 --->")
 				bankerResp := msg.BankersB{
 					Banker: dl.getBankerInfoResp(),
@@ -395,6 +398,8 @@ func (dl *Dealer) ClearChip() {
 				uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
 				c4c.ChangeBankerStatus(uid, constant.BSBeingBanker, 0, fmt.Sprintf("%+v-beBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
 					data.Status = constant.BSBeingBanker
+					bankerStatus = constant.BSBeingBanker
+					log.Debug("玩家状态 :%v", data.Status)
 					dec := util.Math{}
 					var ok bool
 					dl.bankerMoney, ok = dec.AddFloat64(data.BankerBalance, 0.0).Float64()
