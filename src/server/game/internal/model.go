@@ -85,6 +85,12 @@ func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 	r := converter.R2Msg(*dl)
 	mu := converter.U2Msg(*u)
 
+	data := &msg.RespRoomStatus{
+		InGame: true,
+		RoomID: dl.RoomID,
+	}
+	u.ConnAgent.WriteMsg(data)
+
 	resp := &msg.JoinRoomR{
 		User:       &mu,
 		CurBankers: dl.getBankerInfoResp(),
