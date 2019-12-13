@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"github.com/patrickmn/go-cache"
 	"github.com/shopspring/decimal"
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
@@ -456,8 +457,8 @@ func (dl *Dealer) UpdatePlayerList() {
 				winCount = 0
 				ca.Set(fmt.Sprintf("%+v-betAmount", user.UserID), 0.0, cache.DefaultExpiration)
 				ca.Set(fmt.Sprintf("%+v-winCount", user.UserID), winCount, cache.DefaultExpiration)
-				log.Debug("========用户betAmount:%v",0.0)
-				log.Debug("========用户winCount:%v",winCount)
+				log.Debug("========用户betAmount:%v", 0.0)
+				log.Debug("========用户winCount:%v", winCount)
 			} else {
 				addBet, err := ca.IncrementFloat64(fmt.Sprintf("%+v-betAmount", user.UserID), uBet)
 				if err != nil {
@@ -482,8 +483,8 @@ func (dl *Dealer) UpdatePlayerList() {
 				winCount = 0
 				ca.Set(fmt.Sprintf("%+v-betAmount", user.UserID), 0.0, cache.DefaultExpiration)
 				ca.Set(fmt.Sprintf("%+v-winCount", user.UserID), winCount, cache.DefaultExpiration)
-				log.Debug("-----------用户betAmount: %v",0.0)
-				log.Debug("-----------用户winCount: %v",winCount)
+				log.Debug("-----------用户betAmount: %v", 0.0)
+				log.Debug("-----------用户winCount: %v", winCount)
 			}
 		}
 		return true
