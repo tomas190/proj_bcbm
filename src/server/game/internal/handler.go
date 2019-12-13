@@ -160,24 +160,7 @@ func handleJoinRoom(args []interface{}) {
 		if dl.DownBetTotal > 0 || au.Status == constant.BSGrabbingBanker || au.Status == constant.BSBeingBanker {
 			log.Debug("玩家请求房间ID为:%v,已在当前房间:%v", m.RoomID, rid)
 			if m.RoomID == rid {
-				resp := &msg.RespRoomStatus{
-					InGame: true,
-					RoomID: rid,
-				}
-				a.WriteMsg(resp)
-				converter := DTOConverter{}
-				r := converter.R2Msg(*dl)
-				mu := converter.U2Msg(*au)
-
-				joinData := &msg.JoinRoomR{
-					User:       &mu,
-					CurBankers: dl.getBankerInfoResp(),
-					Amount:     dl.AreaBets,
-					PAmount:    dl.UserBets[au.UserID],
-					Room:       &r,
-					ServerTime: uint32(time.Now().Unix()),
-				}
-				a.WriteMsg(joinData)
+				Mgr.AllocateUser(au, dl)
 			} else {
 				resp := &msg.RespRoomStatus{
 					InGame: false,

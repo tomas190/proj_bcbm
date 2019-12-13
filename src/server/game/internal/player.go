@@ -79,6 +79,8 @@ func (u User) GetPlayerAccount() (uint32, float64) {
 	if v1, exist1 := ca.Get(fmt.Sprintf("%+v-betAmount", u.UserID)); exist1 {
 		if ba, ok := v1.(float64); ok {
 			betAmount = ba
+			log.Debug("玩家投注金额:%v", ba)
+			log.Debug("玩家投注金额:%v", betAmount)
 		} else {
 			log.Debug("转换投注数错误 error")
 		}
