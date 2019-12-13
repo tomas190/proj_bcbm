@@ -251,14 +251,13 @@ func (dl *Dealer) playerSettle() {
 
 		var ResultMoney float64
 
-
 		var winFlag bool
 		if uWin > 0 {
 			winFlag = true
 			uWin = uWin - dl.UserBets[user.UserID][dl.res]
 			ResultMoney += uWin - (uWin * taxRate)
 
-			winOrder := strconv.Itoa(int(user.UserID))+"-"+time.Now().Format("2006-01-02 15:04:05")+"win"
+			winOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "win"
 			c4c.UserWinScore(user.UserID, uWin, winOrder, dl.RoundID, func(data *User) {
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
@@ -269,7 +268,7 @@ func (dl *Dealer) playerSettle() {
 			winFlag = false
 		}
 
-		loseOrder := strconv.Itoa(int(user.UserID))+"-"+time.Now().Format("2006-01-02 15:04:05")+"lose"
+		loseOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "lose"
 		if dl.DownBetTotal > 0 {
 			if uWin > 0 {
 				ResultMoney -= dl.DownBetTotal - dl.UserBets[user.UserID][dl.res]
@@ -303,7 +302,7 @@ func (dl *Dealer) playerSettle() {
 		// 玩家结算记录
 		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
 		if uBet > 0 && uWin >= 0 {
-			order := strconv.Itoa(int(user.UserID))+"-"+time.Now().Format("2006-01-02 15:04:05")
+			order := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05")
 			sdb := daoC.Settle2DB(*user, order, dl.RoundID, winFlag, uBet, uWin)
 			err := db.CUserSettle(sdb)
 			if err != nil {
@@ -364,6 +363,7 @@ func (dl *Dealer) ClearChip() {
 		case User:
 			uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
 			c4c.ChangeBankerStatus(uid, constant.BSNotBanker, -dl.bankerMoney, fmt.Sprintf("%+v-notBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
+				data.Status = constant.BSNotBanker
 				log.Debug("<--- 玩家下庄 --->")
 				bankerResp := msg.BankersB{
 					Banker: dl.getBankerInfoResp(),
@@ -394,6 +394,7 @@ func (dl *Dealer) ClearChip() {
 			case User:
 				uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
 				c4c.ChangeBankerStatus(uid, constant.BSBeingBanker, 0, fmt.Sprintf("%+v-beBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
+					data.Status = constant.BSBeingBanker
 					dec := util.Math{}
 					var ok bool
 					dl.bankerMoney, ok = dec.AddFloat64(data.BankerBalance, 0.0).Float64()
