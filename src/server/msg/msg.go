@@ -41,6 +41,9 @@ func init() {
 	Processor.Register(&PlayersR{}) // 玩家列表响应
 	Processor.Register(&RoomStatusB{})
 
+	Processor.Register(&RespRoomStatus{})
+
+
 	// print ID 打印出想要的任意格式
 	//Processor.Range(printMsgIDPB)
 	// Processor.Range(printMsgID)

@@ -155,14 +155,20 @@ func handleJoinRoom(args []interface{}) {
 
 	if v != nil {
 		dl := v.(*Dealer)
-		if m.RoomID != rid {
-			log.Debug("玩家请求房间ID为:%v,已在当前房间:v", m.RoomID, rid)
-			log.Debug("返回房间数据：%v", dl)
+		log.Debug("玩家请求房间ID为:%v,已在当前房间:%v", m.RoomID, rid)
+		log.Debug("返回房间数据：%v", dl)
+		if m.RoomID == rid {
+			log.Debug("进来了1~")
+			resp := &msg.RespRoomStatus{
+				InGame: true,
+				RoomID: rid,
+			}
+			a.WriteMsg(resp)
 			converter := DTOConverter{}
 			r := converter.R2Msg(*dl)
 			mu := converter.U2Msg(*au)
 
-			resp := &msg.JoinRoomR{
+			joinData := &msg.JoinRoomR{
 				User:       &mu,
 				CurBankers: dl.getBankerInfoResp(),
 				Amount:     dl.AreaBets,
@@ -170,11 +176,12 @@ func handleJoinRoom(args []interface{}) {
 				Room:       &r,
 				ServerTime: uint32(time.Now().Unix()),
 			}
-			a.WriteMsg(resp)
+			a.WriteMsg(joinData)
 		} else {
+			log.Debug("进来了2~")
 			resp := &msg.RespRoomStatus{
-				resp.InGame: true,
-				resp.RoomID: rid,
+				InGame: false,
+				RoomID: rid,
 			}
 			a.WriteMsg(resp)
 		}
