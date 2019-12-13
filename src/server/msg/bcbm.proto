@@ -3,28 +3,28 @@ package msg;
 
 // 消息枚举
 enum MessageID {
-	MsgError             = 0;
-	MsgPing              = 1;
-	MsgPong              = 2;
-	MsgLogin             = 3;
-	MsgLoginR            = 4;
-	MsgLogout            = 5;
-	MsgLogoutR           = 6;
-	MsgRoomChangeHB      = 7;
-	MsgJoinRoom          = 8;
-	MsgJoinRoomR         = 9;
-	MsgLeaveRoom         = 10;
-	MsgLeaveRoomR        = 11;
-	MsgGrabBanker        = 12;
-	MsgAutoBet           = 13;
-	MsgAutoBetB          = 14;
-	MsgBet               = 15;
-	MsgBetR              = 16;
-	MsgBetInfoB          = 17;
-	MsgBankersB          = 18;
-	MsgPlayers           = 19;
-	MsgPlayersR          = 20;
-	MsgRoomStatusB       = 21;
+    MsgError = 0;
+    MsgPing = 1;
+    MsgPong = 2;
+    MsgLogin = 3;
+    MsgLoginR = 4;
+    MsgLogout = 5;
+    MsgLogoutR = 6;
+    MsgRoomChangeHB = 7;
+    MsgJoinRoom = 8;
+    MsgJoinRoomR = 9;
+    MsgLeaveRoom = 10;
+    MsgLeaveRoomR = 11;
+    MsgGrabBanker = 12;
+    MsgAutoBet = 13;
+    MsgAutoBetB = 14;
+    MsgBet = 15;
+    MsgBetR = 16;
+    MsgBetInfoB = 17;
+    MsgBankersB = 18;
+    MsgPlayers = 19;
+    MsgPlayersR = 20;
+    MsgRoomStatusB = 21;
 }
 
 enum AreaID {
@@ -56,8 +56,10 @@ enum RoomStatus {
 }
 
 // 心跳
-message Ping{}
-message Pong{}
+message Ping {
+}
+message Pong {
+}
 
 // 用户信息
 message UserInfo {
@@ -74,11 +76,11 @@ message UserInfo {
 // 房间信息
 message RoomInfo {
     uint32 RoomID = 1;
-    double MinBet = 2;    // 限红 下限
-    double MaxBet = 3;    // 限红 上限
-    double MinLimit = 4;  // 能玩的最低金币
+    double MinBet = 2; // 限红 下限
+    double MaxBet = 3; // 限红 上限
+    double MinLimit = 4; // 能玩的最低金币
     uint32 Status = 5;
-    uint32 Counter = 6;   // 当前计时
+    uint32 Counter = 6; // 当前计时
     uint32 EndTime = 7;
     repeated uint32 History = 8;
     repeated uint32 Statistics = 9;
@@ -95,7 +97,7 @@ message LoginR {
     UserInfo User = 1;
     uint32 RoomID = 2;
     repeated RoomInfo Rooms = 3;
-    uint32 ServerTime = 4;  // 服务器时间
+    uint32 ServerTime = 4; // 服务器时间
 }
 
 // 房间变化大厅广播
@@ -103,18 +105,20 @@ message LoginR {
 // Status = 1 表示 下注中 此状态时要显示进度条 - 用EndTime - ServerTime 可计算出进度条时长
 message RoomChangeHB {
     uint32 RoomID = 1;
-    uint32 Status = 2;                 // 改变之后的状态
-    uint32 Counter = 3;                // 倒计时条
-    uint32 EndTime = 4;                // 倒计时结束时间
-    uint32 Result = 5;                 // 开奖结果
-    repeated uint32 Statistics = 6;    // 统计
-    uint32 ServerTime = 7;             // 服务器时间
+    uint32 Status = 2; // 改变之后的状态
+    uint32 Counter = 3; // 倒计时条
+    uint32 EndTime = 4; // 倒计时结束时间
+    uint32 Result = 5; // 开奖结果
+    repeated uint32 Statistics = 6; // 统计
+    uint32 ServerTime = 7; // 服务器时间
 }
 
 // 登出游戏
-message Logout {}
+message Logout {
+}
 
-message LogoutR {}
+message LogoutR {
+}
 
 // 加入房间
 message JoinRoom {
@@ -122,19 +126,19 @@ message JoinRoom {
 }
 
 message JoinRoomR {
-    repeated UserInfo CurBankers = 1;  // 当前房间庄家信息
-    repeated double Amount = 2;        // 当前房间下注信息
-    repeated double PAmount = 3;       // 如果玩家是重新进入房间，需要玩家在该房间的下注信息
-    RoomInfo Room = 4;                 // 当前房间状态
-    repeated uint32 History = 5;       // 历史记录
-    UserInfo User = 6;                 // 玩家信息
-    uint32 ServerTime = 7;             // 服务器时间
+    repeated UserInfo CurBankers = 1; // 当前房间庄家信息
+    repeated double Amount = 2; // 当前房间下注信息
+    repeated double PAmount = 3; // 如果玩家是重新进入房间，需要玩家在该房间的下注信息
+    RoomInfo Room = 4; // 当前房间状态
+    repeated uint32 History = 5; // 历史记录
+    UserInfo User = 6; // 玩家信息
+    uint32 ServerTime = 7; // 服务器时间
 }
 
 // 下注
 message Bet {
-    uint32 Area = 1;      // 投注区域
-    uint32 Chip = 2;      // 筹码
+    uint32 Area = 1; // 投注区域
+    uint32 Chip = 2; // 筹码
 }
 
 // todo 下注返回
@@ -145,70 +149,73 @@ message BetR {
 // 包含了清理筹码倒计时，以及结算结果
 // 状态枚举在 enum RoomStatus
 message RoomStatusB {
-    uint32 Status = 1;                 // 改变之后的状态
-    uint32 Counter = 2;                // 倒计时条已过的时间
-    uint32 EndTime = 3;                // 倒计时结束时间
-    uint32 Result = 4;                 // 开奖结果-如果是开奖状态的话
-    double BankerWin = 5;              // 庄家赢数
-    double BankerMoney = 6;            // 庄家显示金币数
-    double WinMoney = 7;               // 玩家赢数，如果玩家为庄 - 0
-    double PlayerMoney = 9;            // 玩家金币更新 总金币
-    double AutoBetAmount = 8;          // 续投金额，若为0则置灰
-    uint32 ServerTime = 10;             // 服务器时间
-    uint32 Position = 11;               // 位置 1-4
+    uint32 Status = 1; // 改变之后的状态
+    uint32 Counter = 2; // 倒计时条已过的时间
+    uint32 EndTime = 3; // 倒计时结束时间
+    uint32 Result = 4; // 开奖结果-如果是开奖状态的话
+    double BankerWin = 5; // 庄家赢数
+    double BankerMoney = 6; // 庄家显示金币数
+    double WinMoney = 7; // 玩家赢数，如果玩家为庄 - 0
+    double PlayerMoney = 9; // 玩家金币更新 总金币
+    double AutoBetAmount = 8; // 续投金额，若为0则置灰
+    uint32 ServerTime = 10; // 服务器时间
+    uint32 Position = 11; // 位置 1-4
 }
 
 // 下注信息广播
 message BetInfoB {
-     uint32 Area = 1;        // 下注区域
-     uint32 Chip = 2;        // 下注筹码
-     double AreaTotal = 3;   // 当前区域投注总数
-     double PlayerTotal = 4; // 当前玩家在此区域投注总数
-     uint32 PlayerID = 5;    // 谁下的注
-     double Money = 6;       // 该玩家投注后剩余金币
+    uint32 Area = 1; // 下注区域
+    uint32 Chip = 2; // 下注筹码
+    double AreaTotal = 3; // 当前区域投注总数
+    double PlayerTotal = 4; // 当前玩家在此区域投注总数
+    uint32 PlayerID = 5; // 谁下的注
+    double Money = 6; // 该玩家投注后剩余金币
 }
 
 // 庄家广播，数组第一个为当前庄家，若变化，则为庄家轮换
 message BankersB {
     repeated UserInfo Banker = 1; // 庄家列表，0为当前庄家，其余为上庄列表
-    UserInfo UpdateBanker = 2;    // 补充数据
-    uint32 ServerTime = 3;        // 服务器时间
+    UserInfo UpdateBanker = 2; // 补充数据
+    uint32 ServerTime = 3; // 服务器时间
 }
 
 // 玩家列表请求
-message Players {}
+message Players {
+}
 
 // 玩家列表返回
 message PlayersR {
     repeated UserInfo Players = 1; // 玩家列表/历史
-    uint32 ServerTime = 2;         // 服务器时间
+    uint32 ServerTime = 2; // 服务器时间
 }
 
 // 上庄
 message GrabBanker {
-    double LockMoney = 1;  // 上庄带钱
+    double LockMoney = 1; // 上庄带钱
 }
 
 // 续投
-message AutoBet {}
+message AutoBet {
+}
 
 // 续投广播
 message AutoBetB {
     uint32 UserID = 1;
-    repeated double Amounts = 2;  // 玩家续投在每个区域的数量
+    repeated double Amounts = 2; // 玩家续投在每个区域的数量
     repeated double AreaTotal = 3; // 当前8个区域的总数
     repeated double PlayerTotal = 4; // 当前玩家在8个区域投注总数
-    double Money = 5;       // 该玩家投注后剩余金币
+    double Money = 5; // 该玩家投注后剩余金币
 }
 
 // 离开房间
-message LeaveRoom {}
+message LeaveRoom {
+}
 
 message LeaveRoomR {
     UserInfo User = 1;
     uint32 RoomID = 2;
     repeated RoomInfo Rooms = 3;
-    uint32 ServerTime = 4;  // 服务器时间
+    uint32 ServerTime = 4; // 服务器时间
 }
 
 // 错误码
@@ -216,24 +223,29 @@ enum ErrorCode {
     Success = 0;
 
     InsufficientBalanceGrabBanker = 101; // 上庄钱不够
-    InsufficientBalanceBet = 102;        // 下注钱不够
-    ReachTableLimit = 103;               // 到达限红
+    InsufficientBalanceBet = 102; // 下注钱不够
+    ReachTableLimit = 103; // 到达限红
 
     ServerClosed = 201;
     UserRepeatLogin = 202;
     UserRemoteLogin = 203;
 
-    UserNotInRoom = 301;       // 玩家不在房间里
-    UserAlreadyInRoom = 302;   // 玩家已经在房间里了
-    RoomNotExist = 303;        // 房间不存在
-    RoomFull = 304;            // 房间已经满了
+    UserNotInRoom = 301; // 玩家不在房间里
+    UserAlreadyInRoom = 302; // 玩家已经在房间里了
+    RoomNotExist = 303; // 房间不存在
+    RoomFull = 304; // 房间已经满了
 
-    NotInBetting = 401;        // 当前不是下注状态
+    NotInBetting = 401; // 当前不是下注状态
 
-    ServerBusy = 501;          // 服务器忙
+    ServerBusy = 501; // 服务器忙
 }
 
 message Error {
     ErrorCode Code = 1;
     string Detail = 2;
+}
+
+message RespRoomStatus {
+    bool InGame = 1;
+    uint32 RoomID = 2;
 }

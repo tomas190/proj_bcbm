@@ -150,6 +150,37 @@ func handleJoinRoom(args []interface{}) {
 
 	au := a.UserData().(*User)
 
+	rid := Mgr.UserRoom[au.UserID]
+	v, _ := Mgr.RoomRecord.Load(rid)
+
+	if v != nil {
+		dl := v.(*Dealer)
+		if m.RoomID != rid {
+			log.Debug("玩家请求房间ID为:%v,已在当前房间:v", m.RoomID, rid)
+			log.Debug("返回房间数据：%v", dl)
+			converter := DTOConverter{}
+			r := converter.R2Msg(*dl)
+			mu := converter.U2Msg(*au)
+
+			resp := &msg.JoinRoomR{
+				User:       &mu,
+				CurBankers: dl.getBankerInfoResp(),
+				Amount:     dl.AreaBets,
+				PAmount:    dl.UserBets[au.UserID],
+				Room:       &r,
+				ServerTime: uint32(time.Now().Unix()),
+			}
+			a.WriteMsg(resp)
+		} else {
+			resp := &msg.RespRoomStatus{
+				resp.InGame: true,
+				resp.RoomID: rid,
+			}
+			a.WriteMsg(resp)
+		}
+		return
+	}
+
 	// 找到当前房间的玩家 dealer.getPlayerInfoResp()
 	v, exist := Mgr.RoomRecord.Load(m.RoomID)
 	room := v.(*Dealer)
