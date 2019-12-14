@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"github.com/patrickmn/go-cache"
 	"github.com/shopspring/decimal"
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
@@ -452,20 +451,18 @@ func (dl *Dealer) UpdatePlayerList() {
 		user := value.(*User)
 		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
 		log.Debug("UpdatePlayerList  ~~: %v", uBet)
+		winCount, bet := user.GetPlayerAccount()
+		log.Debug("玩家win局数: %v 和 下注金额: %v", winCount, bet)
+
 		if uBet > 0 {
 			win := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
 			result := win - dl.DownBetTotal
 			if result > 0 {
-				winCount, _ := user.GetPlayerAccount()
-				if winCount == 0 {
-					ca.Set(fmt.Sprintf("%+v-betAmount", user.UserID), 1, cache.DefaultExpiration)
-					ca.Set(fmt.Sprintf("%+v-winCount", user.UserID), uBet, cache.DefaultExpiration)
-				} else {
+				if _, exist := ca.Get(fmt.Sprintf("%+v-betAmount", user.UserID)); exist {
 					addBet, err := ca.IncrementFloat64(fmt.Sprintf("%+v-betAmount", user.UserID), uBet)
 					if err != nil {
 						log.Debug("累加用户投注数错误 %+v", err)
 					}
-
 					log.Debug("用户累计投注 %+v", addBet)
 
 					uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
@@ -474,9 +471,20 @@ func (dl *Dealer) UpdatePlayerList() {
 						if err != nil {
 							log.Debug("累加用户赢数错误 %+v", err)
 						}
-
 						log.Debug("用户累计赢数 %+v", addWin)
 					}
+				} else {
+					log.Debug("赢钱没有获取到用户 %+v", exist)
+				}
+			} else {
+				if _, exist := ca.Get(fmt.Sprintf("%+v-betAmount", user.UserID)); exist {
+					addBet, err := ca.IncrementFloat64(fmt.Sprintf("%+v-betAmount", user.UserID), uBet)
+					if err != nil {
+						log.Debug("累加用户投注数错误 %+v", err)
+					}
+					log.Debug("用户累计投注 %+v", addBet)
+				} else {
+					log.Debug("输钱没有获取到用户 %+v", exist)
 				}
 			}
 		}
