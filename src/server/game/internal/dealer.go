@@ -256,6 +256,7 @@ func (dl *Dealer) playerSettle() {
 			winFlag = true
 			uWin = uWin - dl.UserBets[user.UserID][dl.res]
 			ResultMoney += uWin - (uWin * taxRate)
+
 			winOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "win"
 			c4c.UserWinScore(user.UserID, uWin, winOrder, dl.RoundID, func(data *User) {
 				// 赢钱之后更新余额
@@ -455,21 +456,27 @@ func (dl *Dealer) UpdatePlayerList() {
 			win := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
 			result := win - dl.DownBetTotal
 			if result > 0 {
-				addBet, err := ca.IncrementFloat64(fmt.Sprintf("%+v-betAmount", user.UserID), uBet)
-				if err != nil {
-					log.Debug("累加用户投注数错误 %+v", err)
-				}
-
-				log.Debug("用户累计投注 %+v", addBet)
-
-				uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
-				if uWin > 0 {
-					addWin, err := ca.IncrementInt64(fmt.Sprintf("%+v-winCount", user.UserID), 1)
+				winCount, _ := user.GetPlayerAccount()
+				if winCount == 0 {
+					ca.Set(fmt.Sprintf("%+v-betAmount", user.UserID), 1, cache.DefaultExpiration)
+					ca.Set(fmt.Sprintf("%+v-winCount", user.UserID), uBet, cache.DefaultExpiration)
+				} else {
+					addBet, err := ca.IncrementFloat64(fmt.Sprintf("%+v-betAmount", user.UserID), uBet)
 					if err != nil {
-						log.Debug("累加用户赢数错误 %+v", err)
+						log.Debug("累加用户投注数错误 %+v", err)
 					}
 
-					log.Debug("用户累计赢数 %+v", addWin)
+					log.Debug("用户累计投注 %+v", addBet)
+
+					uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
+					if uWin > 0 {
+						addWin, err := ca.IncrementInt64(fmt.Sprintf("%+v-winCount", user.UserID), 1)
+						if err != nil {
+							log.Debug("累加用户赢数错误 %+v", err)
+						}
+
+						log.Debug("用户累计赢数 %+v", addWin)
+					}
 				}
 			}
 		}
