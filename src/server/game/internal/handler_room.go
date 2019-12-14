@@ -211,7 +211,7 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		data.Status = constant.BSGrabbingBanker
 		bankerStatus = constant.BSGrabbingBanker
 
-		log.Debug("玩家状态 :%v",data.Status )
+		log.Debug("玩家状态 :%v", data.Status)
 		bUser := User{
 			UserID:        au.UserID,
 			Balance:       data.Balance,
@@ -270,6 +270,9 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 	uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64()
 	if uBets == 0 {
 		dl.Users.Delete(au.UserID)
+		var winCount int64   //todo
+		ca.Set(fmt.Sprintf("%+v-betAmount", au.UserID), 0.0, cache.DefaultExpiration)
+		ca.Set(fmt.Sprintf("%+v-winCount", au.UserID), winCount, cache.DefaultExpiration)
 	} else {
 		dl.UserLeave = append(dl.UserLeave, au.UserID)
 	}

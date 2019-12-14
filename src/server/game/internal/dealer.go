@@ -256,7 +256,6 @@ func (dl *Dealer) playerSettle() {
 			winFlag = true
 			uWin = uWin - dl.UserBets[user.UserID][dl.res]
 			ResultMoney += uWin - (uWin * taxRate)
-
 			winOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "win"
 			c4c.UserWinScore(user.UserID, uWin, winOrder, dl.RoundID, func(data *User) {
 				// 赢钱之后更新余额
@@ -451,15 +450,11 @@ func (dl *Dealer) UpdatePlayerList() {
 	dl.Users.Range(func(key, value interface{}) bool {
 		user := value.(*User)
 		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
+		log.Debug("UpdatePlayerList  ~~: %v", uBet)
 		if uBet > 0 {
-			if _, exist := ca.Get(fmt.Sprintf("%+v-betAmount", user.UserID)); !exist {
-				//var winCount int64
-				//winCount = 0
-				//ca.Set(fmt.Sprintf("%+v-betAmount", user.UserID), 0.0, cache.DefaultExpiration)
-				//ca.Set(fmt.Sprintf("%+v-winCount", user.UserID), winCount, cache.DefaultExpiration)
-				//log.Debug("========用户betAmount:%v", 0.0)
-				//log.Debug("========用户winCount:%v", winCount)
-			} else {
+			win := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
+			result := win - dl.DownBetTotal
+			if result > 0 {
 				addBet, err := ca.IncrementFloat64(fmt.Sprintf("%+v-betAmount", user.UserID), uBet)
 				if err != nil {
 					log.Debug("累加用户投注数错误 %+v", err)
@@ -476,15 +471,6 @@ func (dl *Dealer) UpdatePlayerList() {
 
 					log.Debug("用户累计赢数 %+v", addWin)
 				}
-			}
-		} else {
-			if _, exist := ca.Get(fmt.Sprintf("%+v-betAmount", user.UserID)); !exist {
-				//var winCount int64
-				//winCount = 0
-				//ca.Set(fmt.Sprintf("%+v-betAmount", user.UserID), 0.0, cache.DefaultExpiration)
-				//ca.Set(fmt.Sprintf("%+v-winCount", user.UserID), winCount, cache.DefaultExpiration)
-				//log.Debug("-----------用户betAmount: %v", 0.0)
-				//log.Debug("-----------用户winCount: %v", winCount)
 			}
 		}
 		return true
