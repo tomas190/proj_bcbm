@@ -457,7 +457,7 @@ func (dl *Dealer) UpdatePlayerList() {
 				user.betAmount += uBet
 			} else {
 				user.betAmount += uBet
-				if user.winCount > 11 {
+				if user.winCount > 10 {
 					user.winCount--
 				}
 			}

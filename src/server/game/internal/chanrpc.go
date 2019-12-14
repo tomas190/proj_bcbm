@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"github.com/name5566/leaf/gate"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
@@ -29,8 +28,8 @@ func rpcCloseAgent(args []interface{}) {
 
 	if ok && au.ConnAgent == a {
 		log.Debug("玩家 %+v 主动断开连接...", au.UserID)
-		ca.Delete(fmt.Sprintf("%+v-betAmount", au.UserID))
-		ca.Delete(fmt.Sprintf("%+v-winCount", au.UserID))
+		au.betAmount = 0
+		au.winCount = 0
 
 		rid := Mgr.UserRoom[au.UserID]
 		v, _ := Mgr.RoomRecord.Load(rid)
@@ -47,9 +46,6 @@ func rpcCloseAgent(args []interface{}) {
 
 			dl.AutoBetRecord[au.UserID] = nil
 		}
-		log.Debug("delete2 --------------------------------")
-		ca.Delete(fmt.Sprintf("%+v-betAmount", au.UserID))
-		ca.Delete(fmt.Sprintf("%+v-winCount", au.UserID))
 
 		c4c.UserLogoutCenter(au.UserID, func(data *User) {
 			Mgr.UserRecord.Delete(au.UserID)

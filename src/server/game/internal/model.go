@@ -2,9 +2,7 @@ package internal
 
 import (
 	"errors"
-	"fmt"
 	"github.com/name5566/leaf/gate"
-	"github.com/patrickmn/go-cache"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
@@ -74,22 +72,15 @@ func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 		dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	}
 
-	var winCount int64   //todo
-
 	for i, lu := range dl.UserLeave {
 		user := lu
 		// 把玩家从掉线列表中移除
 		if user == u.UserID {
 			dl.UserLeave = append(dl.UserLeave[:i], dl.UserLeave[i+1:]...)
-			ca.Set(fmt.Sprintf("%+v-betAmount", u.UserID), 0.0, cache.DefaultExpiration)
-			ca.Set(fmt.Sprintf("%+v-winCount", u.UserID), winCount, cache.DefaultExpiration)
 			log.Debug("AllocateUser 清楚玩家记录~")
 			break
 		}
 	}
-
-	ca.Set(fmt.Sprintf("%+v-betAmount", u.UserID), 0.0, cache.DefaultExpiration)
-	ca.Set(fmt.Sprintf("%+v-winCount", u.UserID), winCount, cache.DefaultExpiration)
 
 	converter := DTOConverter{}
 	r := converter.R2Msg(*dl)

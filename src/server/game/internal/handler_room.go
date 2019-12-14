@@ -248,39 +248,34 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 
 	au := a.UserData().(*User)
 
-	if dl.DownBetTotal > 0 { // todo
-		resp := &msg.LeaveRoomR{
-			User: &msg.UserInfo{
-				UserID:   au.UserID,
-				Avatar:   au.Avatar,
-				NickName: au.NickName,
-				Money:    au.Balance,
-			},
-			Rooms:      Mgr.GetRoomsInfoResp(),
-			ServerTime: uint32(time.Now().Unix()),
-		}
-
-		a.WriteMsg(resp)
-		return
-	}
+	//if dl.DownBetTotal > 0 {
+	//	resp := &msg.LeaveRoomR{
+	//		User: &msg.UserInfo{
+	//			UserID:   au.UserID,
+	//			Avatar:   au.Avatar,
+	//			NickName: au.NickName,
+	//			Money:    au.Balance,
+	//		},
+	//		Rooms:      Mgr.GetRoomsInfoResp(),
+	//		ServerTime: uint32(time.Now().Unix()),
+	//	}
+	//
+	//	a.WriteMsg(resp)
+	//	return
+	//}
 
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
 	math := util.Math{}
 	uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64()
 	if uBets == 0 {
-		dl.Users.Delete(au.UserID)
-		var winCount int64   //todo
-		ca.Set(fmt.Sprintf("%+v-betAmount", au.UserID), 0.0, cache.DefaultExpiration)
-		ca.Set(fmt.Sprintf("%+v-winCount", au.UserID), winCount, cache.DefaultExpiration)
+		au.winCount = 0
+		au.betAmount = 0
 	} else {
 		dl.UserLeave = append(dl.UserLeave, au.UserID)
 	}
 
 	dl.AutoBetRecord[au.UserID] = nil
-	log.Debug("delete1 --------------------------------")
-	ca.Delete(fmt.Sprintf("%+v-betAmount", au.UserID))
-	ca.Delete(fmt.Sprintf("%+v-winCount", au.UserID))
 
 	resp := &msg.LeaveRoomR{
 		User: &msg.UserInfo{
