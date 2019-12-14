@@ -340,7 +340,6 @@ func (dl *Dealer) playerSettle() {
 func (dl *Dealer) ClearChip() {
 	dl.Status = constant.RSClear
 	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime
-	dl.DownBetTotal = 0
 
 	// log.Debug("clear chip... %+v", dl.RoomID)
 
@@ -450,41 +449,16 @@ func (dl *Dealer) UpdatePlayerList() {
 	dl.Users.Range(func(key, value interface{}) bool {
 		user := value.(*User)
 		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
-		log.Debug("UpdatePlayerList  ~~: %v", uBet)
-		winCount, bet := user.GetPlayerAccount()
-		log.Debug("玩家win局数: %v 和 下注金额: %v", winCount, bet)
-
 		if uBet > 0 {
 			win := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
 			result := win - dl.DownBetTotal
 			if result > 0 {
-				if _, exist := ca.Get(fmt.Sprintf("%+v-betAmount", user.UserID)); exist {
-					addBet, err := ca.IncrementFloat64(fmt.Sprintf("%+v-betAmount", user.UserID), uBet)
-					if err != nil {
-						log.Debug("累加用户投注数错误 %+v", err)
-					}
-					log.Debug("用户累计投注 %+v", addBet)
-
-					uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
-					if uWin > 0 {
-						addWin, err := ca.IncrementInt64(fmt.Sprintf("%+v-winCount", user.UserID), 1)
-						if err != nil {
-							log.Debug("累加用户赢数错误 %+v", err)
-						}
-						log.Debug("用户累计赢数 %+v", addWin)
-					}
-				} else {
-					log.Debug("赢钱没有获取到用户 %+v", exist)
-				}
+				user.winCount ++
+				user.betAmount += uBet
 			} else {
-				if _, exist := ca.Get(fmt.Sprintf("%+v-betAmount", user.UserID)); exist {
-					addBet, err := ca.IncrementFloat64(fmt.Sprintf("%+v-betAmount", user.UserID), uBet)
-					if err != nil {
-						log.Debug("累加用户投注数错误 %+v", err)
-					}
-					log.Debug("用户累计投注 %+v", addBet)
-				} else {
-					log.Debug("输钱没有获取到用户 %+v", exist)
+				user.betAmount += uBet
+				if user.winCount > 11 {
+					user.winCount--
 				}
 			}
 		}
@@ -520,6 +494,7 @@ func (dl *Dealer) ClearData() {
 	dl.UserBetsDetail = map[uint32][]msg.Bet{}
 	dl.UserLeave = []uint32{}
 
+	dl.DownBetTotal = 0
 	dl.res = 0
 	dl.bankerWin = 0
 	dl.bankerRound += 1
