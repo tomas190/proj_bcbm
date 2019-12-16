@@ -80,7 +80,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		}
 		dl.Broadcast(resp)
 
-		log.Debug("<<=====>>玩家金额: %v", au.Balance)
+		//log.Debug("<<=====>>玩家金额: %v", au.Balance)
 		// fixme 暂时延迟处理
 		time.Sleep(6 * time.Millisecond)
 		ca.Delete(fmt.Sprintf("%+v-bet", au.UserID))
@@ -113,7 +113,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 	for _, b := range dl.AutoBetRecord[au.UserID] {
 		bet := b
 		cs := constant.ChipSize[bet.Chip]
-		log.Debug("来了来了 ~~~~")
+		//log.Debug("来了来了 ~~~~")
 
 		if dl.roomBonusLimit(bet.Area) < cs || dl.dynamicBonusLimit(bet.Area) < cs {
 			LimitRed = true
@@ -122,7 +122,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		}
 
 		if LimitRed == true {
-			log.Debug("限红 ~~~~")
+			//log.Debug("限红 ~~~~")
 			return
 		}
 
@@ -137,7 +137,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		dl.DownBetTotal += cs
 		au.Balance -= cs
 
-		log.Debug("续投成功 ~~~~")
+		//log.Debug("续投成功 ~~~~")
 	}
 
 	resp := &msg.AutoBetB{
