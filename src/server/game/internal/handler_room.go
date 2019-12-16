@@ -94,7 +94,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 	a := args[1].(gate.Agent)
 
 	au := a.UserData().(*User)
-	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
+	log.Debug("======>> recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
 
 	if dl.Status != constant.RSBetting {
 		errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
@@ -106,17 +106,17 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		return
 	}
 
+	cs := constant.ChipSize[bet.Chip]
+	if dl.roomBonusLimit(bet.Area) < cs || dl.dynamicBonusLimit(bet.Area) < cs {
+		errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
+		return
+	}
+
 	var csSum float64
 	var autoBetAmounts = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+
 	for _, b := range dl.AutoBetRecord[au.UserID] {
 		bet := b
-		cs := constant.ChipSize[bet.Chip]
-
-		if dl.roomBonusLimit(bet.Area) < cs || dl.dynamicBonusLimit(bet.Area) < cs {
-			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
-			return
-		}
-
 		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
 		dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
 		// 当前用户在该区域的历史投注+当前用户投注
