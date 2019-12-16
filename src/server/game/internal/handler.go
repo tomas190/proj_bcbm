@@ -22,7 +22,7 @@ func init() {
 	handlerReg(&msg.Players{}, handleRoomEvent)
 	handlerReg(&msg.LeaveRoom{}, handleRoomEvent)
 	handlerReg(&msg.GrabBanker{}, handleRoomEvent)
-	handlerReg(&msg.AutoBet{}, handleRoomEvent)
+	handlerReg(&msg.AutoBet{}, handleAutoBet)
 }
 
 // 注册消息处理函数
@@ -217,8 +217,6 @@ func handleRoomEvent(args []interface{}) {
 				dealer.handlePlayers(args)
 			case *msg.GrabBanker:
 				dealer.handleGrabBanker(args)
-			case *msg.AutoBet:
-				dealer.handleAutoBet(args)
 			case *msg.LeaveRoom:
 				dealer.handleLeaveRoom(args)
 			default:
