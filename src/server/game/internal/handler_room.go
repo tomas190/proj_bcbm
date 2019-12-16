@@ -89,67 +89,68 @@ func (dl *Dealer) handleBet(args []interface{}) {
 	}
 }
 
-func handleAutoBet(args []interface{}) {
+func (dl *Dealer) handleAutoBet(args []interface{}) {
 	m := args[0].(*msg.AutoBet)
 	a := args[1].(gate.Agent)
 
 	au := a.UserData().(*User)
 	log.Debug("======>> recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
+	var LimitRed bool
 
-	roomID, ok := Mgr.UserRoom[au.UserID]
-	ok = true
-	if ok {
-		v, _ := Mgr.RoomRecord.Load(roomID)
-		dl := v.(*Dealer)
-
-		if dl.Status != constant.RSBetting {
-			errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
-			return
-		}
-
-		if dl.Status == constant.RSBetting && dl.counter > 14 {
-			errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
-			return
-		}
-
-		var csSum float64
-		var autoBetAmounts = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
-
-		for _, b := range dl.AutoBetRecord[au.UserID] {
-			bet := b
-			cs := constant.ChipSize[bet.Chip]
-
-			if dl.roomBonusLimit(bet.Area) < cs || dl.dynamicBonusLimit(bet.Area) < cs {
-				errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
-				return
-			}
-
-			// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
-			dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
-			// 当前用户在该区域的历史投注+当前用户投注
-			dl.UserBets[au.UserID][bet.Area] = dl.UserBets[au.UserID][bet.Area] + cs
-
-			autoBetAmounts[bet.Area] += cs
-			csSum += cs
-
-			dl.DownBetTotal += cs
-			au.Balance -= cs
-
-			log.Debug("handleAutoBet 续投成功~")
-		}
-
-		resp := &msg.AutoBetB{
-			UserID:      au.UserID,
-			Amounts:     autoBetAmounts,
-			AreaTotal:   dl.AreaBets,
-			PlayerTotal: dl.UserBets[au.UserID],
-			Money:       au.Balance,
-		}
-
-		dl.Broadcast(resp)
-
-		dl.UserAutoBet[au.UserID] = true
+	if dl.Status != constant.RSBetting {
+		errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
+		return
 	}
+
+	if dl.Status == constant.RSBetting && dl.counter > 14 {
+		errorResp(au.ConnAgent, msg.ErrorCode_NotInBetting, "当前不是下注状态")
+		return
+	}
+
+	var csSum float64
+	var autoBetAmounts = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+	for _, b := range dl.AutoBetRecord[au.UserID] {
+		bet := b
+		cs := constant.ChipSize[bet.Chip]
+		log.Debug("来了来了 ~~~~")
+
+		if dl.roomBonusLimit(bet.Area) < cs || dl.dynamicBonusLimit(bet.Area) < cs {
+			LimitRed = true
+			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
+			return
+		}
+
+		if LimitRed == true {
+			log.Debug("限红 ~~~~")
+			return
+		}
+
+		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
+		dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
+		// 当前用户在该区域的历史投注+当前用户投注
+		dl.UserBets[au.UserID][bet.Area] = dl.UserBets[au.UserID][bet.Area] + cs
+
+		autoBetAmounts[bet.Area] += cs
+		csSum += cs
+
+		dl.DownBetTotal += cs
+		au.Balance -= cs
+
+		log.Debug("续投成功 ~~~~")
+	}
+
+	resp := &msg.AutoBetB{
+		UserID:      au.UserID,
+		Amounts:     autoBetAmounts,
+		AreaTotal:   dl.AreaBets,
+		PlayerTotal: dl.UserBets[au.UserID],
+		Money:       au.Balance,
+	}
+
+	dl.Broadcast(resp)
+
+	dl.UserAutoBet[au.UserID] = true
 }
 
 func (dl *Dealer) handlePlayers(args []interface{}) {

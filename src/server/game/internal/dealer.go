@@ -455,7 +455,7 @@ func (dl *Dealer) UpdatePlayerList() {
 			win := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
 			result := win - dl.DownBetTotal
 			if result > 0 {
-				user.winCount ++
+				user.winCount++
 				user.betAmount += uBet
 			} else {
 				user.betAmount += uBet
