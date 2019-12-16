@@ -106,17 +106,18 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		return
 	}
 
-	cs := constant.ChipSize[bet.Chip]
-	if dl.roomBonusLimit(bet.Area) < cs || dl.dynamicBonusLimit(bet.Area) < cs {
-		errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
-		return
-	}
-
 	var csSum float64
 	var autoBetAmounts = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 	for _, b := range dl.AutoBetRecord[au.UserID] {
 		bet := b
+		cs := constant.ChipSize[bet.Chip]
+
+		if dl.roomBonusLimit(bet.Area) < cs || dl.dynamicBonusLimit(bet.Area) < cs {
+			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
+			return
+		}
+
 		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
 		dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
 		// 当前用户在该区域的历史投注+当前用户投注
@@ -127,6 +128,8 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 
 		dl.DownBetTotal += cs
 		au.Balance -= cs
+
+		log.Debug("handleAutoBet 续投成功~")
 	}
 
 	resp := &msg.AutoBetB{
