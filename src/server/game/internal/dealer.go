@@ -243,6 +243,8 @@ func (dl *Dealer) playerSettle() {
 	daoC := DAOConverter{}
 	math := util.Math{}
 
+	uid := util.UUID{}
+	dl.RoundID = fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
 	dl.Users.Range(func(key, value interface{}) bool {
 		user := value.(*User)
 		// 中心服需要结算的输赢

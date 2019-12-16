@@ -114,7 +114,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 
 		if dl.roomBonusLimit(bet.Area) < cs || dl.dynamicBonusLimit(bet.Area) < cs {
 			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
-			break
+			return
 		}
 
 		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
@@ -124,6 +124,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 
 		autoBetAmounts[bet.Area] += cs
 		csSum += cs
+
 		dl.DownBetTotal += cs
 		au.Balance -= cs
 	}
