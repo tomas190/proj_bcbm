@@ -48,7 +48,6 @@ type Dealer struct {
 	AreaBets       []float64            // 每个区域玩家投注总数
 	AreaBotBets    []float64            // 每个区域机器人投注总数
 
-	DownBetTotal float64 //玩家总下注
 }
 
 const taxRate = 0.05
@@ -68,7 +67,6 @@ func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 		AutoBetRecord:  map[uint32][]msg.Bet{},
 		AreaBets:       []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 		AreaBotBets:    []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
-		DownBetTotal:   0,
 	}
 }
 
@@ -249,6 +247,7 @@ func (dl *Dealer) playerSettle() {
 		user := value.(*User)
 		// 中心服需要结算的输赢
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
+		log.Debug("玩家ID：%v, 玩家uWin：%v", user.UserID, uWin)
 
 		var ResultMoney float64
 
@@ -270,18 +269,18 @@ func (dl *Dealer) playerSettle() {
 		}
 
 		loseOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "lose"
-		if dl.DownBetTotal > 0 {
+		if user.DownBetTotal > 0 {
 			if uWin > 0 {
-				ResultMoney -= dl.DownBetTotal - dl.UserBets[user.UserID][dl.res]
-				result := -dl.DownBetTotal + dl.UserBets[user.UserID][dl.res]
+				ResultMoney -= user.DownBetTotal - dl.UserBets[user.UserID][dl.res]
+				result := -user.DownBetTotal + dl.UserBets[user.UserID][dl.res]
 				c4c.UserLoseScore(user.UserID, result, loseOrder, dl.RoundID, func(data *User) {
 					user.BalanceLock.Lock()
 					user.Balance = data.Balance
 					user.BalanceLock.Unlock()
 				})
 			} else {
-				ResultMoney -= dl.DownBetTotal
-				c4c.UserLoseScore(user.UserID, -dl.DownBetTotal, loseOrder, dl.RoundID, func(data *User) {
+				ResultMoney -= user.DownBetTotal
+				c4c.UserLoseScore(user.UserID, -user.DownBetTotal, loseOrder, dl.RoundID, func(data *User) {
 					user.BalanceLock.Lock()
 					user.Balance = data.Balance
 					user.BalanceLock.Unlock()
@@ -290,7 +289,7 @@ func (dl *Dealer) playerSettle() {
 		}
 
 		if ResultMoney > 0 {
-			user.Balance += dl.DownBetTotal + ResultMoney
+			user.Balance += user.DownBetTotal + ResultMoney
 		}
 
 		resp := dtoC.RSBMsg(ResultMoney, 0, user.Balance, *dl)
@@ -316,7 +315,7 @@ func (dl *Dealer) playerSettle() {
 			}
 		}
 
-		if dl.DownBetTotal > 0 {
+		if user.DownBetTotal > 0 {
 			timeNow := time.Now().Unix()
 			data := &PlayerDownBetRecode{}
 			data.Id = user.UserID
@@ -334,6 +333,7 @@ func (dl *Dealer) playerSettle() {
 			}
 		}
 
+		ResultMoney = 0
 		return true
 	})
 }
@@ -453,7 +453,7 @@ func (dl *Dealer) UpdatePlayerList() {
 		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
 		if uBet > 0 {
 			win := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
-			result := win - dl.DownBetTotal
+			result := win - user.DownBetTotal
 			if result > 0 {
 				user.winCount++
 				user.betAmount += uBet
@@ -478,6 +478,7 @@ func (dl *Dealer) ClearData() {
 
 	dl.Users.Range(func(key, value interface{}) bool {
 		// 续投 投注 累加到 auto bet record
+		user := value.(*User)
 		u := key.(uint32)
 		if dl.UserAutoBet[u] == true && len(dl.UserBetsDetail[u]) != 0 {
 			dl.AutoBetRecord[u] = append(dl.AutoBetRecord[u], dl.UserBetsDetail[u]...)
@@ -488,6 +489,7 @@ func (dl *Dealer) ClearData() {
 			// 不续投 不投注 不变
 		}
 
+		user.DownBetTotal = 0
 		dl.UserAutoBet[u] = false
 		return true
 	})
@@ -496,7 +498,6 @@ func (dl *Dealer) ClearData() {
 	dl.UserBetsDetail = map[uint32][]msg.Bet{}
 	dl.UserLeave = []uint32{}
 
-	dl.DownBetTotal = 0
 	dl.res = 0
 	dl.bankerWin = 0
 	dl.bankerRound += 1

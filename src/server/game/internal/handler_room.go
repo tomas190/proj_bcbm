@@ -66,7 +66,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		// 用户具体投注信息
 		dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], *m)
 
-		dl.DownBetTotal += constant.ChipSize[m.Chip]
+		au.DownBetTotal += constant.ChipSize[m.Chip]
 		au.Balance -= constant.ChipSize[m.Chip]
 		//log.Debug("11111111111111 玩家总下注: %v", dl.DownBetTotal)
 
@@ -134,7 +134,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		autoBetAmounts[bet.Area] += cs
 		csSum += cs
 
-		dl.DownBetTotal += cs
+		au.DownBetTotal += cs
 		au.Balance -= cs
 
 		//log.Debug("续投成功 ~~~~")

@@ -157,7 +157,7 @@ func handleJoinRoom(args []interface{}) {
 		dl := v.(*Dealer)
 		log.Debug("au.Status: %v", au.Status)
 		log.Debug("bankerStatus: %v", bankerStatus)
-		if dl.DownBetTotal > 0 || au.Status == constant.BSGrabbingBanker || au.Status == constant.BSBeingBanker {
+		if au.DownBetTotal > 0 || au.Status == constant.BSGrabbingBanker || au.Status == constant.BSBeingBanker {
 			log.Debug("玩家请求房间ID为:%v,已在当前房间:%v", m.RoomID, rid)
 			if m.RoomID == rid {
 				Mgr.AllocateUser(au, dl)
