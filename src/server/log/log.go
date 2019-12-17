@@ -21,6 +21,7 @@ type MsgLogServer struct {
 	Type     string `json:"type"`      // "LOG"|"ERR"|"DEG",
 	From     string `json:"from"`      // "game-server",
 	GameName string `json:"game_name"` // "game-name"
+	Id       string `json:"id"`        // 用户ID
 	Host     string `json:"host"`      // 服务IP地址,
 	Msg      string `json:"msg"`       // 消息内容
 	Time     string `json:"time"`      // 时间(YYYY-MM-DD HH:II:SS),
@@ -65,6 +66,7 @@ func SendToLogServer(t string, msg string, timeStr string) {
 		Type:     t,
 		From:     "game-server",
 		GameName: "benchibaoma",
+		Id:       conf.Server.GameID,
 		Host:     "",
 		Msg:      msg,
 		Time:     timeStr,
