@@ -220,10 +220,7 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 	// 上庄
 	log.Debug("<<===== 上庄金额: %v =====>>", m.LockMoney)
 	c4c.ChangeBankerStatus(au.UserID, constant.BSGrabbingBanker, m.LockMoney, fmt.Sprintf("%+v-grabBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
-		data.Status = constant.BSGrabbingBanker
-		bankerStatus = constant.BSGrabbingBanker
 
-		log.Debug("玩家状态 :%v", data.Status)
 		bUser := User{
 			UserID:        au.UserID,
 			Balance:       data.Balance,
@@ -246,6 +243,7 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		dl.Users.Range(func(key, value interface{}) bool {
 			if key == au.UserID {
 				u := value.(*User)
+				u.Status = constant.BSGrabbingBanker
 				u.BankerBalance = data.BankerBalance
 				u.Balance = data.Balance
 			}
@@ -321,15 +319,12 @@ func (dl *Dealer) cancelGrabBanker(userID uint32) {
 			uuid := util.UUID{}
 			// 玩家取消申请上庄
 			c4c.ChangeBankerStatus(userID, constant.BSNotBanker, -bankerBalance, fmt.Sprintf("%+v-cancelBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
-				data.Status = constant.BSNotBanker
-				bankerStatus = constant.BSNotBanker
-
-				log.Debug("玩家状态 :%v", data.Status)
 
 				// 更新房间玩家列表中的玩家余额
 				dl.Users.Range(func(key, value interface{}) bool {
 					if key == uID {
 						u := value.(*User)
+						u.Status = constant.BSNotBanker
 						u.BankerBalance = data.BankerBalance
 						u.Balance = data.Balance
 					}

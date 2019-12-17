@@ -19,8 +19,6 @@ type User struct {
 	betAmount     float64      // 玩家总投注金额
 }
 
-var bankerStatus int
-
 type Bot struct {
 	UserID        uint32
 	NickName      string

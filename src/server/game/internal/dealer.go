@@ -47,7 +47,6 @@ type Dealer struct {
 	AutoBetRecord  map[uint32][]msg.Bet // 续投记录
 	AreaBets       []float64            // 每个区域玩家投注总数
 	AreaBotBets    []float64            // 每个区域机器人投注总数
-
 }
 
 const taxRate = 0.05
@@ -363,11 +362,17 @@ func (dl *Dealer) ClearChip() {
 		case User:
 			uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
 			c4c.ChangeBankerStatus(uid, constant.BSNotBanker, -dl.bankerMoney, fmt.Sprintf("%+v-notBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
-				data.Status = constant.BSNotBanker
-				bankerStatus = constant.BSNotBanker
-				log.Debug("玩家状态 :%v", data.Status)
 
+				// 更新庄家状态
+				dl.Users.Range(func(key, value interface{}) bool {
+					if key == uid {
+						u := value.(*User)
+						u.Status = constant.BSNotBanker
+					}
+					return true
+				})
 				log.Debug("<--- 玩家下庄 --->")
+
 				bankerResp := msg.BankersB{
 					Banker: dl.getBankerInfoResp(),
 					UpdateBanker: &msg.UserInfo{
@@ -397,9 +402,15 @@ func (dl *Dealer) ClearChip() {
 			case User:
 				uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
 				c4c.ChangeBankerStatus(uid, constant.BSBeingBanker, 0, fmt.Sprintf("%+v-beBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
-					data.Status = constant.BSBeingBanker
-					bankerStatus = constant.BSBeingBanker
-					log.Debug("玩家状态 :%v", data.Status)
+
+					// 更新庄家状态
+					dl.Users.Range(func(key, value interface{}) bool {
+						if key == uid {
+							u := value.(*User)
+							u.Status = constant.BSBeingBanker
+						}
+						return true
+					})
 					dec := util.Math{}
 					var ok bool
 					dl.bankerMoney, ok = dec.AddFloat64(data.BankerBalance, 0.0).Float64()
