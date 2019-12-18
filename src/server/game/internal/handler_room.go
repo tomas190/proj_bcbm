@@ -107,40 +107,39 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		return
 	}
 
-	var csSum float64
 	var autoBetAmounts = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 
-	var bet msg.Bet
 	for _, b := range dl.AutoBetRecord[au.UserID] {
-		bet = b
-		log.Debug("筹码数量 :%v", b)
+		var cs float64
+		cs += constant.ChipSize[b.Area]
+		log.Debug("总投注:%v", cs)
+
+		if dl.roomBonusLimit(b.Area) < cs || dl.dynamicBonusLimit(b.Area) < cs {
+			LimitRed = true
+			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
+			return
+		}
+		if LimitRed == true {
+			return
+		}
 	}
 
-	cs := constant.ChipSize[bet.Chip]
+	for _, b := range dl.AutoBetRecord[au.UserID] {
+		bet := b
+		cs := constant.ChipSize[bet.Area]
 
-	if dl.roomBonusLimit(bet.Area) < cs || dl.dynamicBonusLimit(bet.Area) < cs {
-		LimitRed = true
-		errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
-		return
+		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
+		dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
+		// 当前用户在该区域的历史投注+当前用户投注
+		dl.UserBets[au.UserID][bet.Area] = dl.UserBets[au.UserID][bet.Area] + cs
+
+		autoBetAmounts[bet.Area] += cs
+
+		au.DownBetTotal += cs
+		au.Balance -= cs
+
+		log.Debug("续投成功 ~~~~: %v", au.DownBetTotal)
 	}
-
-	if LimitRed == true {
-		//log.Debug("限红 ~~~~")
-		return
-	}
-
-	// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
-	dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
-	// 当前用户在该区域的历史投注+当前用户投注
-	dl.UserBets[au.UserID][bet.Area] = dl.UserBets[au.UserID][bet.Area] + cs
-
-	autoBetAmounts[bet.Area] += cs
-	csSum += cs
-
-	au.DownBetTotal += cs
-	au.Balance -= cs
-
-	log.Debug("续投成功 ~~~~: %v", au.DownBetTotal)
 
 	resp := &msg.AutoBetB{
 		UserID:      au.UserID,
