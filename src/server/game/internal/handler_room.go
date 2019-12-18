@@ -109,9 +109,9 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 
 	var autoBetAmounts = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 
+	var cs float64
 	for _, b := range dl.AutoBetRecord[au.UserID] {
-		var cs float64
-		cs += constant.ChipSize[b.Area]
+		cs += constant.ChipSize[b.Chip]
 		log.Debug("总投注:%v", cs)
 
 		if dl.roomBonusLimit(b.Area) < cs || dl.dynamicBonusLimit(b.Area) < cs {
@@ -126,7 +126,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 
 	for _, b := range dl.AutoBetRecord[au.UserID] {
 		bet := b
-		cs := constant.ChipSize[bet.Area]
+		cs := constant.ChipSize[bet.Chip]
 
 		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
 		dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
