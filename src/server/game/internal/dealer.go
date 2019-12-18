@@ -246,7 +246,7 @@ func (dl *Dealer) playerSettle() {
 		user := value.(*User)
 		// 中心服需要结算的输赢
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
-		log.Debug("玩家ID：%v, 玩家uWin：%v", user.UserID, uWin)
+		//log.Debug("玩家ID：%v, 玩家uWin：%v", user.UserID, uWin)
 
 		var ResultMoney float64
 

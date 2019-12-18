@@ -30,7 +30,7 @@ func NewMgoC(url string) *MgoC {
 }
 
 func (m *MgoC) Init() error {
-	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 6*time.Second)
 	err := m.Connect(ctx)
 	if err != nil {
 		log.Error("数据库连接错误", err)
