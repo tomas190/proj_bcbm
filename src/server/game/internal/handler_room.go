@@ -45,7 +45,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 			return
 		}
 
-		if dl.roomBonusLimit(m.Area) < cs || dl.dynamicBonusLimit(m.Area) < cs {
+		if dl.dynamicBonusLimit(m.Area) < cs {
 			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
 			return
 		}
@@ -114,7 +114,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		cs += constant.ChipSize[b.Chip]
 		log.Debug("总投注:%v", cs)
 
-		if dl.roomBonusLimit(b.Area) < cs || dl.dynamicBonusLimit(b.Area) < cs {
+		if  dl.dynamicBonusLimit(b.Area) < cs {
 			LimitRed = true
 			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
 			return
