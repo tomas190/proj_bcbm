@@ -77,7 +77,7 @@ func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 		// 把玩家从掉线列表中移除
 		if user == u.UserID {
 			dl.UserLeave = append(dl.UserLeave[:i], dl.UserLeave[i+1:]...)
-			log.Debug("AllocateUser 清楚玩家记录~")
+			log.Debug("AllocateUser 清除玩家记录~")
 			break
 		}
 	}

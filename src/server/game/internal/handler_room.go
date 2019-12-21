@@ -388,11 +388,14 @@ func (dl *Dealer) getPlayerInfoResp() []*msg.UserInfo {
 
 // 房间剩余限红
 func (dl *Dealer) roomBonusLimit(area uint32) float64 {
+	log.Debug("房间已限红~~~")
 	return constant.RoomMaxBonus/constant.AreaX[area] - dl.AreaBets[area]
 }
 
 // 区域剩余限红
 func (dl *Dealer) dynamicBonusLimit(area uint32) float64 {
+	num := dl.sumAreaExcept(area)
+	log.Debug("区域已限红~~~ :%v,%v", num, dl.AreaBets[area])
 	return (dl.bankerMoney+dl.sumAreaExcept(area))/constant.AreaX[area] - dl.AreaBets[area]
 }
 

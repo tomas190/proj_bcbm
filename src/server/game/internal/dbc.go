@@ -30,7 +30,7 @@ func NewMgoC(url string) *MgoC {
 }
 
 func (m *MgoC) Init() error {
-	ctx, _ := context.WithTimeout(context.Background(), 6*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err := m.Connect(ctx)
 	if err != nil {
 		log.Error("数据库连接错误", err)
@@ -49,7 +49,7 @@ func (m *MgoC) Init() error {
 // 插入用户信息
 func (m *MgoC) CUserInfo(u interface{}) error {
 	collection := m.Database(constant.DBName).Collection("users")
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 
 	res, err := collection.InsertOne(ctx, u)
 	if err != nil {
@@ -63,7 +63,7 @@ func (m *MgoC) CUserInfo(u interface{}) error {
 
 func (m *MgoC) RUserInfo(userID uint32) error {
 	collection := m.Database(constant.DBName).Collection("users")
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 
 	var userInfo UserDB
 
@@ -77,7 +77,7 @@ func (m *MgoC) RUserInfo(userID uint32) error {
 
 func (m *MgoC) RUserCount() (int64, error) {
 	collection := m.Database(constant.DBName).Collection("users")
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 
 	count, err := collection.CountDocuments(ctx, bson.M{})
 	if err != nil {
@@ -89,7 +89,7 @@ func (m *MgoC) RUserCount() (int64, error) {
 
 func (m *MgoC) CUserSettle(bet interface{}) error {
 	collection := m.Database(constant.DBName).Collection("settles")
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 	res, err := collection.InsertOne(ctx, bet)
 	if err != nil {
 		log.Error("%+v", err)
@@ -103,7 +103,7 @@ func (m *MgoC) CUserSettle(bet interface{}) error {
 
 func (m *MgoC) RUserSettle(userID uint32) ([]SettleDB, error) {
 	collection := m.Database(constant.DBName).Collection("settles")
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 
 	var res []SettleDB
 	filter := bson.M{"User.UserID": userID}
@@ -130,7 +130,7 @@ func (m *MgoC) RUserSettle(userID uint32) ([]SettleDB, error) {
 
 func (m *MgoC) RProfitPool() ProfitDB {
 	collection := m.Database(constant.DBName).Collection("profits")
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 
 	opt := options.FindOne()
 	opt.SetSort(bson.M{"UpdateTime": -1})
@@ -147,7 +147,7 @@ func (m *MgoC) RProfitPool() ProfitDB {
 
 func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	collection := m.Database(constant.DBName).Collection("profits")
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 
 	opt := options.FindOne()
 	opt.SetSort(bson.M{"UpdateTime": -1})
@@ -211,7 +211,7 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 //InsertAccessData 插入运营数据接入
 func (m *MgoC) InsertAccess(data *PlayerDownBetRecode) error {
 	collection := m.Database(constant.DBName).Collection("accessData")
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 
 	res, err := collection.InsertOne(ctx, data)
 	if err != nil {
@@ -227,7 +227,7 @@ func (m *MgoC) InsertAccess(data *PlayerDownBetRecode) error {
 //GetDownRecodeList 获取运营数据接入
 func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string) ([]PlayerDownBetRecode, int, error) {
 	collection := m.Database(constant.DBName).Collection("accessData")
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
 
 	opt := options.Find()
 	opt.SetLimit(20)
