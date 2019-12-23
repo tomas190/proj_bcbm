@@ -45,7 +45,12 @@ func (dl *Dealer) handleBet(args []interface{}) {
 			return
 		}
 
-		if dl.dynamicBonusLimit(m.Area) < cs {
+		log.Debug("限红1:%v", constant.RoomMaxBonus/constant.AreaX[area])
+		log.Debug("限红2:%v", dl.AreaBets[area])
+		log.Debug("限红3:%v", dl.bankerMoney+dl.sumAreaExcept(area))
+		log.Debug("限红4:%v",(dl.bankerMoney+dl.sumAreaExcept(area))/constant.AreaX[area])
+		log.Debug("限红5:%v", dl.AreaBets[area])
+		if dl.roomBonusLimit(m.Area) < cs || dl.dynamicBonusLimit(m.Area) < cs {
 			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
 			return
 		}
@@ -114,9 +119,9 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		cs += constant.ChipSize[b.Chip]
 		log.Debug("总投注:%v", cs)
 
-		if  dl.dynamicBonusLimit(b.Area) < cs {
+		if dl.roomBonusLimit(b.Area) < cs || dl.dynamicBonusLimit(b.Area) < cs {
 			LimitRed = true
-			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
+			errorResp(a, msg.ErrorCode_ContinueBetError, "续投失败")
 			return
 		}
 		if LimitRed == true {
@@ -394,8 +399,7 @@ func (dl *Dealer) roomBonusLimit(area uint32) float64 {
 
 // 区域剩余限红
 func (dl *Dealer) dynamicBonusLimit(area uint32) float64 {
-	num := dl.sumAreaExcept(area)
-	log.Debug("区域已限红~~~ :%v,%v", num, dl.AreaBets[area])
+	log.Debug("区域已限红~")
 	return (dl.bankerMoney+dl.sumAreaExcept(area))/constant.AreaX[area] - dl.AreaBets[area]
 }
 

@@ -225,6 +225,7 @@ enum ErrorCode {
     InsufficientBalanceGrabBanker = 101; // 上庄钱不够
     InsufficientBalanceBet = 102; // 下注钱不够
     ReachTableLimit = 103; // 到达限红
+    ContinueBetError = 104;  // 续投失败
 
     ServerClosed = 201;
     UserRepeatLogin = 202;
