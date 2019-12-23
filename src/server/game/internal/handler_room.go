@@ -45,11 +45,11 @@ func (dl *Dealer) handleBet(args []interface{}) {
 			return
 		}
 
-		log.Debug("限红1:%v", constant.RoomMaxBonus/constant.AreaX[area])
-		log.Debug("限红2:%v", dl.AreaBets[area])
-		log.Debug("限红3:%v", dl.bankerMoney+dl.sumAreaExcept(area))
-		log.Debug("限红4:%v",(dl.bankerMoney+dl.sumAreaExcept(area))/constant.AreaX[area])
-		log.Debug("限红5:%v", dl.AreaBets[area])
+		log.Debug("限红1:%v", constant.RoomMaxBonus/constant.AreaX[m.Area])
+		log.Debug("限红2:%v", dl.AreaBets[m.Area])
+		log.Debug("限红3:%v", dl.bankerMoney+dl.sumAreaExcept(m.Area))
+		log.Debug("限红4:%v",(dl.bankerMoney+dl.sumAreaExcept(m.Area))/constant.AreaX[m.Area])
+		log.Debug("限红5:%v", dl.AreaBets[m.Area])
 		if dl.roomBonusLimit(m.Area) < cs || dl.dynamicBonusLimit(m.Area) < cs {
 			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
 			return
