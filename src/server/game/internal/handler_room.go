@@ -45,11 +45,6 @@ func (dl *Dealer) handleBet(args []interface{}) {
 			return
 		}
 
-		log.Debug("限红1:%v", constant.RoomMaxBonus/constant.AreaX[m.Area])
-		log.Debug("限红2:%v", dl.AreaBets[m.Area])
-		log.Debug("限红3:%v", dl.bankerMoney+dl.sumAreaExcept(m.Area))
-		log.Debug("限红4:%v",(dl.bankerMoney+dl.sumAreaExcept(m.Area))/constant.AreaX[m.Area])
-		log.Debug("限红5:%v", dl.AreaBets[m.Area])
 		if dl.roomBonusLimit(m.Area) < cs || dl.dynamicBonusLimit(m.Area) < cs {
 			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
 			return
@@ -393,29 +388,27 @@ func (dl *Dealer) getPlayerInfoResp() []*msg.UserInfo {
 
 // 房间剩余限红
 func (dl *Dealer) roomBonusLimit(area uint32) float64 {
-	log.Debug("房间已限红~~~")
 	return constant.RoomMaxBonus/constant.AreaX[area] - dl.AreaBets[area]
 }
 
 // 区域剩余限红
 func (dl *Dealer) dynamicBonusLimit(area uint32) float64 {
-	log.Debug("区域已限红~")
-	return (dl.bankerMoney+dl.sumAreaExcept(area))/constant.AreaX[area] - dl.AreaBets[area]
-}
-
-// 其他区域投注数总和
-func (dl *Dealer) sumAreaExcept(area uint32) float64 {
 	var sum float64
 	for i, a := range dl.AreaBets {
 		if uint32(i) == area {
 			break
 		}
-		areaBet := a
-		sum += areaBet
+		sum += a
 	}
-
-	return sum
+	log.Debug("sum总和:%v", sum)
+	log.Debug("限红1:%v", dl.AreaBets)
+	log.Debug("限红2:%v", dl.AreaBets[area])
+	log.Debug("限红3:%v",(dl.bankerMoney+sum)/constant.AreaX[area])
+	log.Debug("限红4:%v", (dl.bankerMoney+sum)/constant.AreaX[area]-dl.AreaBets[area])
+	return (dl.bankerMoney+sum)/constant.AreaX[area] - dl.AreaBets[area]
 }
+
+// 其他区域投注数总和
 
 func (dl *Dealer) getBankerInfoResp() []*msg.UserInfo {
 	var bankerInfoResp []*msg.UserInfo
