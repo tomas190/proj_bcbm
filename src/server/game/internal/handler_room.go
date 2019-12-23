@@ -44,7 +44,8 @@ func (dl *Dealer) handleBet(args []interface{}) {
 			errorResp(a, msg.ErrorCode_InsufficientBalanceBet, "余额不足")
 			return
 		}
-
+		log.Debug("限红1:%v", dl.AreaBets)
+		log.Debug("限红2:%v", dl.AreaBets[m.Area])
 		if dl.roomBonusLimit(m.Area) < cs || dl.dynamicBonusLimit(m.Area) < cs {
 			errorResp(a, msg.ErrorCode_ReachTableLimit, "到达限红")
 			return
@@ -400,11 +401,7 @@ func (dl *Dealer) dynamicBonusLimit(area uint32) float64 {
 		}
 		sum += a
 	}
-	log.Debug("sum总和:%v", sum)
-	log.Debug("限红1:%v", dl.AreaBets)
-	log.Debug("限红2:%v", dl.AreaBets[area])
-	log.Debug("限红3:%v",(dl.bankerMoney+sum)/constant.AreaX[area])
-	log.Debug("限红4:%v", (dl.bankerMoney+sum)/constant.AreaX[area]-dl.AreaBets[area])
+
 	return (dl.bankerMoney+sum)/constant.AreaX[area] - dl.AreaBets[area]
 }
 
