@@ -1,9 +1,9 @@
 package internal
 
 import (
+	"go.mongodb.org/mongo-driver/bson"
 	"proj_bcbm/src/server/msg"
 	"time"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type DTOConverter struct{}
@@ -81,8 +81,8 @@ func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
 
 func (c *DTOConverter) RSBMsg(userWin float64, autoBetAmount, userBalance float64, dl Dealer) msg.RoomStatusB {
 	bMsg := msg.RoomStatusB{
-		Status: dl.Status,
-		// Counter:       0,
+		RoomId:        dl.RoomID,
+		Status:        dl.Status,
 		EndTime:       dl.ddl,
 		Result:        dl.res,
 		BankerWin:     dl.bankerWin,

@@ -160,6 +160,7 @@ message RoomStatusB {
     double AutoBetAmount = 8; // 续投金额，若为0则置灰
     uint32 ServerTime = 10; // 服务器时间
     uint32 Position = 11; // 位置 1-4
+    uint32 RoomId = 12; //房间ID
 }
 
 // 下注信息广播
@@ -225,7 +226,7 @@ enum ErrorCode {
     InsufficientBalanceGrabBanker = 101; // 上庄钱不够
     InsufficientBalanceBet = 102; // 下注钱不够
     ReachTableLimit = 103; // 到达限红
-    ContinueBetError = 104;  // 续投失败
+    ContinueBetError = 104; // 续投失败
 
     ServerClosed = 201;
     UserRepeatLogin = 202;
