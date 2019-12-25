@@ -281,6 +281,7 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 	if uBets == 0 {
 		au.winCount = 0
 		au.betAmount = 0
+		dl.Users.Delete(au.UserID)
 	} else {
 		dl.UserLeave = append(dl.UserLeave, au.UserID)
 	}
