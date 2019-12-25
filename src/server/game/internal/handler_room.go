@@ -399,7 +399,7 @@ func (dl *Dealer) dynamicBonusLimit(area uint32) float64 {
 			sum += v
 		}
 	}
-	return (dl.bankerMoney+sum)/constant.AreaX[area] - dl.AreaBets[area]
+	return (dl.bankerMoney+sum)/(constant.AreaX[area]-1) - dl.AreaBets[area]
 }
 
 // 其他区域投注数总和
