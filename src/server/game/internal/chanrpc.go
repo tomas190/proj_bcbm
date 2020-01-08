@@ -37,7 +37,7 @@ func rpcCloseAgent(args []interface{}) {
 		if v != nil {
 			dl := v.(*Dealer)
 			math := util.Math{}
-			uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64()
+			uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64()   // 获取下注金额
 			if uBets == 0 {
 				dl.Users.Delete(au.UserID)
 			} else {

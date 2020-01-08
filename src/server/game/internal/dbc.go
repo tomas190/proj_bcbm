@@ -3,10 +3,10 @@ package internal
 import (
 	"context"
 	"fmt"
-	"gopkg.in/mgo.v2/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"gopkg.in/mgo.v2/bson"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
 	"time"
@@ -185,7 +185,7 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	newLost := lastProfit.PlayerAllLost + lose
 	newWin := lastProfit.PlayerAllWin + win
 	newCount := userCount
-	newProfit := newLost - newWin*(1.0+constant.HouseEdge) - float64(userCount)*constant.GiftAmount
+	newProfit := (newLost - (newWin * 1) - float64(userCount)) * 0.5
 
 	newRecord := ProfitDB{
 		UpdateTime:     time.Now(),
