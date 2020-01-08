@@ -16,7 +16,7 @@ const (
 )
 
 // 最大容量
-const MaxPlayerCount = 100
+const MaxPlayerCount = 1000
 const RoomMaxBonus = 100000
 
 // 房间等级 room level

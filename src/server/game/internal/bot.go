@@ -14,7 +14,7 @@ func (dl *Dealer) AddBots() {
 	nextBankerBot := dl.NextBotBanker()
 	dl.Bots = append(dl.Bots, &betGod, &nextBankerBot)
 
-	for i := 0; i < 30; i++ {
+	for i := 0; i < 12; i++ {
 		richMan := dl.RichMan()
 		dl.Bots = append(dl.Bots, &richMan)
 	}

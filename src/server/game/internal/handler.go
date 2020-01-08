@@ -181,6 +181,7 @@ func handleJoinRoom(args []interface{}) {
 
 	// fixme 最大人数
 	if len(room.UserBets) == constant.MaxPlayerCount {
+		log.Debug("房间人数为:%v", len(room.UserBets))
 		errorResp(a, msg.ErrorCode_RoomFull, "房间已满")
 		return
 	}
