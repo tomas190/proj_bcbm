@@ -28,9 +28,8 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 				area = preArea
 				break
 			}
-			log.Debug("preLoseAmount :%v", preLoseAmount)
-
 		} else {
+			log.Debug("preLoseAmount :%v", preLoseAmount)
 			area = preArea
 			break
 		}
@@ -72,7 +71,7 @@ func (dl *Dealer) fairLottery() uint32 {
 // userBets 玩家投注
 // preArea 预开奖区域
 func (dl *Dealer) preUserWin(preArea uint32) float64 {
-	userWin := dl.AreaBets[preArea] * constant.AreaX[preArea]
+	userWin := dl.DownBetArea[preArea] * constant.AreaX[preArea]
 
 	return userWin - dl.TotalDownMoney
 }

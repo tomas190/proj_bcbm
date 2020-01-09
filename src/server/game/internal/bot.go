@@ -48,7 +48,7 @@ func (dl *Dealer) BotsBet() {
 			continue
 		}
 		// 区域所有玩家投注总数
-		//dl.AreaBets[area] = dl.AreaBets[area] + cs
+		dl.AreaBets[area] = dl.AreaBets[area] + cs
 		// 区域机器人投注总数
 		dl.AreaBotBets[area] = dl.AreaBotBets[area] + cs
 

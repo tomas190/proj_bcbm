@@ -48,6 +48,7 @@ type Dealer struct {
 	AreaBets       []float64            // 每个区域玩家投注总数
 	AreaBotBets    []float64            // 每个区域机器人投注总数
 	TotalDownMoney float64              // 当局所有总下注
+	DownBetArea    []float64
 }
 
 const taxRate = 0.05
@@ -66,6 +67,7 @@ func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 		UserBetsDetail: map[uint32][]msg.Bet{},
 		AutoBetRecord:  map[uint32][]msg.Bet{},
 		AreaBets:       []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
+		DownBetArea:    []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 		AreaBotBets:    []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 	}
 }
@@ -249,6 +251,7 @@ func (dl *Dealer) playerSettle() {
 		log.Debug("房间: %v 玩家ID：%v, 玩家uWin：%v", dl.RoomID, user.UserID, uWin)
 
 		var ResultMoney float64
+		var uBet float64
 
 		var winFlag bool
 		if uWin > 0 {
@@ -267,13 +270,16 @@ func (dl *Dealer) playerSettle() {
 			winFlag = false
 		}
 
-		var uBet float64
-
 		loseOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "lose"
 		if user.DownBetTotal > 0 {
+			if uWin > user.DownBetTotal {
+				uBet = user.DownBetTotal - uWin
+			}else {
+				uBet = uWin - user.DownBetTotal
+			}
+
 			if uWin > 0 {
 				ResultMoney -= user.DownBetTotal - dl.UserBets[user.UserID][dl.res]
-				uBet = user.DownBetTotal - dl.UserBets[user.UserID][dl.res]
 				result := -user.DownBetTotal + dl.UserBets[user.UserID][dl.res]
 				c4c.UserLoseScore(user.UserID, result, loseOrder, dl.RoundID, func(data *User) {
 					user.BalanceLock.Lock()
@@ -281,7 +287,6 @@ func (dl *Dealer) playerSettle() {
 					user.BalanceLock.Unlock()
 				})
 			} else {
-				uBet = user.DownBetTotal
 				ResultMoney -= user.DownBetTotal
 				c4c.UserLoseScore(user.UserID, -user.DownBetTotal, loseOrder, dl.RoundID, func(data *User) {
 					user.BalanceLock.Lock()
@@ -485,6 +490,7 @@ func (dl *Dealer) UpdatePlayerList() {
 func (dl *Dealer) ClearData() {
 	// 清理
 	dl.AreaBets = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+	dl.DownBetArea = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	for i := range dl.UserBets {
 		dl.UserBets[i] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 	}
