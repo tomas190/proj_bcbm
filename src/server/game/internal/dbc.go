@@ -145,7 +145,7 @@ func (m *MgoC) RProfitPool() ProfitDB {
 	return lastProfit
 }
 
-func (m *MgoC) UProfitPool(lose, win float64, rid uint32, player float64) error {
+func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	collection := m.Database(constant.DBName).Collection("profits")
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
@@ -171,7 +171,7 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32, player float64) error 
 			PlayerAllWin:   win,
 			PlayerAllLost:  lose,
 			RoomID:         rid,
-			Profit:         lose - win - player,
+			Profit:         lose - win,
 			PlayerNum:      uint32(userCount),
 		}
 		res, err := collection.InsertOne(ctx, newProfit)
@@ -181,50 +181,31 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32, player float64) error 
 
 		log.Debug("插入第一条盈余数据 %+v", res)
 	}
-	if player == 1 {
-		newRecord := ProfitDB{
-			UpdateTime:     time.Now(),
-			UpdateTimeStr:  now.Format("2006-01-02T15:04:05"),
-			PlayerThisLost: lose,
-			PlayerThisWin:  win,
-			PlayerAllWin:   lastProfit.PlayerAllWin,
-			PlayerAllLost:  lastProfit.PlayerAllLost,
-			Profit:         lastProfit.Profit -player,
-			RoomID:         rid,
-			PlayerNum:      uint32(userCount),
-		}
 
-		res, err := collection.InsertOne(ctx, newRecord)
-		if err != nil {
-			log.Debug("插入盈余数据 %+v", err)
-		}
-		log.Debug("插入盈余数据 %+v", res)
-	}else {
-		newLost := lastProfit.PlayerAllLost + lose
-		newWin := lastProfit.PlayerAllWin + win
-		newCount := userCount
-		newProfit := (newLost - (newWin * 1) - float64(newCount)) * 0.5
-		log.Debug("newProfit:%v",newLost - (newWin * 1) - float64(newCount))
-		log.Debug("盈余数据为： %+v", newProfit)
+	newLost := lastProfit.PlayerAllLost + lose
+	newWin := lastProfit.PlayerAllWin + win
+	newCount := userCount
+	newProfit := (newLost - (newWin * 1)) * 0.5
+	log.Debug("newProfit:%v", newLost-(newWin*1))
+	log.Debug("盈余数据为： %+v", newProfit)
 
-		newRecord := ProfitDB{
-			UpdateTime:     time.Now(),
-			UpdateTimeStr:  now.Format("2006-01-02T15:04:05"),
-			PlayerThisLost: lose,
-			PlayerThisWin:  win,
-			PlayerAllWin:   newWin,
-			PlayerAllLost:  newLost,
-			Profit:         newProfit,
-			RoomID:         rid,
-			PlayerNum:      uint32(newCount),
-		}
-
-		res, err := collection.InsertOne(ctx, newRecord)
-		if err != nil {
-			log.Debug("插入盈余数据 %+v", err)
-		}
-		log.Debug("插入盈余数据 %+v", res)
+	newRecord := ProfitDB{
+		UpdateTime:     time.Now(),
+		UpdateTimeStr:  now.Format("2006-01-02T15:04:05"),
+		PlayerThisLost: lose,
+		PlayerThisWin:  win,
+		PlayerAllWin:   newWin,
+		PlayerAllLost:  newLost,
+		Profit:         newProfit,
+		RoomID:         rid,
+		PlayerNum:      uint32(newCount),
 	}
+
+	res, err := collection.InsertOne(ctx, newRecord)
+	if err != nil {
+		log.Debug("插入盈余数据 %+v", err)
+	}
+	log.Debug("插入盈余数据 %+v", res)
 
 	return nil
 }

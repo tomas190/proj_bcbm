@@ -180,7 +180,7 @@ func (dl *Dealer) Settle() {
 					//}
 					dl.bankerMoney = data.BankerBalance
 					// 玩家坐庄盈余池更新
-					err := db.UProfitPool(0, dl.bankerWin, dl.RoomID,0)
+					err := db.UProfitPool(0, dl.bankerWin, dl.RoomID)
 					if err != nil {
 						log.Debug("更新盈余池失败 %+v", err)
 					}
@@ -191,7 +191,7 @@ func (dl *Dealer) Settle() {
 					dl.bankerMoney = data.BankerBalance
 
 					// 玩家坐庄盈余池更新
-					err := db.UProfitPool(-dl.bankerWin, 0, dl.RoomID,0)
+					err := db.UProfitPool(-dl.bankerWin, 0, dl.RoomID)
 					if err != nil {
 						log.Debug("更新盈余池失败 %+v", err)
 					}
@@ -238,7 +238,6 @@ func (dl *Dealer) Settle() {
 func (dl *Dealer) playerSettle() {
 	dtoC := DTOConverter{}
 	daoC := DAOConverter{}
-	math := util.Math{}
 
 	uid := util.UUID{}
 	dl.RoundID = fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
@@ -267,10 +266,13 @@ func (dl *Dealer) playerSettle() {
 			winFlag = false
 		}
 
+		var uBet float64
+
 		loseOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "lose"
 		if user.DownBetTotal > 0 {
 			if uWin > 0 {
 				ResultMoney -= user.DownBetTotal - dl.UserBets[user.UserID][dl.res]
+				uBet = -user.DownBetTotal + dl.UserBets[user.UserID][dl.res]
 				result := -user.DownBetTotal + dl.UserBets[user.UserID][dl.res]
 				c4c.UserLoseScore(user.UserID, result, loseOrder, dl.RoundID, func(data *User) {
 					user.BalanceLock.Lock()
@@ -278,6 +280,7 @@ func (dl *Dealer) playerSettle() {
 					user.BalanceLock.Unlock()
 				})
 			} else {
+				uBet -= user.DownBetTotal
 				ResultMoney -= user.DownBetTotal
 				c4c.UserLoseScore(user.UserID, -user.DownBetTotal, loseOrder, dl.RoundID, func(data *User) {
 					user.BalanceLock.Lock()
@@ -299,7 +302,6 @@ func (dl *Dealer) playerSettle() {
 		}
 
 		// 玩家结算记录
-		uBet, _ := math.SumSliceFloat64(dl.UserBets[user.UserID]).Float64()
 		if uBet > 0 && uWin >= 0 {
 			order := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05")
 			sdb := daoC.Settle2DB(*user, order, dl.RoundID, winFlag, uBet, uWin)
@@ -308,7 +310,7 @@ func (dl *Dealer) playerSettle() {
 				log.Debug("保存用户结算数据错误 %+v", err)
 			}
 
-			err = db.UProfitPool(uBet, uWin, dl.RoomID,0)
+			err = db.UProfitPool(uBet, uWin, dl.RoomID)
 			if err != nil {
 				log.Debug("更新盈余池失败 %+v", err)
 			}

@@ -109,10 +109,6 @@ func handleLogin(args []interface{}) {
 					if errC != nil {
 						log.Error("玩家信息保存错误 %+v", errC)
 					}
-					errP := db.UProfitPool(0, 0, 0, 1)
-					if errP != nil {
-						log.Error("玩家首次登录盈余池更新错误 %+v", errP)
-					}
 				}
 			}()
 
