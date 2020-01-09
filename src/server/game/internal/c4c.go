@@ -676,8 +676,7 @@ func (c4c *Client4Center) sendMsg2Center(data interface{}) {
 
 func (c4c *Client4Center) NoticeWinMoreThan(playerId uint32, playerName string, winGold float64) {
 	log.Debug("<-------- NoticeWinMoreThan  -------->")
-	winGold, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", winGold), 64)
-	msg := fmt.Sprintf("<size=20><color=yellow>恭喜!</color><color=orange>%v</color><color=yellow>在</color></><color=orange><size=25>奔驰宝马</color></><color=yellow><size=20>中一把赢了</color></><color=yellow><size=30>%v</color></><color=yellow><size=25>金币！</color></>", playerName, winGold)
+	msg := fmt.Sprintf("<size=20><color=yellow>恭喜!</color><color=orange>%v</color><color=yellow>在</color></><color=orange><size=25>奔驰宝马</color></><color=yellow><size=20>中一把赢了</color></><color=yellow><size=30>%.2f</color></><color=yellow><size=25>金币！</color></>", playerName, winGold)
 
 	base := &NoticeReq{}
 	base.Event = constant.CEventNotice
