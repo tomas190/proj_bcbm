@@ -21,13 +21,18 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 	for i := 0; i < 100; i++ {
 		preArea := dl.fairLottery()
 		preLoseAmount := dl.preUserWin(preArea)
-		log.Debug("preLoseAmount :%v", preLoseAmount)
 
-		if acceptableMaxLose > preLoseAmount {
+		if preLoseAmount > acceptableMaxLose {
 			area = preArea
-			break
+			if preLoseAmount <= 0 {
+				area = preArea
+				break
+			}
+			log.Debug("preLoseAmount :%v", preLoseAmount)
+
 		} else {
 			area = preArea
+			break
 		}
 	}
 
@@ -69,7 +74,7 @@ func (dl *Dealer) fairLottery() uint32 {
 func (dl *Dealer) preUserWin(preArea uint32) float64 {
 	userWin := dl.AreaBets[preArea] * constant.AreaX[preArea]
 
-	return dl.TotalDownMoney - userWin
+	return userWin - dl.TotalDownMoney
 }
 
 // 盈余池 = 玩家总输 - 玩家总赢 * 杀数 - (玩家数量 * 6)
