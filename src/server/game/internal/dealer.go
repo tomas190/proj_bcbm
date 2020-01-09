@@ -272,7 +272,7 @@ func (dl *Dealer) playerSettle() {
 		if user.DownBetTotal > 0 {
 			if uWin > 0 {
 				ResultMoney -= user.DownBetTotal - dl.UserBets[user.UserID][dl.res]
-				uBet = -user.DownBetTotal + dl.UserBets[user.UserID][dl.res]
+				uBet = user.DownBetTotal - dl.UserBets[user.UserID][dl.res]
 				result := -user.DownBetTotal + dl.UserBets[user.UserID][dl.res]
 				c4c.UserLoseScore(user.UserID, result, loseOrder, dl.RoundID, func(data *User) {
 					user.BalanceLock.Lock()
@@ -280,7 +280,7 @@ func (dl *Dealer) playerSettle() {
 					user.BalanceLock.Unlock()
 				})
 			} else {
-				uBet -= user.DownBetTotal
+				uBet = user.DownBetTotal
 				ResultMoney -= user.DownBetTotal
 				c4c.UserLoseScore(user.UserID, -user.DownBetTotal, loseOrder, dl.RoundID, func(data *User) {
 					user.BalanceLock.Lock()
