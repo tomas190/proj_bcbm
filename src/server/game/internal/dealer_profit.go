@@ -12,18 +12,22 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 	// 盈余池 随机从10%到50%取一个值，算出一个预计赔付数
 	//randomUtil := util.Random{}
 	//profitPoolRatePercent := randomUtil.RandInRange(constant.ProfitPoolMinPercent, constant.ProfitPoolMaxPercent)
-	profitPoolRatePercent := constant.ProfitPoolMaxPercent
-	profitPoolRate := float64(profitPoolRatePercent) / 100.0
-	acceptableMaxLose := dl.profitPool() * profitPoolRate
+
+	acceptableMaxLose := dl.profitPool() * 0.5
+	log.Debug("dl.profitPool() :%v", dl.profitPool())
+	log.Debug("acceptableMaxLose :%v", acceptableMaxLose)
 
 	var area uint32
 	for i := 0; i < 100; i++ {
 		preArea := dl.fairLottery()
 		preLoseAmount := dl.preUserWin(dl.UserBets, preArea)
+		log.Debug("preLoseAmount :%v", preLoseAmount)
 		if preLoseAmount > acceptableMaxLose {
+			log.Debug("111111111111111")
 			area = preArea
 			continue
 		} else {
+			log.Debug("222222222222222")
 			area = preArea
 			break
 		}
