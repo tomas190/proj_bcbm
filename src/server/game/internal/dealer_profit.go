@@ -26,6 +26,8 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 		if acceptableMaxLose > preLoseAmount {
 			area = preArea
 			break
+		} else {
+			area = preArea
 		}
 	}
 
