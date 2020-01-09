@@ -47,6 +47,7 @@ type Dealer struct {
 	AutoBetRecord  map[uint32][]msg.Bet // 续投记录
 	AreaBets       []float64            // 每个区域玩家投注总数
 	AreaBotBets    []float64            // 每个区域机器人投注总数
+	TotalDownMoney float64              // 当局所有总下注
 }
 
 const taxRate = 0.05
@@ -503,6 +504,7 @@ func (dl *Dealer) ClearData() {
 		}
 
 		user.DownBetTotal = 0
+		dl.TotalDownMoney = 0
 		dl.UserAutoBet[u] = false
 		return true
 	})
