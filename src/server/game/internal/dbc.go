@@ -162,24 +162,7 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	var lastProfit ProfitDB
 	err := collection.FindOne(ctx, bson.M{}, opt).Decode(&lastProfit)
 	if err != nil {
-		log.Debug("未查找到盈余池数据 %+v", err)
-		var newProfit = ProfitDB{
-			UpdateTime:     time.Now(),
-			UpdateTimeStr:  now.Format("2006-01-02T15:04:05"),
-			PlayerThisWin:  win,
-			PlayerThisLost: lose,
-			PlayerAllWin:   win,
-			PlayerAllLost:  lose,
-			RoomID:         rid,
-			Profit:         lose - win,
-			PlayerNum:      uint32(userCount),
-		}
-		res, err := collection.InsertOne(ctx, newProfit)
-		if err != nil {
-			log.Debug("插入第一条盈余数据 %+v", err)
-		}
-
-		log.Debug("插入第一条盈余数据 %+v", res)
+		log.Debug("插入第一条盈余数据~")
 	}
 
 	newLost := lastProfit.PlayerAllLost + lose
