@@ -308,7 +308,7 @@ func (dl *Dealer) playerSettle() {
 		}
 
 		// 玩家结算记录
-		if uBet > 0 && uWin >= 0 {
+		if uWin >= 0 {
 			order := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05")
 			sdb := daoC.Settle2DB(*user, order, dl.RoundID, winFlag, uBet, uWin)
 			err := db.CUserSettle(sdb)
