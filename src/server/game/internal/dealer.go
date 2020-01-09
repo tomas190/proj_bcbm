@@ -273,9 +273,9 @@ func (dl *Dealer) playerSettle() {
 		loseOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "lose"
 		if user.DownBetTotal > 0 {
 			if uWin > user.DownBetTotal {
-				uBet = user.DownBetTotal - uWin
+				uBet -= user.DownBetTotal - uWin
 			}else {
-				uBet = uWin - user.DownBetTotal
+				uBet -= uWin - user.DownBetTotal
 			}
 
 			if uWin > 0 {
