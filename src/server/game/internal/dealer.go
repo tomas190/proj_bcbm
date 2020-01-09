@@ -272,13 +272,8 @@ func (dl *Dealer) playerSettle() {
 
 		loseOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "lose"
 		if user.DownBetTotal > 0 {
-			if uWin > user.DownBetTotal {
-				uBet -= user.DownBetTotal - uWin
-			}else {
-				uBet -= uWin - user.DownBetTotal
-			}
-
 			if uWin > 0 {
+				uBet = user.DownBetTotal - dl.UserBets[user.UserID][dl.res]
 				ResultMoney -= user.DownBetTotal - dl.UserBets[user.UserID][dl.res]
 				result := -user.DownBetTotal + dl.UserBets[user.UserID][dl.res]
 				c4c.UserLoseScore(user.UserID, result, loseOrder, dl.RoundID, func(data *User) {
@@ -287,6 +282,7 @@ func (dl *Dealer) playerSettle() {
 					user.BalanceLock.Unlock()
 				})
 			} else {
+				uBet = user.DownBetTotal
 				ResultMoney -= user.DownBetTotal
 				c4c.UserLoseScore(user.UserID, -user.DownBetTotal, loseOrder, dl.RoundID, func(data *User) {
 					user.BalanceLock.Lock()
