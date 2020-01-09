@@ -60,7 +60,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 
 		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
 		dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
-		dl.DownBetArea[bet.Area] = dl.DownBetArea[bet.Area] + cs
+		dl.DownBetArea[m.Area] = dl.DownBetArea[m.Area] + cs
 		// 当前用户在该区域的历史投注+当前用户投注
 		dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
 		// 用户具体投注信息
