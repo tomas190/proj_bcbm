@@ -180,7 +180,7 @@ func (dl *Dealer) Settle() {
 					//}
 					dl.bankerMoney = data.BankerBalance
 					// 玩家坐庄盈余池更新
-					err := db.UProfitPool(0, dl.bankerWin, dl.RoomID)
+					err := db.UProfitPool(0, dl.bankerWin, dl.RoomID,0)
 					if err != nil {
 						log.Debug("更新盈余池失败 %+v", err)
 					}
@@ -191,7 +191,7 @@ func (dl *Dealer) Settle() {
 					dl.bankerMoney = data.BankerBalance
 
 					// 玩家坐庄盈余池更新
-					err := db.UProfitPool(-dl.bankerWin, 0, dl.RoomID)
+					err := db.UProfitPool(-dl.bankerWin, 0, dl.RoomID,0)
 					if err != nil {
 						log.Debug("更新盈余池失败 %+v", err)
 					}
@@ -308,7 +308,7 @@ func (dl *Dealer) playerSettle() {
 				log.Debug("保存用户结算数据错误 %+v", err)
 			}
 
-			err = db.UProfitPool(uBet, uWin, dl.RoomID)
+			err = db.UProfitPool(uBet, uWin, dl.RoomID,0)
 			if err != nil {
 				log.Debug("更新盈余池失败 %+v", err)
 			}
