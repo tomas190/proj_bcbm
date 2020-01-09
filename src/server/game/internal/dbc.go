@@ -185,7 +185,7 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	newLost := lastProfit.PlayerAllLost + lose
 	newWin := lastProfit.PlayerAllWin + win
 	newCount := userCount
-	newProfit := (newLost - (newWin * 1) - float64(userCount)) * 0.5
+	newProfit := (newLost - (newWin * 1)- float64(newCount)) * 0.5
 
 	newRecord := ProfitDB{
 		UpdateTime:     time.Now(),
