@@ -113,7 +113,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 	var cs float64
 	for _, b := range dl.AutoBetRecord[au.UserID] {
 		cs += constant.ChipSize[b.Chip]
-		log.Debug("总投注:%v", cs)
+		//log.Debug("总投注:%v", cs)
 
 		if dl.roomBonusLimit(b.Area) < cs || dl.dynamicBonusLimit(b.Area) < cs {
 			LimitRed = true
@@ -141,7 +141,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		dl.TotalDownMoney += cs
 		au.Balance -= cs
 
-		log.Debug("续投成功 ~~~~: %v", au.DownBetTotal)
+		//log.Debug("续投成功 ~~~~: %v", au.DownBetTotal)
 	}
 
 	resp := &msg.AutoBetB{

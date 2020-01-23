@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"proj_bcbm/src/server/conf"
-	"time"
 )
 
 type PlainFormatter struct {
@@ -45,17 +44,17 @@ func init() {
 
 func Debug(format string, a ...interface{}) {
 	log.Debugf(format, a...)
-	go SendToLogServer("DEG", fmt.Sprintf(format, a...), time.Now().Format("2006-01-02 15:04:05"))
+	//go SendToLogServer("DEG", fmt.Sprintf(format, a...), time.Now().Format("2006-01-02 15:04:05"))
 }
 
 func Error(format string, a ...interface{}) {
 	log.Errorf(format, a...)
-	go SendToLogServer("ERR", fmt.Sprintf(format, a...), time.Now().Format("2006-01-02 15:04:05"))
+	//go SendToLogServer("ERR", fmt.Sprintf(format, a...), time.Now().Format("2006-01-02 15:04:05"))
 }
 
 func Fatal(format string, a ...interface{}) {
 	log.Fatalf(format, a...)
-	go SendToLogServer("ERR", fmt.Sprintf(format, a...), time.Now().Format("2006-01-02 15:04:05"))
+	//go SendToLogServer("ERR", fmt.Sprintf(format, a...), time.Now().Format("2006-01-02 15:04:05"))
 
 }
 
