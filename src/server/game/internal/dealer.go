@@ -260,12 +260,14 @@ func (dl *Dealer) playerSettle() {
 				uBet = user.DownBetTotal - dl.UserBets[user.UserID][dl.res]
 				ResultMoney -= user.DownBetTotal - dl.UserBets[user.UserID][dl.res]
 				result := -user.DownBetTotal + dl.UserBets[user.UserID][dl.res]
-				c4c.UserLoseScore(user.UserID, result, loseOrder, dl.RoundID, func(data *User) {
-					user.BalanceLock.Lock()
-					user.Balance = data.Balance
-					log.Debug("玩家金额2:%v",user.Balance)
-					user.BalanceLock.Unlock()
-				})
+				if result != 0 {
+					c4c.UserLoseScore(user.UserID, result, loseOrder, dl.RoundID, func(data *User) {
+						user.BalanceLock.Lock()
+						user.Balance = data.Balance
+						log.Debug("玩家金额2:%v",user.Balance)
+						user.BalanceLock.Unlock()
+					})
+				}
 			} else {
 				uBet = user.DownBetTotal
 				ResultMoney -= user.DownBetTotal
@@ -296,10 +298,14 @@ func (dl *Dealer) playerSettle() {
 			winFlag = false
 		}
 
-		//if ResultMoney > 0 {  //todo
-		//	user.Balance += user.DownBetTotal + ResultMoney
-		//	log.Debug("玩家金额4:%v",user.Balance)
-		//}
+		if uWin > 0 {
+			if ResultMoney > 0 {  //todo
+				user.Balance += user.DownBetTotal + ResultMoney
+				log.Debug("玩家金额4:%v",user.Balance)
+			}else if ResultMoney < 0  {
+				user.Balance += uWin - (uWin * taxRate)
+			}
+		}
 
 		resp := dtoC.RSBMsg(ResultMoney, 0, user.Balance, *dl)
 		user.ConnAgent.WriteMsg(&resp)

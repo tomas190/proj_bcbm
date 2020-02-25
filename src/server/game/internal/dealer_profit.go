@@ -14,8 +14,8 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 	//profitPoolRatePercent := randomUtil.RandInRange(constant.ProfitPoolMinPercent, constant.ProfitPoolMaxPercent)
 
 	acceptableMaxLose := dl.profitPool() * 0.5
-	log.Debug("dl.profitPool() :%v", dl.profitPool())
-	log.Debug("acceptableMaxLose :%v", acceptableMaxLose)
+	//log.Debug("dl.profitPool() :%v", dl.profitPool())
+	//log.Debug("acceptableMaxLose :%v", acceptableMaxLose)
 
 	var area uint32
 	for i := 0; i < 100; i++ {
@@ -29,7 +29,7 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 				break
 			}
 		} else {
-			log.Debug("preLoseAmount :%v", preLoseAmount)
+			//log.Debug("preLoseAmount :%v", preLoseAmount)
 			area = preArea
 			break
 		}
