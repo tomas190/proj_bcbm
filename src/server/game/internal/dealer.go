@@ -254,24 +254,6 @@ func (dl *Dealer) playerSettle() {
 		var uBet float64
 		log.Debug("玩家金额0:%v",user.Balance)
 
-		var winFlag bool
-		if uWin > 0 {
-			winFlag = true
-			uWin = uWin - dl.UserBets[user.UserID][dl.res]
-			ResultMoney += uWin - (uWin * taxRate)
-
-			winOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "win"
-			c4c.UserWinScore(user.UserID, uWin, winOrder, dl.RoundID, func(data *User) {
-				// 赢钱之后更新余额
-				user.BalanceLock.Lock()
-				user.Balance = data.Balance
-				log.Debug("玩家金额1:%v",user.Balance)
-				user.BalanceLock.Unlock()
-			})
-		} else {
-			winFlag = false
-		}
-
 		loseOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "lose"
 		if user.DownBetTotal > 0 {
 			if uWin > 0 {
@@ -294,6 +276,24 @@ func (dl *Dealer) playerSettle() {
 					user.BalanceLock.Unlock()
 				})
 			}
+		}
+
+		var winFlag bool
+		if uWin > 0 {
+			winFlag = true
+			uWin = uWin - dl.UserBets[user.UserID][dl.res]
+			ResultMoney += uWin - (uWin * taxRate)
+
+			winOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "win"
+			c4c.UserWinScore(user.UserID, uWin, winOrder, dl.RoundID, func(data *User) {
+				// 赢钱之后更新余额
+				user.BalanceLock.Lock()
+				user.Balance = data.Balance
+				log.Debug("玩家金额1:%v",user.Balance)
+				user.BalanceLock.Unlock()
+			})
+		} else {
+			winFlag = false
 		}
 
 		if ResultMoney > 0 {
