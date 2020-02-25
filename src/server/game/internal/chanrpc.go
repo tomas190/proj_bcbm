@@ -4,7 +4,6 @@ import (
 	"github.com/name5566/leaf/gate"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
-	"proj_bcbm/src/server/util"
 )
 
 func init() {
