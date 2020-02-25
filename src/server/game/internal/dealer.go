@@ -296,10 +296,10 @@ func (dl *Dealer) playerSettle() {
 			winFlag = false
 		}
 
-		if ResultMoney > 0 {
-			user.Balance += user.DownBetTotal + ResultMoney
-			log.Debug("玩家金额4:%v",user.Balance)
-		}
+		//if ResultMoney > 0 {  //todo
+		//	user.Balance += user.DownBetTotal + ResultMoney
+		//	log.Debug("玩家金额4:%v",user.Balance)
+		//}
 
 		resp := dtoC.RSBMsg(ResultMoney, 0, user.Balance, *dl)
 		user.ConnAgent.WriteMsg(&resp)
