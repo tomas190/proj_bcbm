@@ -310,7 +310,7 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 		}
 
 	} else {
-		log.Error("中心服务器状态码 %+v", syncData.Code,syncData.Msg)
+		log.Error("中心服务器状态码 %+v %+v", syncData.Code,syncData.Msg)
 	}
 }
 

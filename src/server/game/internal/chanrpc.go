@@ -40,18 +40,16 @@ func rpcCloseAgent(args []interface{}) {
 			log.Debug("当局总下注：%v",dl.TotalDownMoney)
 			if  dl.TotalDownMoney == 0 { //uBets
 				dl.Users.Delete(au.UserID)
+				c4c.UserLogoutCenter(au.UserID, func(data *User) {
+					Mgr.UserRecord.Delete(au.UserID)
+					resp := &msg.LogoutR{}
+					a.WriteMsg(resp)
+					a.Close()
+				})
 			} else {
 				dl.UserLeave = append(dl.UserLeave, au.UserID)
 			}
-
 			dl.AutoBetRecord[au.UserID] = nil
 		}
-
-		c4c.UserLogoutCenter(au.UserID, func(data *User) {
-			Mgr.UserRecord.Delete(au.UserID)
-			resp := &msg.LogoutR{}
-			a.WriteMsg(resp)
-			a.Close()
-		})
 	}
 }
