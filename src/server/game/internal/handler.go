@@ -123,13 +123,26 @@ func handleLogout(args []interface{}) {
 	// m := args[0].(*msg.Logout)
 	a := args[1].(gate.Agent)
 
-	au := a.UserData().(*User)
-	c4c.UserLogoutCenter(au.UserID, func(data *User) {
-		Mgr.UserRecord.Delete(au.UserID)
-		resp := &msg.LogoutR{}
-		a.WriteMsg(resp)
-		a.Close()
-	})
+	au,ok := a.UserData().(*User)
+	if ok {
+		rid := Mgr.UserRoom[au.UserID]
+		v, _ := Mgr.RoomRecord.Load(rid)
+		if v != nil {
+			dl := v.(*Dealer)
+			if dl.TotalDownMoney == 0 {
+				c4c.UserLogoutCenter(au.UserID, func(data *User) {
+					Mgr.UserRecord.Delete(au.UserID)
+					resp := &msg.LogoutR{}
+					a.WriteMsg(resp)
+					a.Close()
+				})
+			}else {
+				dl.UserLeave = append(dl.UserLeave, au.UserID)
+				resp := &msg.LogoutR{}
+				a.WriteMsg(resp)
+			}
+		}
+	}
 }
 
 /*************************************
