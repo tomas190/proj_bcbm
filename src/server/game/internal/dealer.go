@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"github.com/shopspring/decimal"
+	"gopkg.in/mgo.v2/bson"
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
@@ -170,11 +171,11 @@ func (dl *Dealer) Settle() {
 		{
 			u := dl.Bankers[0].(User)
 			preBankerBalance := dl.bankerMoney
-			order := uuid.GenUUID()
+			order := bson.NewObjectId().String()
 
 			if preBankerWin > 0 {
 				log.Debug("玩家的当局总下注1: %v", preBankerWin)
-				c4c.BankerWinScore(u.UserID, preBankerWin, order+"-banker-win", dl.RoundID, func(data *User) {
+				c4c.BankerWinScore(u.UserID, preBankerWin, order, dl.RoundID, func(data *User) {
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					log.Debug("玩家的当局总下注2: %v", dl.bankerWin)
 					//////庄家跑马灯
@@ -189,7 +190,7 @@ func (dl *Dealer) Settle() {
 					}
 				})
 			} else {
-				c4c.BankerLoseScore(u.UserID, preBankerWin, order+"-banker-lose", dl.RoundID, func(data *User) {
+				c4c.BankerLoseScore(u.UserID, preBankerWin, order, dl.RoundID, func(data *User) {
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					dl.bankerMoney = data.BankerBalance
 
@@ -252,9 +253,9 @@ func (dl *Dealer) playerSettle() {
 
 		var ResultMoney float64
 		var uBet float64
-		log.Debug("玩家金额0:%v",user.Balance)
+		log.Debug("玩家金额0:%v", user.Balance)
 
-		loseOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "lose"
+		loseOrder := bson.NewObjectId().String()
 		if user.DownBetTotal > 0 {
 			if uWin > 0 {
 				uBet = user.DownBetTotal - dl.UserBets[user.UserID][dl.res]
@@ -264,7 +265,7 @@ func (dl *Dealer) playerSettle() {
 					c4c.UserLoseScore(user.UserID, result, loseOrder, dl.RoundID, func(data *User) {
 						user.BalanceLock.Lock()
 						user.Balance = data.Balance
-						log.Debug("玩家金额2:%v",user.Balance)
+						log.Debug("玩家金额2:%v", user.Balance)
 						user.BalanceLock.Unlock()
 					})
 				}
@@ -274,7 +275,7 @@ func (dl *Dealer) playerSettle() {
 				c4c.UserLoseScore(user.UserID, -user.DownBetTotal, loseOrder, dl.RoundID, func(data *User) {
 					user.BalanceLock.Lock()
 					user.Balance = data.Balance
-					log.Debug("玩家金额3:%v",user.Balance)
+					log.Debug("玩家金额3:%v", user.Balance)
 					user.BalanceLock.Unlock()
 				})
 			}
@@ -285,13 +286,12 @@ func (dl *Dealer) playerSettle() {
 			winFlag = true
 			uWin = uWin - dl.UserBets[user.UserID][dl.res]
 			ResultMoney += uWin - (uWin * taxRate)
-
-			winOrder := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05") + "win"
+			winOrder := bson.NewObjectId().String()
 			c4c.UserWinScore(user.UserID, uWin, winOrder, dl.RoundID, func(data *User) {
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
-				log.Debug("玩家金额1:%v",user.Balance)
+				log.Debug("玩家金额1:%v", user.Balance)
 				user.BalanceLock.Unlock()
 			})
 		} else {
@@ -299,10 +299,10 @@ func (dl *Dealer) playerSettle() {
 		}
 
 		if uWin > 0 {
-			if ResultMoney > 0 {  //todo
+			if ResultMoney > 0 { //todo
 				user.Balance += user.DownBetTotal + ResultMoney
-				log.Debug("玩家金额4:%v",user.Balance)
-			}else if ResultMoney < 0  {
+				log.Debug("玩家金额4:%v", user.Balance)
+			} else if ResultMoney < 0 {
 				user.Balance += uWin - (uWin * taxRate)
 			}
 		}
@@ -317,7 +317,7 @@ func (dl *Dealer) playerSettle() {
 		// 玩家结算记录
 		if uWin == 0 && uBet == 0 {
 			log.Debug("空数据,不插入")
-		}else {
+		} else {
 			order := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05")
 			sdb := daoC.Settle2DB(*user, order, dl.RoundID, winFlag, uBet, uWin)
 			err := db.CUserSettle(sdb)
