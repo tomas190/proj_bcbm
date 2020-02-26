@@ -156,7 +156,6 @@ func (dl *Dealer) Settle() {
 		LotteryResult: res,
 	}
 
-	uuid := util.UUID{}
 
 	// 结算
 	// 庄家赢数 = Sum(所有筹码数) - 中奖倍数*中奖筹码数
