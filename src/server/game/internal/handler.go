@@ -57,6 +57,21 @@ func handleLogin(args []interface{}) {
 			errorResp(a, msg.ErrorCode_UserRepeatLogin, "重复登录")
 			return
 		} else { // 用户存在，但连接不同
+			rid := Mgr.UserRoom[u.UserID]
+			r, _ := Mgr.RoomRecord.Load(rid)
+			if r != nil {
+				dl := r.(*Dealer)
+				for i, lu := range dl.UserLeave {
+					user := lu
+					// 把玩家从掉线列表中移除
+					if user == u.UserID {
+						dl.UserLeave = append(dl.UserLeave[:i], dl.UserLeave[i+1:]...)
+						log.Debug("AllocateUser 清除玩家记录~")
+						break
+					}
+				}
+			}
+
 			err := Mgr.ReplaceUserAgent(userID, a)
 			if err != nil {
 				log.Error("用户连接替换错误", err)
