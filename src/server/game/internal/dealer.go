@@ -226,14 +226,15 @@ func (dl *Dealer) Settle() {
 	// 处理离开房间的用户
 	for _, uid := range dl.UserLeave {
 		userID := uid
-		_, ok := dl.Users.Load(userID)
+		p, ok := dl.Users.Load(userID)
 		if ok {
+			player := p.(*User)
 			dl.Users.Delete(userID)
 			c4c.UserLogoutCenter(userID, func(data *User) {
-				Mgr.UserRecord.Delete(userID)
+				Mgr.UserRecord.Delete(player.UserID)
 				resp := &msg.LogoutR{}
-				data.ConnAgent.WriteMsg(resp)
-				data.ConnAgent.Close()
+				player.ConnAgent.WriteMsg(resp)
+				player.ConnAgent.Close()
 				log.Debug("投注后离开房间的玩家已登出")
 			})
 		}
