@@ -288,11 +288,11 @@ func (dl *Dealer) playerSettle() {
 		var winFlag bool
 		if uWin > 0 {
 			winFlag = true
-			uWin = uWin - dl.UserBets[user.UserID][dl.res]
-			ResultMoney += uWin - (uWin * taxRate)
 			data += uWin - ((uWin+data) *taxRate)
 			user.Balance += dl.UserBets[user.UserID][dl.res] + data
 
+			uWin = uWin - dl.UserBets[user.UserID][dl.res]
+			ResultMoney += uWin - (uWin * taxRate)
 			winOrder := bson.NewObjectId().String()
 			c4c.UserWinScore(user.UserID, uWin, winOrder, dl.RoundID, func(data *User) {
 				// 赢钱之后更新余额
