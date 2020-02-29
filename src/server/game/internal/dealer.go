@@ -170,7 +170,7 @@ func (dl *Dealer) Settle() {
 		{
 			u := dl.Bankers[0].(User)
 			preBankerBalance := dl.bankerMoney
-			order := bson.NewObjectId().String()
+			order := bson.NewObjectId().Hex()
 
 			if preBankerWin > 0 {
 				log.Debug("玩家的当局总下注1: %v", preBankerWin)
@@ -259,7 +259,7 @@ func (dl *Dealer) playerSettle() {
 		var uBet float64
 		var data float64
 
-		loseOrder := bson.NewObjectId().String()
+		loseOrder := bson.NewObjectId().Hex()
 		if user.DownBetTotal > 0 {
 			if uWin > 0 {
 				uBet = user.DownBetTotal - dl.UserBets[user.UserID][dl.res]
@@ -293,7 +293,7 @@ func (dl *Dealer) playerSettle() {
 
 			uWin = uWin - dl.UserBets[user.UserID][dl.res]
 			ResultMoney += uWin - (uWin * taxRate)
-			winOrder := bson.NewObjectId().String()
+			winOrder := bson.NewObjectId().Hex()
 			c4c.UserWinScore(user.UserID, uWin, winOrder, dl.RoundID, func(data *User) {
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
