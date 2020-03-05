@@ -22,6 +22,9 @@ type Client4Center struct {
 	userWaitEvent sync.Map
 }
 
+var winChan chan bool
+var loseChan chan bool
+
 func NewClient4Center() *Client4Center {
 	wsURL := "ws" + strings.TrimPrefix(conf.Server.CenterServer, "http")
 	c, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
@@ -276,6 +279,7 @@ func (c4c *Client4Center) onUserWinScore(msg []byte) {
 	syncData := winResp.Data
 	if syncData.Code == constant.CRespStatusSuccess {
 		log.Debug("onUserWinScore SUCCESS :%v", winResp)
+		winChan <- true
 
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-win-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
 			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})
@@ -300,6 +304,7 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 	syncData := loseResp.Data
 	if syncData.Code == constant.CRespStatusSuccess {
 		log.Debug("onUserLoseScore SUCCESS :%v", loseResp)
+		loseChan <- true
 
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
 			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})

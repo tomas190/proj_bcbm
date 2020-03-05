@@ -274,6 +274,12 @@ func (dl *Dealer) playerSettle() {
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
 			})
+			select {
+			case t := <-winChan:
+				if t == true {
+					break
+				}
+			}
 		} else {
 			winFlag = false
 		}
@@ -292,6 +298,12 @@ func (dl *Dealer) playerSettle() {
 						user.Balance = data.Balance
 						user.BalanceLock.Unlock()
 					})
+					select {
+					case t := <-loseChan:
+						if t == true {
+							break
+						}
+					}
 				}
 			} else {
 				uBet = user.DownBetTotal
@@ -301,6 +313,12 @@ func (dl *Dealer) playerSettle() {
 					user.Balance = data.Balance
 					user.BalanceLock.Unlock()
 				})
+				select {
+				case t := <-loseChan:
+					if t == true {
+						break
+					}
+				}
 			}
 		}
 
