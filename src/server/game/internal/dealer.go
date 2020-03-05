@@ -223,23 +223,6 @@ func (dl *Dealer) Settle() {
 	// log.Debug("settle... %+v", dl.RoomID)
 	dl.playerSettle()
 
-	// 处理离开房间的用户
-	for _, uid := range dl.UserLeave {
-		userID := uid
-		p, ok := dl.Users.Load(userID)
-		if ok {
-			player := p.(*User)
-			dl.Users.Delete(userID)
-			c4c.UserLogoutCenter(userID, func(data *User) {
-				Mgr.UserRecord.Delete(player.UserID)
-				resp := &msg.LogoutR{}
-				player.ConnAgent.WriteMsg(resp)
-				player.ConnAgent.Close()
-				log.Debug("投注后离开房间的玩家已登出")
-			})
-		}
-	}
-
 	dl.ClockReset(constant.SettleTime, dl.ClearChip)
 }
 
@@ -376,8 +359,27 @@ func (dl *Dealer) ClearChip() {
 
 	// log.Debug("clear chip... %+v", dl.RoomID)
 
+	// 处理离开房间的用户
+	for _, uid := range dl.UserLeave {
+		userID := uid
+		p, ok := dl.Users.Load(userID)
+		if ok {
+			player := p.(*User)
+			dl.Users.Delete(userID)
+			c4c.UserLogoutCenter(userID, func(data *User) {
+				dl.AutoBetRecord[player.UserID] = nil
+				Mgr.UserRecord.Delete(player.UserID)
+				resp := &msg.LogoutR{}
+				player.ConnAgent.WriteMsg(resp)
+				player.ConnAgent.Close()
+				log.Debug("投注后离开房间的玩家已登出")
+			})
+		}
+	}
+
 	// 更新玩家列表数据
 	dl.UpdatePlayerList()
+
 	// 清空数据
 	dl.ClearData()
 

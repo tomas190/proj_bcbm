@@ -41,6 +41,7 @@ func rpcCloseAgent(args []interface{}) {
 			if  dl.TotalDownMoney == 0 { //uBets
 				dl.Users.Delete(au.UserID)
 				c4c.UserLogoutCenter(au.UserID, func(data *User) {
+					dl.AutoBetRecord[au.UserID] = nil
 					Mgr.UserRecord.Delete(au.UserID)
 					resp := &msg.LogoutR{}
 					a.WriteMsg(resp)
@@ -49,7 +50,6 @@ func rpcCloseAgent(args []interface{}) {
 			} else {
 				dl.UserLeave = append(dl.UserLeave, au.UserID)
 			}
-			dl.AutoBetRecord[au.UserID] = nil
 		}
 	}
 }
