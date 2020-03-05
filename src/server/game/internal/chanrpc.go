@@ -4,6 +4,7 @@ import (
 	"github.com/name5566/leaf/gate"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
+	"proj_bcbm/src/server/util"
 )
 
 func init() {
@@ -35,10 +36,9 @@ func rpcCloseAgent(args []interface{}) {
 
 		if v != nil {
 			dl := v.(*Dealer)
-			//math := util.Math{}
-			//uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64()   // 获取下注金额
-			log.Debug("当局总下注：%v",dl.TotalDownMoney)
-			if  dl.TotalDownMoney == 0 { //uBets
+			math := util.Math{}
+			uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64()   // 获取下注金额
+			if uBets == 0 {
 				dl.Users.Delete(au.UserID)
 				c4c.UserLogoutCenter(au.UserID, func(data *User) {
 					dl.AutoBetRecord[au.UserID] = nil

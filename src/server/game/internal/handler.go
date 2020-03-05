@@ -6,6 +6,7 @@ import (
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
+	"proj_bcbm/src/server/util"
 	"reflect"
 	"time"
 )
@@ -138,20 +139,22 @@ func handleLogout(args []interface{}) {
 	// m := args[0].(*msg.Logout)
 	a := args[1].(gate.Agent)
 
-	au,ok := a.UserData().(*User)
+	au, ok := a.UserData().(*User)
 	if ok {
 		rid := Mgr.UserRoom[au.UserID]
 		v, _ := Mgr.RoomRecord.Load(rid)
 		if v != nil {
 			dl := v.(*Dealer)
-			if dl.TotalDownMoney == 0 {
+			math := util.Math{}
+			uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64() // 获取下注金额
+			if uBets == 0 {
 				c4c.UserLogoutCenter(au.UserID, func(data *User) {
 					Mgr.UserRecord.Delete(au.UserID)
 					resp := &msg.LogoutR{}
 					a.WriteMsg(resp)
 					a.Close()
 				})
-			}else {
+			} else {
 				dl.UserLeave = append(dl.UserLeave, au.UserID)
 				resp := &msg.LogoutR{}
 				a.WriteMsg(resp)
