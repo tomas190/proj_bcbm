@@ -140,6 +140,7 @@ func handleLogout(args []interface{}) {
 	a := args[1].(gate.Agent)
 
 	au, ok := a.UserData().(*User)
+
 	if ok {
 		rid := Mgr.UserRoom[au.UserID]
 		v, _ := Mgr.RoomRecord.Load(rid)

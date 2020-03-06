@@ -30,6 +30,16 @@ type ProfitDB struct {
 	PlayerNum      uint32    `bson:"PlayerNum"`
 }
 
+type SurPool struct {
+	player_total_lose                   float64
+	player_total_win                    float64
+	percentage_to_total_win             float64
+	total_player                        int64
+	coefficient_to_total_player         int64
+	final_percentage                    float64
+	player_lose_rate_after_surplus_pool float64
+}
+
 // 玩家的记录
 type PlayerDownBetRecode struct {
 	Id          uint32    `json:"id" bson:"id"`                       // 玩家Id
