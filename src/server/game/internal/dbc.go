@@ -214,7 +214,7 @@ func (m *MgoC) InsertSurPool(data *SurPool) error {
 		return err
 	}
 
-	log.Debug("<----- 插入SurPool成功 ~ ----->: %+v", res)
+	log.Debug("<----- 插入SurPool成功 ~ ----->: %+v,%v", res,data)
 	return nil
 }
 
