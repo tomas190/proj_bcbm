@@ -31,8 +31,10 @@ type ProfitDB struct {
 }
 
 type SurPool struct {
+    surplus_pool                        float64
 	player_total_lose                   float64
 	player_total_win                    float64
+    player_total_lose_win float64
 	percentage_to_total_win             float64
 	total_player                        int64
 	coefficient_to_total_player         int64

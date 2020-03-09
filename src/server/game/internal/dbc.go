@@ -173,6 +173,8 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	log.Debug("盈余数据为： %+v", newProfit)
 
 	SurPool := &SurPool{}
+	SurPool.surplus_pool = newProfit
+    SurPool.player_total_lose_win = newLost - newWin
 	SurPool.player_total_lose = newLost
 	SurPool.player_total_win = newWin
 	SurPool.total_player = userCount

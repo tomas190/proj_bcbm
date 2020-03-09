@@ -312,6 +312,7 @@ func (dl *Dealer) playerSettle() {
 			c4c.NoticeWinMoreThan(user.UserID, user.NickName, ResultMoney)
 		}
 
+
 		// 玩家结算记录
 		if uWin == 0 && uBet == 0 {
 			log.Debug("空数据,不插入")
