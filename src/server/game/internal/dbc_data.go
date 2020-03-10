@@ -31,15 +31,15 @@ type ProfitDB struct {
 }
 
 type SurPool struct {
-    surplus_pool                        float64
-	player_total_lose                   float64
-	player_total_win                    float64
-    player_total_lose_win float64
-	percentage_to_total_win             float64
-	total_player                        int64
-	coefficient_to_total_player         int64
-	final_percentage                    float64
-	player_lose_rate_after_surplus_pool float64
+	PlayerTotalLose                float64 `json:"player_total_lose" bson:"player_total_lose"`
+	PlayerTotalWin                 float64 `json:"player_total_win" bson:"player_total_win"`
+	PercentageToTotalWin           float64 `json:"percentage_to_total_win" bson:"percentage_to_total_win"`
+	TotalPlayer                    int64   `json:"total_player" bson:"total_player"`
+	CoefficientToTotalPlayer       int64   `json:"coefficient_to_total_player"`
+	FinalPercentage                float64 `json:"final_percentage" bson:"final_percentage"`
+	PlayerTotalLoseWin             float64 `json:"player_total_lose_win" bson:"player_total_lose_win" `
+	SurplusPool                    float64 `json:"surplus_pool" bson:"surplus_pool"`
+	PlayerLoseRateAfterSurplusPool float64 `json:"player_lose_rate_after_surplus_pool" bson:"player_lose_rate_after_surplus_pool"`
 }
 
 // 玩家的记录

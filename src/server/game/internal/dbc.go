@@ -173,15 +173,15 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	log.Debug("盈余数据为： %+v", newProfit)
 
 	SurPool := &SurPool{}
-	SurPool.surplus_pool = newProfit
-    SurPool.player_total_lose_win = newLost - newWin
-	SurPool.player_total_lose = newLost
-	SurPool.player_total_win = newWin
-	SurPool.total_player = userCount
-	SurPool.final_percentage = newProfit
-	SurPool.percentage_to_total_win = newWin * 1
-	SurPool.coefficient_to_total_player = userCount * 0
-	SurPool.player_lose_rate_after_surplus_pool = 0.7
+	SurPool.SurplusPool = newProfit
+	SurPool.PlayerTotalLoseWin = newLost - newWin
+	SurPool.PlayerTotalLose = newLost
+	SurPool.PlayerTotalWin = newWin
+	SurPool.TotalPlayer = userCount
+	SurPool.FinalPercentage = newProfit
+	SurPool.PercentageToTotalWin = newWin * 1
+	SurPool.CoefficientToTotalPlayer = userCount * 0
+	SurPool.PlayerLoseRateAfterSurplusPool = 0.7
 	_ = m.InsertSurPool(SurPool)
 
 	newRecord := ProfitDB{
@@ -216,7 +216,7 @@ func (m *MgoC) InsertSurPool(data *SurPool) error {
 		return err
 	}
 
-	log.Debug("<----- 插入SurPool成功 ~ ----->: %+v,%v", res,data)
+	log.Debug("<----- 插入SurPool成功 ~ ----->: %+v,%v", res, data)
 	return nil
 }
 
