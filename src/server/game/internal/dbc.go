@@ -178,11 +178,12 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	SurPool.PlayerTotalLose = newLost
 	SurPool.PlayerTotalWin = newWin
 	SurPool.TotalPlayer = userCount
-	SurPool.FinalPercentage = newProfit
-	SurPool.PercentageToTotalWin = newWin * 1
+	SurPool.FinalPercentage = 0.5
+	SurPool.PercentageToTotalWin =  1
 	SurPool.CoefficientToTotalPlayer = userCount * 0
 	SurPool.PlayerLoseRateAfterSurplusPool = 0.7
 	_ = m.InsertSurPool(SurPool)
+
 
 	newRecord := ProfitDB{
 		UpdateTime:     time.Now(),

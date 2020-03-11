@@ -35,7 +35,7 @@ type SurPool struct {
 	PlayerTotalWin                 float64 `json:"player_total_win" bson:"player_total_win"`
 	PercentageToTotalWin           float64 `json:"percentage_to_total_win" bson:"percentage_to_total_win"`
 	TotalPlayer                    int64   `json:"total_player" bson:"total_player"`
-	CoefficientToTotalPlayer       int64   `json:"coefficient_to_total_player"`
+	CoefficientToTotalPlayer       int64   `json:"coefficient_to_total_player" bson:"coefficient_to_total_player"`
 	FinalPercentage                float64 `json:"final_percentage" bson:"final_percentage"`
 	PlayerTotalLoseWin             float64 `json:"player_total_lose_win" bson:"player_total_lose_win" `
 	SurplusPool                    float64 `json:"surplus_pool" bson:"surplus_pool"`
