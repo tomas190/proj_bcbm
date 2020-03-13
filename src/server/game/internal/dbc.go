@@ -179,11 +179,10 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	SurPool.PlayerTotalWin = newWin
 	SurPool.TotalPlayer = userCount
 	SurPool.FinalPercentage = 0.5
-	SurPool.PercentageToTotalWin =  1
+	SurPool.PercentageToTotalWin = 1
 	SurPool.CoefficientToTotalPlayer = userCount * 0
 	SurPool.PlayerLoseRateAfterSurplusPool = 0.7
-	_ = m.InsertSurPool(SurPool)
-
+	m.FindSurPool(SurPool)
 
 	newRecord := ProfitDB{
 		UpdateTime:     time.Now(),
@@ -206,7 +205,18 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	return nil
 }
 
-//InsertAccessData 插入运营数据接入
+func (m *MgoC) FindSurPool(data *SurPool) {
+	collection := m.Database(constant.DBName).Collection("surplus-pool")
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	count, _ := collection.CountDocuments(ctx, bson.M{})
+	log.Debug("FindSurPool 数量:%v", count)
+	if count == 0 {
+		_ = m.InsertSurPool(data)
+	} else {
+		m.UpdateSurPool(data)
+	}
+}
+
 func (m *MgoC) InsertSurPool(data *SurPool) error {
 	collection := m.Database(constant.DBName).Collection("surplus-pool")
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
@@ -218,6 +228,19 @@ func (m *MgoC) InsertSurPool(data *SurPool) error {
 	}
 
 	log.Debug("<----- 插入SurPool成功 ~ ----->: %+v,%v", res, data)
+	return nil
+}
+
+func (m *MgoC) UpdateSurPool(data *SurPool) error {
+	collection := m.Database(constant.DBName).Collection("surplus-pool")
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+
+	res,err := collection.UpdateOne(ctx, bson.M{}, data)
+	if err != nil {
+		log.Error("<----- 更新 SurPool数据失败 ~ ----->:%v", err)
+		return err
+	}
+	log.Debug("<----- 更新SurPool数据成功 ~ ----->",res)
 	return nil
 }
 
