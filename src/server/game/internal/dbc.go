@@ -213,7 +213,7 @@ func (m *MgoC) FindSurPool(data *SurPool) {
 	if count == 0 {
 		_ = m.InsertSurPool(data)
 	} else {
-		m.UpdateSurPool(data)
+		_ = m.UpdateSurPool(data)
 	}
 }
 
@@ -235,12 +235,12 @@ func (m *MgoC) UpdateSurPool(data *SurPool) error {
 	collection := m.Database(constant.DBName).Collection("surplus-pool")
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
-	res,err := collection.UpdateOne(ctx, bson.M{}, data)
+	res, err := collection.ReplaceOne(ctx, bson.M{}, data)
 	if err != nil {
 		log.Error("<----- 更新 SurPool数据失败 ~ ----->:%v", err)
 		return err
 	}
-	log.Debug("<----- 更新SurPool数据成功 ~ ----->",res)
+	log.Debug("<----- 更新SurPool数据成功 ~ ----->", res)
 	return nil
 }
 
