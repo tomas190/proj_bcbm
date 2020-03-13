@@ -213,11 +213,11 @@ func (m *MgoC) FindSurPool(data *SurPool) {
 
 	count, _ := collection.CountDocuments(ctx, bson.M{})
 	log.Debug("FindSurPool 数量:%v", count)
-	//if count == 0 {
+	if count == 0 {
 		_ = m.InsertSurPool(data)
-	//} else {
-	//	_ = m.UpdateSurPool(data)
-	//}
+	} else {
+		_ = m.UpdateSurPool(data)
+	}
 }
 
 func (m *MgoC) InsertSurPool(data *SurPool) error {
