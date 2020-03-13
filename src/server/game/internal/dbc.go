@@ -208,13 +208,16 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 func (m *MgoC) FindSurPool(data *SurPool) {
 	collection := m.Database(constant.DBName).Collection("surplus-pool")
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+
+	collection.DeleteMany(ctx,bson.M{},nil)
+
 	count, _ := collection.CountDocuments(ctx, bson.M{})
 	log.Debug("FindSurPool 数量:%v", count)
-	if count == 0 {
+	//if count == 0 {
 		_ = m.InsertSurPool(data)
-	} else {
-		_ = m.UpdateSurPool(data)
-	}
+	//} else {
+	//	_ = m.UpdateSurPool(data)
+	//}
 }
 
 func (m *MgoC) InsertSurPool(data *SurPool) error {
