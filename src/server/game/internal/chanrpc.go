@@ -33,11 +33,11 @@ func rpcCloseAgent(args []interface{}) {
 
 		rid := Mgr.UserRoom[au.UserID]
 		v, _ := Mgr.RoomRecord.Load(rid)
-
 		if v != nil {
 			dl := v.(*Dealer)
 			math := util.Math{}
-			uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64()   // 获取下注金额
+			uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64() // 获取下注金额
+			log.Debug("玩家下注金额:%v", uBets)
 			if uBets == 0 {
 				dl.Users.Delete(au.UserID)
 				c4c.UserLogoutCenter(au.UserID, func(data *User) {
@@ -58,6 +58,12 @@ func rpcCloseAgent(args []interface{}) {
 					dl.UserLeave = append(dl.UserLeave, au.UserID)
 				}
 			}
+		}else {
+			c4c.UserLogoutCenter(au.UserID, func(data *User) {
+				resp := &msg.LogoutR{}
+				a.WriteMsg(resp)
+				a.Close()
+			})
 		}
 	}
 }
