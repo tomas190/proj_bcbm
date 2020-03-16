@@ -287,7 +287,15 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 		au.betAmount = 0
 		dl.Users.Delete(au.UserID)
 	} else {
-		dl.UserLeave = append(dl.UserLeave, au.UserID)
+		var exist bool
+		for _, v := range dl.UserLeave {
+			if v == au.UserID {
+				exist = true
+			}
+		}
+		if exist == false {
+			dl.UserLeave = append(dl.UserLeave, au.UserID)
+		}
 	}
 
 	dl.AutoBetRecord[au.UserID] = nil

@@ -48,7 +48,15 @@ func rpcCloseAgent(args []interface{}) {
 					a.Close()
 				})
 			} else {
-				dl.UserLeave = append(dl.UserLeave, au.UserID)
+				var exist bool
+				for _, v := range dl.UserLeave {
+					if v == au.UserID {
+						exist = true
+					}
+				}
+				if exist == false {
+					dl.UserLeave = append(dl.UserLeave, au.UserID)
+				}
 			}
 		}
 	}
