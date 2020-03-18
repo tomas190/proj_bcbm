@@ -50,6 +50,7 @@ type Dealer struct {
 	AreaBotBets    []float64            // 每个区域机器人投注总数
 	TotalDownMoney float64              // 当局所有总下注
 	DownBetArea    []float64
+	UserIsDownBet  map[uint32]bool // 玩家当局是否下注
 }
 
 const taxRate = 0.05
@@ -67,6 +68,7 @@ func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 		UserBets:       map[uint32][]float64{},
 		UserBetsDetail: map[uint32][]msg.Bet{},
 		AutoBetRecord:  map[uint32][]msg.Bet{},
+		UserIsDownBet:  map[uint32]bool{},
 		AreaBets:       []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 		DownBetArea:    []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 		AreaBotBets:    []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -156,7 +158,6 @@ func (dl *Dealer) Settle() {
 		LotteryResult: res,
 	}
 
-
 	// 结算
 	// 庄家赢数 = Sum(所有筹码数) - 中奖倍数*中奖筹码数
 	// 玩家赢数 = 开奖区域投注金额*区域倍数-总投注金额
@@ -245,7 +246,7 @@ func (dl *Dealer) playerSettle() {
 		var winFlag bool
 		if uWin > 0 {
 			winFlag = true
-			data += uWin - ((uWin+data) *taxRate)
+			data += uWin - ((uWin + data) * taxRate)
 			user.Balance += dl.UserBets[user.UserID][dl.res] + data
 
 			uWin = uWin - dl.UserBets[user.UserID][dl.res]
@@ -311,7 +312,6 @@ func (dl *Dealer) playerSettle() {
 		if ResultMoney > PaoMaDeng {
 			c4c.NoticeWinMoreThan(user.UserID, user.NickName, ResultMoney)
 		}
-
 
 		// 玩家结算记录
 		if uWin == 0 && uBet == 0 {
@@ -539,6 +539,7 @@ func (dl *Dealer) ClearData() {
 		user.DownBetTotal = 0
 		dl.TotalDownMoney = 0
 		dl.UserAutoBet[u] = false
+		dl.UserIsDownBet[u] = false
 		return true
 	})
 

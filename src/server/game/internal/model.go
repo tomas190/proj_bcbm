@@ -101,7 +101,7 @@ func (h *Hall) AllocateUser(u *User, dl *Dealer) {
 		ServerTime: uint32(time.Now().Unix()),
 	}
 
-	log.Debug("<---加入房间响应 %+v--->", resp.Room)
+	//log.Debug("<---加入房间响应 %+v--->", resp.Room)
 	u.ConnAgent.WriteMsg(resp)
 }
 
