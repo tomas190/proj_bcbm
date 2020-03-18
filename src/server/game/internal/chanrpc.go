@@ -38,7 +38,7 @@ func rpcCloseAgent(args []interface{}) {
 			math := util.Math{}
 			uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64() // 获取下注金额
 			log.Debug("rpcCloseAgent 玩家下注金额:%v", uBets)
-			if dl.UserIsDownBet[au.UserID] == false {
+			if dl.UserIsDownBet[au.UserID] == false || uBets == 0 {
 				log.Debug("rpcCloseAgent dl.UserIsDownBet:%v", dl.UserIsDownBet[au.UserID])
 				dl.Users.Delete(au.UserID)
 				c4c.UserLogoutCenter(au.UserID, func(data *User) {
