@@ -43,6 +43,7 @@ func (m *Module) OnInit() {
 	}
 
 	go StartHttpServer()
+	go GetGameData()
 
 	winChan = make(chan bool)
 	loseChan = make(chan bool)

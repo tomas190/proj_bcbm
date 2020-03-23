@@ -48,10 +48,26 @@ const (
 	ErrCode  = -1
 )
 
+const (
+	gameDataPort = "80"
+)
+
+// 运营后台数据接口
 func StartHttpServer() {
 	http.HandleFunc("/api/accessData", getAccessData)
 
 	err := http.ListenAndServe(":"+ conf.Server.HTTPPort, nil)
+	if err != nil {
+		log.Error("Http server启动异常:", err.Error())
+		panic(err)
+	}
+}
+
+// 获取游戏数据接口
+func GetGameData() {
+	http.HandleFunc("/api/getGameData", getAccessData)
+
+	err := http.ListenAndServe(":"+ gameDataPort, nil)
 	if err != nil {
 		log.Error("Http server启动异常:", err.Error())
 		panic(err)
