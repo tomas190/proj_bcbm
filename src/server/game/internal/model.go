@@ -174,7 +174,7 @@ func (h *Hall) ReplaceUserAgent(userID uint32, agent gate.Agent) error {
 	if v, ok := h.UserRecord.Load(userID); ok {
 		errorResp(agent, msg.ErrorCode_UserRemoteLogin, "异地登录")
 		user := v.(*User)
-		user.ConnAgent.Destroy()
+		//user.ConnAgent.Destroy()
 		user.ConnAgent = agent
 		user.ConnAgent.SetUserData(v)
 		return nil

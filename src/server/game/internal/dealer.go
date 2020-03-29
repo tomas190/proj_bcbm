@@ -237,7 +237,7 @@ func (dl *Dealer) playerSettle() {
 		user := value.(*User)
 		// 中心服需要结算的输赢
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
-		log.Debug("房间: %v 玩家ID：%v, 玩家uWin：%v", dl.RoomID, user.UserID, uWin)
+		//log.Debug("房间: %v 玩家ID：%v, 玩家uWin：%v", dl.RoomID, user.UserID, uWin)
 
 		var ResultMoney float64
 		var uBet float64
@@ -315,7 +315,7 @@ func (dl *Dealer) playerSettle() {
 
 		// 玩家结算记录
 		if uWin == 0 && uBet == 0 {
-			log.Debug("空数据,不插入")
+			//log.Debug("空数据,不插入")
 		} else {
 			order := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05")
 			sdb := daoC.Settle2DB(*user, order, dl.RoundID, winFlag, uBet, uWin)
