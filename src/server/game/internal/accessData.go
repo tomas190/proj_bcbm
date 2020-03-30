@@ -49,7 +49,7 @@ const (
 )
 
 const (
-	gameDataPort = "80"
+	gameDataPort = "3220"
 )
 
 // 运营后台数据接口
@@ -65,7 +65,7 @@ func StartHttpServer() {
 
 // 获取游戏数据接口
 func GetGameData() {
-	http.HandleFunc("/api/getGameData", getAccessData)
+	http.HandleFunc("/rapi/getGameData", getAccessData)
 
 	err := http.ListenAndServe(":"+ gameDataPort, nil)
 	if err != nil {
