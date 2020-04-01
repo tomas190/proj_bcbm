@@ -1,11 +1,12 @@
 package internal
 
 import (
+	"encoding/json"
 	"fmt"
-	"gopkg.in/mgo.v2/bson"
-	"proj_bcbm/src/server/conf"
 	"github.com/name5566/leaf/log"
+	"gopkg.in/mgo.v2/bson"
 	"net/http"
+	"proj_bcbm/src/server/conf"
 	"strconv"
 	"time"
 )
@@ -55,13 +56,12 @@ func StartHttpServer() {
 	// 获取游戏数据接口
 	http.HandleFunc("/api/getGameData", getAccessData)
 
-	err := http.ListenAndServe(":"+ conf.Server.HTTPPort, nil)
+	err := http.ListenAndServe(":"+conf.Server.HTTPPort, nil)
 	if err != nil {
 		log.Error("Http server启动异常:", err.Error())
 		panic(err)
 	}
 }
-
 
 func getAccessData(w http.ResponseWriter, r *http.Request) {
 	var req GameDataReq
@@ -138,6 +138,10 @@ func getAccessData(w http.ResponseWriter, r *http.Request) {
 	var result pageData
 	result.Total = count
 	result.List = gameData
+
+	api := NewResp(SuccCode, "", result)
+	res,_ := json.Marshal(api)
+	w.Write(res)
 
 	fmt.Fprintf(w, "%+v", ApiResp{Code: SuccCode, Msg: "", Data: result})
 }
