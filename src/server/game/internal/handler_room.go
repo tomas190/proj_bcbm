@@ -71,6 +71,7 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		au.Balance -= constant.ChipSize[m.Chip]
 
 		dl.UserIsDownBet[au.UserID] = true
+		au.IsAction = true
 
 		resp := &msg.BetInfoB{
 			Area:        m.Area,
@@ -156,6 +157,7 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 	dl.Broadcast(resp)
 
 	dl.UserIsDownBet[au.UserID] = true
+	au.IsAction = true
 	dl.UserAutoBet[au.UserID] = true
 }
 
@@ -288,6 +290,7 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 		au.winCount = 0
 		au.betAmount = 0
 		dl.UserIsDownBet[au.UserID] = false
+		au.IsAction = false
 		dl.UserBets[au.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 		dl.Users.Delete(au.UserID)
 	} else {

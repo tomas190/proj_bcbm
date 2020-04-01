@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/shopspring/decimal"
 	"gopkg.in/mgo.v2/bson"
+	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
@@ -334,6 +335,7 @@ func (dl *Dealer) playerSettle() {
 			timeNow := time.Now().Unix()
 			data := &PlayerDownBetRecode{}
 			data.Id = user.UserID
+			data.GameId = conf.Server.GameID
 			data.RandId = dl.RoomID + - +uint32(timeNow)
 			data.RoomId = dl.RoomID
 			data.DownBetInfo = dl.UserBets[user.UserID]
@@ -536,6 +538,7 @@ func (dl *Dealer) ClearData() {
 			// 不续投 不投注 不变
 		}
 
+		user.IsAction = false
 		user.DownBetTotal = 0
 		dl.TotalDownMoney = 0
 		dl.UserAutoBet[u] = false

@@ -38,8 +38,8 @@ func rpcCloseAgent(args []interface{}) {
 			math := util.Math{}
 			uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64() // 获取下注金额
 			log.Debug("rpcCloseAgent 玩家下注金额:%v", uBets)
-			if dl.UserIsDownBet[au.UserID] == false || uBets == 0 {
-				log.Debug("rpcCloseAgent dl.UserIsDownBet:%v", dl.UserIsDownBet[au.UserID])
+			log.Debug("rpcCloseAgent au.IsAction:%v", au.IsAction)
+			if au.IsAction == false {
 				dl.Users.Delete(au.UserID)
 				c4c.UserLogoutCenter(au.UserID, func(data *User) {
 					dl.AutoBetRecord[au.UserID] = nil
@@ -53,9 +53,11 @@ func rpcCloseAgent(args []interface{}) {
 				for _, v := range dl.UserLeave {
 					if v == au.UserID {
 						exist = true
+						log.Debug("rpcCloseAgent 玩家已存在UserLeave:%v", au.UserID)
 					}
 				}
 				if exist == false {
+					log.Debug("rpcCloseAgent 添加离线UserLeave:%v", au.UserID)
 					dl.UserLeave = append(dl.UserLeave, au.UserID)
 				}
 			}
