@@ -2,7 +2,6 @@ package internal
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/name5566/leaf/log"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
@@ -143,7 +142,7 @@ func getAccessData(w http.ResponseWriter, r *http.Request) {
 	res,_ := json.Marshal(api)
 	w.Write(res)
 
-	fmt.Fprintf(w, "%+v", ApiResp{Code: SuccCode, Msg: "", Data: result})
+	//fmt.Fprintf(w, "%+v", ApiResp{Code: SuccCode, Msg: "", Data: result})
 }
 
 func FormatTime(timeUnix int64, layout string) string {
