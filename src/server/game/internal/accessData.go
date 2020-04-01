@@ -65,9 +65,9 @@ func StartHttpServer() {
 
 // 获取游戏数据接口
 func GetGameData() {
-	http.HandleFunc("/rapi/getGameData", getAccessData)
+	http.HandleFunc("/api/getGameData", getAccessData)
 
-	err := http.ListenAndServe(":"+ gameDataPort, nil)
+	err := http.ListenAndServe(":"+ conf.Server.HTTPPort, nil)
 	if err != nil {
 		log.Error("Http server启动异常:", err.Error())
 		panic(err)
