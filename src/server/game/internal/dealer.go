@@ -336,7 +336,7 @@ func (dl *Dealer) playerSettle() {
 			data := &PlayerDownBetRecode{}
 			data.Id = user.UserID
 			data.GameId = conf.Server.GameID
-			data.RoundId = dl.RoomID + uint32(timeNow)
+			data.RoundId = strconv.Itoa(int(dl.RoomID + uint32(timeNow)))
 			data.RoomId = dl.RoomID
 			data.DownBetInfo = dl.UserBets[user.UserID]
 			data.DownBetTime = timeNow

@@ -46,7 +46,7 @@ type SurPool struct {
 type PlayerDownBetRecode struct {
 	Id          uint32    `json:"id" bson:"id"`                       // 玩家Id
 	GameId      string    `json:"game_id" bson:"game_id"`             // GameId
-	RoundId     uint32    `json:"round_id" bson:"round_id"`           // 随机Id
+	RoundId     string    `json:"round_id" bson:"round_id"`           // 随机Id
 	RoomId      uint32    `json:"room_id" bson:"room_id"`             // 所在房间
 	DownBetInfo []float64 `json:"down_bet_info" bson:"down_bet_info"` // 8个注池个下注金额
 	DownBetTime int64     `json:"down_bet_time" bson:"down_bet_time"` // 下注时间
