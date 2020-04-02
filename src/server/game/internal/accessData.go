@@ -2,6 +2,7 @@ package internal
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/name5566/leaf/log"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
@@ -138,11 +139,17 @@ func getAccessData(w http.ResponseWriter, r *http.Request) {
 	result.Total = count
 	result.List = gameData
 
-	api := NewResp(SuccCode, "", result)
-	res,_ := json.Marshal(api)
-	w.Write(res)
-
 	//fmt.Fprintf(w, "%+v", ApiResp{Code: SuccCode, Msg: "", Data: result})
+
+	js, err := json.Marshal(NewResp(SuccCode, "", result))
+	if err != nil {
+		fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+
 }
 
 func FormatTime(timeUnix int64, layout string) string {
