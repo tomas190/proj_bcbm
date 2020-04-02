@@ -127,7 +127,7 @@ func getAccessData(w http.ResponseWriter, r *http.Request) {
 		gd.TimeFmt = FormatTime(pr.DownBetTime, "2006-01-02 15:04:05")
 		gd.PlayerId = pr.Id
 		gd.RoomId = pr.RoomId
-		gd.RoundId = pr.RandId
+		gd.RoundId = pr.RoundId
 		gd.BetInfo = pr.DownBetInfo
 		gd.Card = pr.CardResult
 		gd.Settlement = pr.ResultMoney
