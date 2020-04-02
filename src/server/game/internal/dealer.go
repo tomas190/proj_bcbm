@@ -238,7 +238,7 @@ func (dl *Dealer) playerSettle() {
 		user := value.(*User)
 		// 中心服需要结算的输赢
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
-		//log.Debug("房间: %v 玩家ID：%v, 玩家uWin：%v", dl.RoomID, user.UserID, uWin)
+		timeNow := time.Now().Unix()
 
 		var ResultMoney float64
 		var uBet float64
@@ -253,7 +253,7 @@ func (dl *Dealer) playerSettle() {
 			uWin = uWin - dl.UserBets[user.UserID][dl.res]
 			ResultMoney += uWin - (uWin * taxRate)
 			winOrder := bson.NewObjectId().Hex()
-			c4c.UserWinScore(user.UserID, uWin, winOrder, dl.RoundID, func(data *User) {
+			c4c.UserWinScore(uint32(timeNow), user.UserID, uWin, winOrder, dl.RoundID, func(data *User) {
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
@@ -278,7 +278,7 @@ func (dl *Dealer) playerSettle() {
 
 				result := -user.DownBetTotal + dl.UserBets[user.UserID][dl.res]
 				if result != 0 {
-					c4c.UserLoseScore(user.UserID, result, loseOrder, dl.RoundID, func(data *User) {
+					c4c.UserLoseScore(uint32(timeNow),user.UserID, result, loseOrder, dl.RoundID, func(data *User) {
 						user.BalanceLock.Lock()
 						user.Balance = data.Balance
 						user.BalanceLock.Unlock()
@@ -293,7 +293,7 @@ func (dl *Dealer) playerSettle() {
 			} else {
 				uBet = user.DownBetTotal
 				ResultMoney -= user.DownBetTotal
-				c4c.UserLoseScore(user.UserID, -user.DownBetTotal, loseOrder, dl.RoundID, func(data *User) {
+				c4c.UserLoseScore(uint32(timeNow),user.UserID, -user.DownBetTotal, loseOrder, dl.RoundID, func(data *User) {
 					user.BalanceLock.Lock()
 					user.Balance = data.Balance
 					user.BalanceLock.Unlock()
@@ -332,7 +332,6 @@ func (dl *Dealer) playerSettle() {
 		}
 
 		if user.DownBetTotal > 0 {
-			timeNow := time.Now().Unix()
 			data := &PlayerDownBetRecode{}
 			data.Id = strconv.Itoa(int(user.UserID))
 			data.GameId = conf.Server.GameID
