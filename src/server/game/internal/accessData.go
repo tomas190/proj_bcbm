@@ -35,7 +35,7 @@ type GameData struct {
 	RoomId     uint32      `json:"room_id"`
 	TaxRate    float64     `json:"tax_rate"`
 	Card       interface{} `json:"card"`       // 开牌信息
-	BetInfo    interface{} `json:"bet_info"`   // 玩家下注信息  //todo  betinfo
+	BetInfo    interface{} `json:"bet_info"`   // 玩家下注信息
 	Settlement interface{} `json:"settlement"` // 结算信息 输赢结果
 }
 
@@ -79,16 +79,16 @@ func getAccessData(w http.ResponseWriter, r *http.Request) {
 	if req.Id != "" {
 		selector["id"] = req.Id
 	}
-	log.Debug("id :%v",req.Id)
 
 	if req.GameId != "" {
 		selector["game_id"] = req.GameId
 	}
+	log.Debug("game_id :%v", req.GameId)
 
 	if req.RoundId != "" {
 		selector["round_id"] = req.RoundId
 	}
-	log.Debug("round_id:%v",req.RoundId)
+	log.Debug("round_id :%v", req.RoundId)
 
 	sTime, _ := strconv.Atoi(startTime)
 
@@ -142,16 +142,13 @@ func getAccessData(w http.ResponseWriter, r *http.Request) {
 	result.List = gameData
 
 	//fmt.Fprintf(w, "%+v", ApiResp{Code: SuccCode, Msg: "", Data: result})
-
 	js, err := json.Marshal(NewResp(SuccCode, "", result))
 	if err != nil {
 		fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
-
 }
 
 func FormatTime(timeUnix int64, layout string) string {

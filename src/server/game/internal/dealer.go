@@ -336,14 +336,13 @@ func (dl *Dealer) playerSettle() {
 			data := &PlayerDownBetRecode{}
 			data.Id = user.UserID
 			data.GameId = conf.Server.GameID
-			data.RoundId = dl.RoomID + - +uint32(timeNow)
+			data.RoundId = dl.RoomID + uint32(timeNow)
 			data.RoomId = dl.RoomID
 			data.DownBetInfo = dl.UserBets[user.UserID]
 			data.DownBetTime = timeNow
 			data.CardResult = dl.res
 			data.ResultMoney = ResultMoney
 			data.TaxRate = taxRate
-
 			err := db.InsertAccess(data)
 			if err != nil {
 				log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)

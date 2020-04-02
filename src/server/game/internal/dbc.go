@@ -271,7 +271,18 @@ func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string
 
 	var wts []PlayerDownBetRecode
 
-	cur, err := collection.Find(ctx, selector, opt)
+	count, err := collection.CountDocuments(ctx, selector)
+	if err != nil {
+		log.Debug("获取用户数量错误 %+v", err)
+	}
+	log.Debug("获取用户数量 %+v", count)
+
+
+	cur, err2 := collection.Find(ctx, selector, opt)
+	if err2 != nil {
+		log.Debug("获取用户數據错误 %+v", err2)
+	}
+
 	log.Debug("cur :", cur)
 
 	for cur.Next(ctx) {
@@ -282,12 +293,6 @@ func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string
 		}
 		wts = append(wts, PRecode)
 	}
-
-	count, err := collection.CountDocuments(ctx, selector)
-	if err != nil {
-		log.Debug("获取用户数量错误 %+v", err)
-	}
-	log.Debug("获取用户数量 %+v", count)
 
 	return wts, int(count), nil
 }
