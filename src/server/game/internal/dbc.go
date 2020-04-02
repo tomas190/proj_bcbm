@@ -209,7 +209,7 @@ func (m *MgoC) FindSurPool(data *SurPool) {
 	collection := m.Database(constant.DBName).Collection("surplus-pool")
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
-	collection.DeleteMany(ctx,bson.M{},nil)
+	collection.DeleteMany(ctx, bson.M{}, nil)
 
 	count, _ := collection.CountDocuments(ctx, bson.M{})
 	log.Debug("FindSurPool 数量:%v", count)
@@ -252,13 +252,13 @@ func (m *MgoC) InsertAccess(data *PlayerDownBetRecode) error {
 	collection := m.Database(constant.DBName).Collection("accessData")
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
-	res, err := collection.InsertOne(ctx, data)
+	_, err := collection.InsertOne(ctx, data)
 	if err != nil {
 		log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)
 		return err
 	}
 
-	log.Debug("运营接入数据插入成功: %+v", res)
+	log.Debug("运营接入数据插入成功: %+v", data)
 	return nil
 }
 
@@ -268,11 +268,11 @@ func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
 	opt := options.Find()
-	opt.SetLimit(20)
 
 	var wts []PlayerDownBetRecode
 
 	cur, err := collection.Find(ctx, selector, opt)
+	log.Debug("cur :", cur)
 
 	for cur.Next(ctx) {
 		var PRecode PlayerDownBetRecode
