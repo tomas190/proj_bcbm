@@ -44,7 +44,7 @@ type SurPool struct {
 
 // 玩家的记录
 type PlayerDownBetRecode struct {
-	Id          uint32    `json:"id" bson:"id"`                       // 玩家Id
+	Id          string    `json:"id" bson:"id"`                       // 玩家Id
 	GameId      string    `json:"game_id" bson:"game_id"`             // GameId
 	RoundId     string    `json:"round_id" bson:"round_id"`           // 随机Id
 	RoomId      uint32    `json:"room_id" bson:"room_id"`             // 所在房间

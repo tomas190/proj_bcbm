@@ -283,8 +283,6 @@ func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string
 		log.Debug("获取用户數據错误 %+v", err2)
 	}
 
-	log.Debug("cur :", cur)
-
 	for cur.Next(ctx) {
 		var PRecode PlayerDownBetRecode
 		err := cur.Decode(&PRecode)
