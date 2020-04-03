@@ -287,7 +287,7 @@ func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string
 		var PRecode PlayerDownBetRecode
 		err := cur.Decode(&PRecode)
 		if err != nil {
-			log.Debug("数据库数据解码错误 %+v", err)
+			//log.Debug("数据库数据解码错误 %+v", err)
 		}
 		wts = append(wts, PRecode)
 	}
