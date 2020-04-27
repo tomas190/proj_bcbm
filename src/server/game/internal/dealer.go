@@ -406,7 +406,7 @@ func (dl *Dealer) ClearChip() {
 					}
 					return true
 				})
-				log.Debug("<--- 玩家下庄 --->")
+				log.Debug("<--- 玩家下庄 --->:%v",dl.bankerMoney)
 
 				bankerResp := msg.BankersB{
 					Banker: dl.getBankerInfoResp(),
