@@ -431,9 +431,15 @@ func (dl *Dealer) ClearChip() {
 				if key == uid {
 					u := value.(*User)
 					u.Balance = balance
+					resp := &msg.BetInfoB{
+						PlayerID:    u.UserID,
+						Money:       u.Balance,
+					}
+					u.ConnAgent.WriteMsg(resp)
 				}
 				return true
 			})
+
 
 			// 如果玩家不在线，登出
 			_, ok := dl.Users.Load(uid)
