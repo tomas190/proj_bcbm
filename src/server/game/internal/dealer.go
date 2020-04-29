@@ -56,6 +56,8 @@ type Dealer struct {
 
 const taxRate = 0.05
 
+var downBankerChan chan bool
+
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 	return &Dealer{
 		Users:          sync.Map{},
@@ -420,7 +422,7 @@ func (dl *Dealer) ClearChip() {
 
 				dl.Broadcast(&bankerResp)
 			})
-
+			time.Sleep(10 * time.Millisecond)
 			// 如果玩家不在线，登出
 			_, ok := dl.Users.Load(uid)
 			if !ok {
