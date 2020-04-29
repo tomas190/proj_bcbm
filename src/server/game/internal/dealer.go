@@ -278,7 +278,7 @@ func (dl *Dealer) playerSettle() {
 
 				result := -user.DownBetTotal + dl.UserBets[user.UserID][dl.res]
 				if result != 0 {
-					c4c.UserLoseScore(uint32(timeNow),user.UserID, result, loseOrder, dl.RoundID, func(data *User) {
+					c4c.UserLoseScore(uint32(timeNow), user.UserID, result, loseOrder, dl.RoundID, func(data *User) {
 						user.BalanceLock.Lock()
 						user.Balance = data.Balance
 						user.BalanceLock.Unlock()
@@ -293,7 +293,7 @@ func (dl *Dealer) playerSettle() {
 			} else {
 				uBet = user.DownBetTotal
 				ResultMoney -= user.DownBetTotal
-				c4c.UserLoseScore(uint32(timeNow),user.UserID, -user.DownBetTotal, loseOrder, dl.RoundID, func(data *User) {
+				c4c.UserLoseScore(uint32(timeNow), user.UserID, -user.DownBetTotal, loseOrder, dl.RoundID, func(data *User) {
 					user.BalanceLock.Lock()
 					user.Balance = data.Balance
 					user.BalanceLock.Unlock()
@@ -385,7 +385,7 @@ func (dl *Dealer) ClearChip() {
 	dl.ClearData()
 
 	converter := DTOConverter{}
-	uuid := util.UUID{}
+	//uuid := util.UUID{}
 
 	resp := converter.RSBMsg(0, 0, 0, *dl)
 	dl.Broadcast(&resp)
@@ -396,7 +396,8 @@ func (dl *Dealer) ClearChip() {
 		switch dl.Bankers[0].(type) {
 		case User:
 			uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
-			c4c.ChangeBankerStatus(uid, constant.BSNotBanker, -dl.bankerMoney, fmt.Sprintf("%+v-notBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
+			order := bson.NewObjectId().Hex()
+			c4c.ChangeBankerStatus(uid, constant.BSNotBanker, -dl.bankerMoney, order, dl.RoundID, func(data *User) {
 
 				// 更新庄家状态
 				dl.Users.Range(func(key, value interface{}) bool {
@@ -406,7 +407,7 @@ func (dl *Dealer) ClearChip() {
 					}
 					return true
 				})
-				log.Debug("<--- 玩家下庄 --->:%v",dl.bankerMoney)
+				log.Debug("<--- 玩家下庄 --->:%v", dl.bankerMoney)
 
 				bankerResp := msg.BankersB{
 					Banker: dl.getBankerInfoResp(),
@@ -436,7 +437,8 @@ func (dl *Dealer) ClearChip() {
 			switch dl.Bankers[0].(type) {
 			case User:
 				uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
-				c4c.ChangeBankerStatus(uid, constant.BSBeingBanker, 0, fmt.Sprintf("%+v-beBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
+				order := bson.NewObjectId().Hex()
+				c4c.ChangeBankerStatus(uid, constant.BSBeingBanker, 0, order, dl.RoundID, func(data *User) {
 
 					// 更新庄家状态
 					dl.Users.Range(func(key, value interface{}) bool {

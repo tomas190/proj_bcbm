@@ -7,6 +7,7 @@ import (
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -315,7 +316,7 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 		}
 
 	} else {
-		log.Error("中心服务器状态码 %+v %+v", syncData.Code,syncData.Msg)
+		log.Error("中心服务器状态码 %+v %+v", syncData.Code, syncData.Msg)
 	}
 }
 
@@ -423,11 +424,12 @@ func (c4c *Client4Center) onDefault(msg []byte) {
 
 // 服务器登录中心服
 func (c4c *Client4Center) ServerLoginCenter() {
+	port, _ := strconv.Atoi(conf.Server.CenterServerPort)
 	serverLoginMsg := ServerLoginReq{
 		constant.CEventServerLogin,
 		ServerLoginReqData{
 			Host:    conf.Server.CenterServer,
-			Port:    conf.Server.CenterServerPort,
+			Port:    port,
 			GameID:  conf.Server.GameID,
 			DevName: conf.Server.DevName,
 			DevKey:  conf.Server.DevKey,
@@ -496,7 +498,7 @@ func (c4c *Client4Center) UserLogoutCenter(userID uint32, callback UserCallback)
 	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-logout", userID), callback)
 }
 
-func (c4c *Client4Center) UserWinScore(timeNow , userID uint32, money float64, order, roundID string, callback UserCallback) {
+func (c4c *Client4Center) UserWinScore(timeNow, userID uint32, money float64, order, roundID string, callback UserCallback) {
 	if !c4c.isServerLogin {
 		log.Debug("Game Server NOT Ready! Need login to Center Server!")
 		return

@@ -19,7 +19,7 @@ type ServerLoginReq struct {
 
 type ServerLoginReqData struct {
 	Host    string `json:"host"`
-	Port    string `json:"port"`
+	Port    int    `json:"port"`
 	GameID  string `json:"game_id"`
 	DevName string `json:"dev_name"`
 	DevKey  string `json:"dev_key"`
@@ -266,7 +266,7 @@ type NoticeReqData struct {
 }
 
 type NoticeResp struct {
-	Event string        `json:"event"`
+	Event string         `json:"event"`
 	Data  NoticeRespData `json:"data"`
 }
 

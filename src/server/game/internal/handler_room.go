@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/name5566/leaf/gate"
 	"github.com/patrickmn/go-cache"
+	"gopkg.in/mgo.v2/bson"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
@@ -224,10 +225,11 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		}
 	}
 
-	uuid := util.UUID{}
+	//uuid := util.UUID{}
 	// 上庄
 	log.Debug("<<===== 上庄金额: %v =====>>", m.LockMoney)
-	c4c.ChangeBankerStatus(au.UserID, constant.BSGrabbingBanker, m.LockMoney, fmt.Sprintf("%+v-grabBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
+	order := bson.NewObjectId().Hex()
+	c4c.ChangeBankerStatus(au.UserID, constant.BSGrabbingBanker, m.LockMoney, order, dl.RoundID, func(data *User) {
 
 		bUser := User{
 			UserID:        au.UserID,
@@ -336,9 +338,10 @@ func (dl *Dealer) cancelGrabBanker(userID uint32) {
 				dl.Bots = append(dl.Bots, &nextB)
 			}
 
-			uuid := util.UUID{}
+			//uuid := util.UUID{}
+			order := bson.NewObjectId().Hex()
 			// 玩家取消申请上庄
-			c4c.ChangeBankerStatus(userID, constant.BSNotBanker, -bankerBalance, fmt.Sprintf("%+v-cancelBanker", uuid.GenUUID()), dl.RoundID, func(data *User) {
+			c4c.ChangeBankerStatus(userID, constant.BSNotBanker, -bankerBalance, order, dl.RoundID, func(data *User) {
 
 				// 更新房间玩家列表中的玩家余额
 				dl.Users.Range(func(key, value interface{}) bool {
