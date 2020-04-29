@@ -399,6 +399,7 @@ func (dl *Dealer) ClearChip() {
 		case User:
 			uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
 			order := bson.NewObjectId().Hex()
+			var balance float64 = 0
 			c4c.ChangeBankerStatus(uid, constant.BSNotBanker, -dl.bankerMoney, order, dl.RoundID, func(data *User) {
 
 				// 更新庄家状态
@@ -409,7 +410,8 @@ func (dl *Dealer) ClearChip() {
 					}
 					return true
 				})
-				log.Debug("<--- 玩家下庄 --->:%v", dl.bankerMoney)
+				log.Debug("<--- 玩家下庄 --->:%v", data.Balance)
+				balance = data.Balance
 
 				bankerResp := msg.BankersB{
 					Banker: dl.getBankerInfoResp(),
@@ -423,6 +425,16 @@ func (dl *Dealer) ClearChip() {
 				dl.Broadcast(&bankerResp)
 			})
 			time.Sleep(10 * time.Millisecond)
+
+			// 更新庄家状态
+			dl.Users.Range(func(key, value interface{}) bool {
+				if key == uid {
+					u := value.(*User)
+					u.Balance = balance
+				}
+				return true
+			})
+
 			// 如果玩家不在线，登出
 			_, ok := dl.Users.Load(uid)
 			if !ok {
