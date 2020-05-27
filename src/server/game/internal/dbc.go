@@ -17,7 +17,6 @@ type MgoC struct {
 	*mongo.Client
 }
 
-
 // "mongodb://localhost:27017"
 func NewMgoC(url string) *MgoC {
 	client, err := mongo.NewClient(options.Client().ApplyURI(url))
@@ -44,10 +43,7 @@ func (m *MgoC) Init() error {
 	}
 
 	log.Debug("数据库连接成功...")
-
-	SurPool := &SurPool{}
-	SurPool.PlayerTotalLose = 20000
-	m.FindSurPool(SurPool)
+	m.UProfitPool(-7988, 0, 0)
 	return nil
 }
 
@@ -181,7 +177,7 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	SurPool.SurplusPool = newProfit
 	SurPool.PlayerTotalLoseWin = newLost - newWin
 	SurPool.PlayerTotalLose = newLost
-	log.Debug("玩家总输为:%v",SurPool.PlayerTotalLose)
+	log.Debug("玩家总输为:%v", SurPool.PlayerTotalLose)
 	SurPool.PlayerTotalWin = newWin
 	SurPool.TotalPlayer = userCount
 	SurPool.FinalPercentage = 0.5
@@ -282,7 +278,6 @@ func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string
 		log.Debug("获取用户数量错误 %+v", err)
 	}
 	log.Debug("获取用户数量 %+v", count)
-
 
 	cur, err2 := collection.Find(ctx, selector, opt)
 	if err2 != nil {
