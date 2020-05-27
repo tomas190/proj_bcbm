@@ -17,6 +17,8 @@ type MgoC struct {
 	*mongo.Client
 }
 
+var ChangeMoney = 0
+
 // "mongodb://localhost:27017"
 func NewMgoC(url string) *MgoC {
 	client, err := mongo.NewClient(options.Client().ApplyURI(url))
@@ -176,6 +178,7 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	SurPool.SurplusPool = newProfit
 	SurPool.PlayerTotalLoseWin = newLost - newWin
 	SurPool.PlayerTotalLose = newLost
+	log.Debug("玩家总输为:%v",SurPool.PlayerTotalLose)
 	SurPool.PlayerTotalWin = newWin
 	SurPool.TotalPlayer = userCount
 	SurPool.FinalPercentage = 0.5
