@@ -17,7 +17,6 @@ type MgoC struct {
 	*mongo.Client
 }
 
-var ChangeMoney = 0
 
 // "mongodb://localhost:27017"
 func NewMgoC(url string) *MgoC {
@@ -45,6 +44,10 @@ func (m *MgoC) Init() error {
 	}
 
 	log.Debug("数据库连接成功...")
+
+	SurPool := &SurPool{}
+	SurPool.PlayerTotalLose = 20000
+	m.FindSurPool(SurPool)
 	return nil
 }
 
