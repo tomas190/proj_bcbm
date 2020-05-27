@@ -43,7 +43,7 @@ func (m *MgoC) Init() error {
 	}
 
 	log.Debug("数据库连接成功...")
-	m.UProfitPool(-7988, 0, 0)
+	m.UProfitPool(-33600, 0, 0)
 	return nil
 }
 
