@@ -15,8 +15,8 @@ type GameDataReq struct {
 	Id        string `form:"id" json:"id"`
 	GameId    string `form:"game_id" json:"game_id"`
 	RoundId   string `form:"round_id" json:"round_id"`
-	StartTime int64  `form:"start_time" json:"start_time"`
-	EndTime   int64  `form:"end_time" json:"end_time"`
+	StartTime string `form:"start_time" json:"start_time"`
+	EndTime   string `form:"end_time" json:"end_time"`
 	Skip      int    `form:"skip" json:"skip"`
 	Limit     int    `form:"limit" json:"limit"`
 }
@@ -71,8 +71,8 @@ func getAccessData(w http.ResponseWriter, r *http.Request) {
 	req.Id = r.FormValue("id")
 	req.GameId = r.FormValue("game_id")
 	req.RoundId = r.FormValue("round_id")
-	startTime := r.FormValue("start_time")
-	endTime := r.FormValue("end_time")
+	req.StartTime = r.FormValue("start_time")
+	req.EndTime = r.FormValue("end_time")
 	skip := r.FormValue("skip")
 	limit := r.FormValue("limit")
 
@@ -90,20 +90,20 @@ func getAccessData(w http.ResponseWriter, r *http.Request) {
 		selector["round_id"] = req.RoundId
 	}
 
-	sTime, _ := strconv.Atoi(startTime)
+	sTime, _ := strconv.Atoi(req.StartTime)
 
-	eTime, _ := strconv.Atoi(endTime)
+	eTime, _ := strconv.Atoi(req.EndTime)
 
 	if sTime != 0 && eTime != 0 {
 		selector["down_bet_time"] = bson.M{"$gte": sTime, "$lte": eTime}
 	}
 
 	if sTime != 0 && eTime == 0 {
-		selector["down_bet_time"] = bson.M{"$gt": sTime}
+		selector["start_time"] = bson.M{"$gte": sTime}
 	}
 
 	if eTime != 0 && sTime == 0 {
-		selector["down_bet_time"] = bson.M{"$lt": eTime}
+		selector["end_time"] = bson.M{"$lte": eTime}
 	}
 
 	skips, _ := strconv.Atoi(skip)
@@ -127,8 +127,8 @@ func getAccessData(w http.ResponseWriter, r *http.Request) {
 		pr := recodes[i]
 		gd.Time = pr.DownBetTime
 		gd.TimeFmt = FormatTime(pr.DownBetTime, "2006-01-02 15:04:05")
-		gd.StartTime = pr.DownBetTime - 16
-		gd.EndTime = pr.DownBetTime - 25
+		gd.StartTime = pr.StartTime
+		gd.EndTime = pr.EndTime
 		gd.PlayerId = pr.Id
 		gd.RoomId = pr.RoomId
 		gd.RoundId = pr.RoundId

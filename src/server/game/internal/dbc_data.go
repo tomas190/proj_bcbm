@@ -50,6 +50,8 @@ type PlayerDownBetRecode struct {
 	RoomId      uint32    `json:"room_id" bson:"room_id"`             // 所在房间
 	DownBetInfo []float64 `json:"down_bet_info" bson:"down_bet_info"` // 8个注池个下注金额
 	DownBetTime int64     `json:"down_bet_time" bson:"down_bet_time"` // 下注时间
+	StartTime   int64     `json:"start_time" bson:"start_time"`       // 开始时间
+	EndTime     int64     `json:"end_time" bson:"end_time"`           // 结束时间
 	CardResult  uint32    `json:"card_result" bson:"card_result"`     // 当局开牌结果
 	ResultMoney float64   `json:"result_money" bson:"result_money"`   // 当局输赢结果(税后)
 	TaxRate     float64   `json:"tax_rate" bson:"tax_rate"`           // 税率

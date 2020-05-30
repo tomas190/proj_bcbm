@@ -341,6 +341,8 @@ func (dl *Dealer) playerSettle() {
 			data.RoomId = dl.RoomID
 			data.DownBetInfo = dl.UserBets[user.UserID]
 			data.DownBetTime = timeNow
+			data.StartTime = timeNow - 16
+			data.EndTime = timeNow + 25
 			data.CardResult = dl.res
 			data.ResultMoney = ResultMoney
 			data.TaxRate = taxRate
