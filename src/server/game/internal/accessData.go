@@ -30,6 +30,8 @@ type ApiResp struct {
 type GameData struct {
 	Time       int64       `json:"time"`
 	TimeFmt    string      `json:"time_fmt"`
+	StartTime  int64       `json:"start_time"`
+	EndTime    int64       `json:"end_time"`
 	PlayerId   string      `json:"player_id"`
 	RoundId    string      `json:"round_id"`
 	RoomId     uint32      `json:"room_id"`
@@ -123,8 +125,10 @@ func getAccessData(w http.ResponseWriter, r *http.Request) {
 	for i := 0; i < len(recodes); i++ {
 		var gd GameData
 		pr := recodes[i]
-		gd.Time = pr.DownBetTime * 1000
+		gd.Time = pr.DownBetTime
 		gd.TimeFmt = FormatTime(pr.DownBetTime, "2006-01-02 15:04:05")
+		gd.StartTime = pr.DownBetTime - 16
+		gd.EndTime = pr.DownBetTime - 25
 		gd.PlayerId = pr.Id
 		gd.RoomId = pr.RoomId
 		gd.RoundId = pr.RoundId
