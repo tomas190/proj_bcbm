@@ -170,8 +170,9 @@ func NewResp(code int, msg string, data interface{}) ApiResp {
 
 func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 	Id := r.FormValue("id")
-	log.Debug("玩家id为:%v", Id)
-	u, _ := Mgr.UserRecord.Load(Id)
+	userId, _ := strconv.Atoi(Id)
+	log.Debug("玩家id为:%v,%v", Id, uint32(userId))
+	u, _ := Mgr.UserRecord.Load(uint32(userId))
 	if u != nil {
 		player := u.(*User)
 		log.Debug("玩家信息:%v", player)
