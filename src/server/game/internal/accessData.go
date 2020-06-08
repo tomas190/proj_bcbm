@@ -181,6 +181,18 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 		if v != nil {
 			dl := v.(*Dealer)
 			dl.Users.Delete(player.UserID)
+			resp := &msg.LeaveRoomR{
+				User: &msg.UserInfo{
+					UserID:   player.UserID,
+					Avatar:   player.Avatar,
+					NickName: player.NickName,
+					Money:    player.Balance,
+				},
+				Rooms:      Mgr.GetRoomsInfoResp(),
+				ServerTime: uint32(time.Now().Unix()),
+			}
+
+			player.ConnAgent.WriteMsg(resp)
 			c4c.UserLogoutCenter(player.UserID, func(data *User) {
 				dl.AutoBetRecord[player.UserID] = nil
 				Mgr.UserRecord.Delete(player.UserID)
