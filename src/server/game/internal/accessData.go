@@ -170,15 +170,14 @@ func NewResp(code int, msg string, data interface{}) ApiResp {
 
 func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 	Id := r.FormValue("id")
-	userId, _ := strconv.Atoi(Id)
-	rid := Mgr.UserRoom[uint32(userId)]
-	v, _ := Mgr.RoomRecord.Load(rid)
-	if v != nil {
-		dl := v.(*Dealer)
-		u, _ := Mgr.UserRecord.Load(Id)
-		if u != nil {
-			player := u.(*User)
-			log.Debug("玩家信息:%v", u)
+	u, _ := Mgr.UserRecord.Load(Id)
+	if u != nil {
+		player := u.(*User)
+		log.Debug("玩家信息:%v", player)
+		rid := Mgr.UserRoom[player.UserID]
+		v, _ := Mgr.RoomRecord.Load(rid)
+		if v != nil {
+			dl := v.(*Dealer)
 			dl.Users.Delete(player.UserID)
 			c4c.UserLogoutCenter(player.UserID, func(data *User) {
 				dl.AutoBetRecord[player.UserID] = nil
@@ -190,5 +189,4 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	}
-
 }
