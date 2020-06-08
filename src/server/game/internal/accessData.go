@@ -174,32 +174,42 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 	log.Debug("玩家id为:%v,%v", Id, uint32(userId))
 	u, _ := Mgr.UserRecord.Load(uint32(userId))
 	if u != nil {
-		player := u.(*User)
-		log.Debug("玩家信息:%v", player)
-		rid := Mgr.UserRoom[player.UserID]
+		au := u.(*User)
+		log.Debug("玩家信息:%v", au)
+		rid := Mgr.UserRoom[au.UserID]
 		v, _ := Mgr.RoomRecord.Load(rid)
 		if v != nil {
 			dl := v.(*Dealer)
-			dl.Users.Delete(player.UserID)
-			resp := &msg.LeaveRoomR{
-				User: &msg.UserInfo{
-					UserID:   player.UserID,
-					Avatar:   player.Avatar,
-					NickName: player.NickName,
-					Money:    player.Balance,
-				},
-				Rooms:      Mgr.GetRoomsInfoResp(),
-				ServerTime: uint32(time.Now().Unix()),
+			if au.IsAction == false {
+				log.Debug("进来了111")
+				dl.Users.Delete(au.UserID)
+				c4c.UserLogoutCenter(au.UserID, func(data *User) {
+					dl.AutoBetRecord[au.UserID] = nil
+					Mgr.UserRecord.Delete(au.UserID)
+					resp := &msg.LogoutR{}
+					au.ConnAgent.WriteMsg(resp)
+					au.ConnAgent.Close()
+				})
+			} else {
+				log.Debug("进来了222")
+				var exist bool
+				for _, v := range dl.UserLeave {
+					if v == au.UserID {
+						exist = true
+						log.Debug("rpcCloseAgent 玩家已存在UserLeave:%v", au.UserID)
+					}
+				}
+				if exist == false {
+					log.Debug("rpcCloseAgent 添加离线UserLeave:%v", au.UserID)
+					dl.UserLeave = append(dl.UserLeave, au.UserID)
+				}
 			}
-
-			player.ConnAgent.WriteMsg(resp)
-			c4c.UserLogoutCenter(player.UserID, func(data *User) {
-				dl.AutoBetRecord[player.UserID] = nil
-				Mgr.UserRecord.Delete(player.UserID)
+		} else {
+			log.Debug("进来了333")
+			c4c.UserLogoutCenter(au.UserID, func(data *User) {
 				resp := &msg.LogoutR{}
-				player.ConnAgent.WriteMsg(resp)
-				player.ConnAgent.Close()
-				log.Debug("强制请求踢出该玩家:%v", player.UserID)
+				au.ConnAgent.WriteMsg(resp)
+				au.ConnAgent.Close()
 			})
 		}
 	}
