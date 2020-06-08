@@ -7,6 +7,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
 	"proj_bcbm/src/server/conf"
+	"proj_bcbm/src/server/msg"
 	"strconv"
 	"time"
 )
@@ -57,6 +58,8 @@ func StartHttpServer() {
 	http.HandleFunc("/api/accessData", getAccessData)
 	// 获取游戏数据接口
 	http.HandleFunc("/api/getGameData", getAccessData)
+	// 请求玩家退出
+	http.HandleFunc("/api/reqPlayerLeave", reqPlayerLeave)
 
 	err := http.ListenAndServe(":"+conf.Server.HTTPPort, nil)
 	if err != nil {
@@ -163,4 +166,29 @@ func FormatTime(timeUnix int64, layout string) string {
 
 func NewResp(code int, msg string, data interface{}) ApiResp {
 	return ApiResp{Code: code, Msg: msg, Data: data}
+}
+
+func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
+	Id := r.FormValue("id")
+	userId, _ := strconv.Atoi(Id)
+	rid := Mgr.UserRoom[uint32(userId)]
+	v, _ := Mgr.RoomRecord.Load(rid)
+	if v != nil {
+		dl := v.(*Dealer)
+		u, _ := Mgr.UserRecord.Load(Id)
+		if u != nil {
+			player := u.(*User)
+			log.Debug("玩家信息:%v", u)
+			dl.Users.Delete(player.UserID)
+			c4c.UserLogoutCenter(player.UserID, func(data *User) {
+				dl.AutoBetRecord[player.UserID] = nil
+				Mgr.UserRecord.Delete(player.UserID)
+				resp := &msg.LogoutR{}
+				player.ConnAgent.WriteMsg(resp)
+				player.ConnAgent.Close()
+				log.Debug("强制请求踢出该玩家:%v", player.UserID)
+			})
+		}
+	}
+
 }
