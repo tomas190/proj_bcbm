@@ -171,7 +171,6 @@ func NewResp(code int, msg string, data interface{}) ApiResp {
 func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 	Id := r.FormValue("id")
 	userId, _ := strconv.Atoi(Id)
-	log.Debug("玩家id为:%v,%v", Id, uint32(userId))
 	u, _ := Mgr.UserRecord.Load(uint32(userId))
 	if u != nil {
 		au := u.(*User)
@@ -180,33 +179,10 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 		v, _ := Mgr.RoomRecord.Load(rid)
 		if v != nil {
 			dl := v.(*Dealer)
-			if au.IsAction == false {
-				log.Debug("进来了111")
-				dl.Users.Delete(au.UserID)
-				c4c.UserLogoutCenter(au.UserID, func(data *User) {
-					dl.AutoBetRecord[au.UserID] = nil
-					Mgr.UserRecord.Delete(au.UserID)
-					resp := &msg.LogoutR{}
-					au.ConnAgent.WriteMsg(resp)
-					au.ConnAgent.Close()
-				})
-			} else {
-				log.Debug("进来了222")
-				var exist bool
-				for _, v := range dl.UserLeave {
-					if v == au.UserID {
-						exist = true
-						log.Debug("rpcCloseAgent 玩家已存在UserLeave:%v", au.UserID)
-					}
-				}
-				if exist == false {
-					log.Debug("rpcCloseAgent 添加离线UserLeave:%v", au.UserID)
-					dl.UserLeave = append(dl.UserLeave, au.UserID)
-				}
-			}
-		} else {
-			log.Debug("进来了333")
+			dl.Users.Delete(au.UserID)
 			c4c.UserLogoutCenter(au.UserID, func(data *User) {
+				dl.AutoBetRecord[au.UserID] = nil
+				Mgr.UserRecord.Delete(au.UserID)
 				resp := &msg.LogoutR{}
 				au.ConnAgent.WriteMsg(resp)
 				au.ConnAgent.Close()
