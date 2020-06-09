@@ -185,8 +185,8 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 				Mgr.UserRecord.Delete(au.UserID)
 				resp := &msg.LogoutR{}
 				au.ConnAgent.WriteMsg(resp)
-				au.ConnAgent.Close()
 			})
+			au.ConnAgent.Close()
 		}
 	}
 }
