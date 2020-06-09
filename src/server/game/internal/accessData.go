@@ -180,11 +180,12 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 		if v != nil {
 			dl := v.(*Dealer)
 			dl.Users.Delete(au.UserID)
+			resp := &msg.Logout{}
+			au.ConnAgent.WriteMsg(resp)
+
 			c4c.UserLogoutCenter(au.UserID, func(data *User) {
 				dl.AutoBetRecord[au.UserID] = nil
 				Mgr.UserRecord.Delete(au.UserID)
-				resp := &msg.Logout{}
-				au.ConnAgent.WriteMsg(resp)
 			})
 			au.ConnAgent.Close()
 		}
