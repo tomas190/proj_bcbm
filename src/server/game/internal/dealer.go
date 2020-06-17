@@ -207,9 +207,9 @@ func (dl *Dealer) Settle() {
 					}
 				})
 			}
-
-			timeNow := time.Now().Unix()
-			if ResultMoney != 0 {
+			log.Debug("庄家当局的输赢:%v", dl.bankerWin)
+			if dl.bankerWin != 0 {
+				timeNow := time.Now().Unix()
 				data := &PlayerDownBetRecode{}
 				data.Id = strconv.Itoa(int(u.UserID))
 				data.GameId = conf.Server.GameID
@@ -227,7 +227,6 @@ func (dl *Dealer) Settle() {
 					log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)
 				}
 			}
-
 			time.Sleep(200 * time.Millisecond)
 		}
 	default:
