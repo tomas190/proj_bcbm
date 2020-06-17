@@ -209,7 +209,7 @@ func (dl *Dealer) Settle() {
 			}
 
 			timeNow := time.Now().Unix()
-			if u.DownBetTotal > 0 {
+			if ResultMoney != 0 {
 				data := &PlayerDownBetRecode{}
 				data.Id = strconv.Itoa(int(u.UserID))
 				data.GameId = conf.Server.GameID
@@ -457,14 +457,13 @@ func (dl *Dealer) ClearChip() {
 					u := value.(*User)
 					u.Balance = balance
 					resp := &msg.BetInfoB{
-						PlayerID:    u.UserID,
-						Money:       u.Balance,
+						PlayerID: u.UserID,
+						Money:    u.Balance,
 					}
 					u.ConnAgent.WriteMsg(resp)
 				}
 				return true
 			})
-
 
 			// 如果玩家不在线，登出
 			_, ok := dl.Users.Load(uid)
