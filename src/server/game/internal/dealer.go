@@ -182,7 +182,7 @@ func (dl *Dealer) Settle() {
 				c4c.BankerWinScore(u.UserID, preBankerWin, order, dl.RoundID, func(data *User) {
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					log.Debug("玩家的当局总下注2: %v", dl.bankerWin)
-					ResultMoney += dl.bankerWin - (dl.bankerWin * taxRate)
+					ResultMoney += preBankerWin - (preBankerWin * taxRate)
 					//////庄家跑马灯
 					//if dl.bankerWin > PaoMaDeng {
 					//	c4c.NoticeWinMoreThan(u.UserID, u.NickName, dl.bankerWin)
@@ -198,7 +198,7 @@ func (dl *Dealer) Settle() {
 				c4c.BankerLoseScore(u.UserID, preBankerWin, order, dl.RoundID, func(data *User) {
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					dl.bankerMoney = data.BankerBalance
-					ResultMoney -= dl.bankerWin
+					ResultMoney -= preBankerWin
 
 					// 玩家坐庄盈余池更新
 					err := db.UProfitPool(-dl.bankerWin, 0, dl.RoomID)
@@ -208,7 +208,7 @@ func (dl *Dealer) Settle() {
 				})
 			}
 			log.Debug("庄家当局的输赢:%v", dl.bankerWin)
-			if dl.bankerWin != 0 {
+			if preBankerWin != 0 {
 				timeNow := time.Now().Unix()
 				data := &PlayerDownBetRecode{}
 				data.Id = strconv.Itoa(int(u.UserID))
