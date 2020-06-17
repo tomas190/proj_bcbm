@@ -169,6 +169,7 @@ func (dl *Dealer) Settle() {
 	// 税前庄家输赢
 	preBankerWin, _ := math.SumSliceFloat64(dl.AreaBets).Sub(math.MultiFloat64(con.AreaX[dl.res], dl.AreaBets[dl.res])).Float64()
 
+	var ResultMoney float64
 	switch dl.Bankers[0].(type) {
 	case User:
 		{
@@ -181,6 +182,7 @@ func (dl *Dealer) Settle() {
 				c4c.BankerWinScore(u.UserID, preBankerWin, order, dl.RoundID, func(data *User) {
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					log.Debug("玩家的当局总下注2: %v", dl.bankerWin)
+					ResultMoney += dl.bankerWin - (dl.bankerWin * taxRate)
 					//////庄家跑马灯
 					//if dl.bankerWin > PaoMaDeng {
 					//	c4c.NoticeWinMoreThan(u.UserID, u.NickName, dl.bankerWin)
@@ -196,6 +198,7 @@ func (dl *Dealer) Settle() {
 				c4c.BankerLoseScore(u.UserID, preBankerWin, order, dl.RoundID, func(data *User) {
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					dl.bankerMoney = data.BankerBalance
+					ResultMoney -= dl.bankerWin
 
 					// 玩家坐庄盈余池更新
 					err := db.UProfitPool(-dl.bankerWin, 0, dl.RoomID)
@@ -203,6 +206,26 @@ func (dl *Dealer) Settle() {
 						log.Debug("更新盈余池失败 %+v", err)
 					}
 				})
+			}
+
+			timeNow := time.Now().Unix()
+			if u.DownBetTotal > 0 {
+				data := &PlayerDownBetRecode{}
+				data.Id = strconv.Itoa(int(u.UserID))
+				data.GameId = conf.Server.GameID
+				data.RoundId = dl.RoundID
+				data.RoomId = dl.RoomID
+				data.DownBetInfo = dl.UserBets[u.UserID]
+				data.DownBetTime = timeNow
+				data.StartTime = timeNow - 16
+				data.EndTime = timeNow + 25
+				data.CardResult = dl.res
+				data.ResultMoney = ResultMoney
+				data.TaxRate = taxRate
+				err := db.InsertAccess(data)
+				if err != nil {
+					log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)
+				}
 			}
 
 			time.Sleep(200 * time.Millisecond)
