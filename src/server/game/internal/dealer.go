@@ -218,7 +218,6 @@ func (dl *Dealer) Settle() {
 				data.DownBetInfo = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 				for i := 0; i < len(data.DownBetInfo); i++ {
 					data.DownBetInfo[i] += dl.AreaBets[i]
-					data.DownBetInfo[i] += dl.AreaBotBets[i]
 				}
 				data.DownBetTime = timeNow
 				data.StartTime = timeNow - 16
