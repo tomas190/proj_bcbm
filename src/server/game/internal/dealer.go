@@ -215,7 +215,10 @@ func (dl *Dealer) Settle() {
 				data.GameId = conf.Server.GameID
 				data.RoundId = dl.RoundID
 				data.RoomId = dl.RoomID
-				data.DownBetInfo = dl.UserBets[u.UserID]
+				for i := 0; i < 8; i++ {
+					data.DownBetInfo[i] += dl.AreaBets[i]
+					data.DownBetInfo[i] += dl.AreaBotBets[i]
+				}
 				data.DownBetTime = timeNow
 				data.StartTime = timeNow - 16
 				data.EndTime = timeNow + 25
