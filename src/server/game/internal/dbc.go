@@ -301,16 +301,18 @@ func (m *MgoC) GetSurPoolData(selector bson.M) (SurPool, error) {
 	collection := m.Database(constant.DBName).Collection("surplus-pool")
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
-	opt := options.FindOne()
-	opt.SetSort(bson.M{"UpdateTime": -1})
+	opt := options.Find()
+
+	cur, err := collection.Find(ctx, selector, opt)
+	if err != nil {
+		log.Debug("获取用户數據错误 %+v", err)
+	}
 
 	var sur SurPool
-
-	err := collection.FindOne(ctx, selector, opt).Decode(&sur)
+	err = cur.Decode(&sur)
 	if err != nil {
-		log.Debug("获取盈余池数据错误 %+v", err)
+		log.Debug("数据库数据解码错误 %+v", err)
 	}
-	log.Debug("GetSurPoolData 盈余池数据:%v", sur)
 
 	return sur, err
 }
