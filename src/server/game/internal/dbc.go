@@ -297,22 +297,26 @@ func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string
 }
 
 //GetDownRecodeList 获取盈余池数据
-func (m *MgoC) GetSurPoolData(selector bson.M) (SurPool, error) {
+func (m *MgoC) GetSurPoolData(selector bson.M) ([]SurPool, error) {
 	collection := m.Database(constant.DBName).Collection("surplus-pool")
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
 	opt := options.Find()
 
-	cur, err := collection.Find(ctx, selector, opt)
-	if err != nil {
-		log.Debug("获取用户數據错误 %+v", err)
+	var wts []SurPool
+
+	cur, err2 := collection.Find(ctx, selector, opt)
+	if err2 != nil {
+		log.Debug("获取用户數據错误 %+v", err2)
 	}
 
-	var sur SurPool
-	err = cur.Decode(&sur)
-	if err != nil {
-		log.Debug("数据库数据解码错误 %+v", err)
+	for cur.Next(ctx) {
+		var sur SurPool
+		err := cur.Decode(&sur)
+		if err != nil {
+			//log.Debug("数据库数据解码错误 %+v", err)
+		}
+		wts = append(wts, sur)
 	}
-
-	return sur, err
+	return wts, nil
 }
