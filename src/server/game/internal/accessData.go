@@ -63,7 +63,7 @@ func StartHttpServer() {
 	// 查询子游戏盈余池数据
 	http.HandleFunc("/api/getSurplusOne", getSurplusOne)
 	// 修改盈余池数据
-	http.HandleFunc("/api/uptSurplusConf", uptSurplusOne)
+	//http.HandleFunc("/api/uptSurplusConf", uptSurplusOne)
 
 	err := http.ListenAndServe(":"+conf.Server.HTTPPort, nil)
 	if err != nil {
