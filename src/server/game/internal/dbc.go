@@ -222,7 +222,7 @@ func (m *MgoC) FindSurPool(data *SurPool) {
 	} else {
 		var sur SurPool
 		_ = cur.Decode(&sur)
-		log.Debug("FindSurPool 更新数据:%v", sur)
+		log.Debug("FindSurPool 更新数据:%v", sur.FinalPercentage)
 		data.FinalPercentage = sur.FinalPercentage
 		data.PercentageToTotalWin = sur.PercentageToTotalWin
 		data.CoefficientToTotalPlayer = sur.CoefficientToTotalPlayer
