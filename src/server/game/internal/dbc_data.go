@@ -31,6 +31,7 @@ type ProfitDB struct {
 }
 
 type SurPool struct {
+	GameId                         string  `json:"game_id" bson:"game_id"`
 	PlayerTotalLose                float64 `json:"player_total_lose" bson:"player_total_lose"`
 	PlayerTotalWin                 float64 `json:"player_total_win" bson:"player_total_win"`
 	PercentageToTotalWin           float64 `json:"percentage_to_total_win" bson:"percentage_to_total_win"`

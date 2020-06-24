@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"gopkg.in/mgo.v2/bson"
+	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
 	"time"
@@ -173,10 +174,10 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	log.Debug("盈余数据为： %+v", newProfit)
 
 	SurPool := &SurPool{}
+	SurPool.GameId = conf.Server.GameID
 	SurPool.SurplusPool = newProfit
 	SurPool.PlayerTotalLoseWin = newLost - newWin
 	SurPool.PlayerTotalLose = newLost
-	log.Debug("玩家总输为:%v", SurPool.PlayerTotalLose)
 	SurPool.PlayerTotalWin = newWin
 	SurPool.TotalPlayer = userCount
 	SurPool.FinalPercentage = 0.5
@@ -210,7 +211,7 @@ func (m *MgoC) FindSurPool(data *SurPool) {
 	collection := m.Database(constant.DBName).Collection("surplus-pool")
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
-	collection.DeleteMany(ctx, bson.M{}, nil)
+	//collection.DeleteMany(ctx, bson.M{}, nil)
 
 	count, _ := collection.CountDocuments(ctx, bson.M{})
 	log.Debug("FindSurPool 数量:%v", count)
@@ -293,4 +294,23 @@ func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string
 	}
 
 	return wts, int(count), nil
+}
+
+//GetDownRecodeList 获取盈余池数据
+func (m *MgoC) GetSurPoolData(selector bson.M) (SurPool, error) {
+	collection := m.Database(constant.DBName).Collection("surplus-pool")
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+
+	opt := options.Find()
+
+	cur, err := collection.Find(ctx, selector, opt)
+	if err != nil {
+		log.Debug("获取盈余池数据错误 %+v", err)
+	}
+	log.Debug("GetSurPoolData 盈余池数据1:%v", cur)
+
+	var sur *SurPool
+	err = cur.Decode(&sur)
+	log.Debug("GetSurPoolData 盈余池数据2:%v", sur)
+	return *sur, err
 }

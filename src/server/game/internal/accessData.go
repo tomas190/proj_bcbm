@@ -60,6 +60,10 @@ func StartHttpServer() {
 	http.HandleFunc("/api/getGameData", getAccessData)
 	// 请求玩家退出
 	http.HandleFunc("/api/reqPlayerLeave", reqPlayerLeave)
+	// 查询子游戏盈余池数据
+	http.HandleFunc("/api/getSurplusOne", getSurplusOne)
+	// 修改盈余池数据
+	http.HandleFunc("/api/uptSurplusConf", uptSurplusOne)
 
 	err := http.ListenAndServe(":"+conf.Server.HTTPPort, nil)
 	if err != nil {
@@ -190,4 +194,29 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 			au.ConnAgent.Close()
 		}
 	}
+}
+
+// 查询子游戏盈余池数据
+func getSurplusOne(w http.ResponseWriter, r *http.Request) {
+	var req GameDataReq
+	req.GameId = r.FormValue("game_id")
+	log.Debug("game_id :%v",req.GameId)
+
+	selector := bson.M{}
+	if req.GameId != "" {
+		selector["game_id"] = req.GameId
+	}
+
+	result, err := db.GetSurPoolData(selector)
+	if err != nil {
+		return
+	}
+
+	js, err := json.Marshal(NewResp(SuccCode, "", result))
+	if err != nil {
+		fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
