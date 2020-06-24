@@ -1,12 +1,15 @@
 package internal
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/name5566/leaf/log"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
 	"proj_bcbm/src/server/conf"
+	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"strconv"
 	"time"
@@ -52,6 +55,13 @@ const (
 	ErrCode  = -1
 )
 
+type UpSurPool struct {
+	PlayerLoseRateAfterSurplusPool float64 `json:"player_lose_rate_after_surplus_pool" bson:"player_lose_rate_after_surplus_pool"`
+	PercentageToTotalWin           float64 `json:"percentage_to_total_win" bson:"percentage_to_total_win"`
+	CoefficientToTotalPlayer       int64   `json:"coefficient_to_total_player" bson:"coefficient_to_total_player"`
+	FinalPercentage                float64 `json:"final_percentage" bson:"final_percentage"`
+}
+
 // HTTP端口监听
 func StartHttpServer() {
 	// 运营后台数据接口
@@ -63,7 +73,7 @@ func StartHttpServer() {
 	// 查询子游戏盈余池数据
 	http.HandleFunc("/api/getSurplusOne", getSurplusOne)
 	// 修改盈余池数据
-	//http.HandleFunc("/api/uptSurplusConf", uptSurplusOne)
+	http.HandleFunc("/api/uptSurplusConf", uptSurplusOne)
 
 	err := http.ListenAndServe(":"+conf.Server.HTTPPort, nil)
 	if err != nil {
@@ -213,6 +223,61 @@ func getSurplusOne(w http.ResponseWriter, r *http.Request) {
 	}
 
 	js, err := json.Marshal(NewResp(SuccCode, "", result))
+	if err != nil {
+		fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+}
+
+func uptSurplusOne(w http.ResponseWriter, r *http.Request) {
+
+	rateSur := r.PostFormValue("player_lose_rate_after_surplus_pool")
+	percentage := r.PostFormValue("percentage_to_total_win")
+	coefficient := r.PostFormValue("coefficient_to_total_player")
+	final := r.PostFormValue("final_percentage")
+	log.Debug("uptSurplusOne~ :%v", final)
+
+	m := &MgoC{}
+	collection := m.Database(constant.DBName).Collection("surplus-pool")
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	opt := options.Find()
+	cur, err := collection.Find(ctx, bson.M{}, opt)
+	var sur SurPool
+	if err != nil {
+		log.Debug("uptSurplusOne 获取用户數據错误 %+v", err)
+	} else {
+		_ = cur.Decode(&sur)
+	}
+
+	var upt UpSurPool
+	upt.PlayerLoseRateAfterSurplusPool = sur.PlayerLoseRateAfterSurplusPool
+	upt.PercentageToTotalWin = sur.PercentageToTotalWin
+	upt.CoefficientToTotalPlayer = sur.CoefficientToTotalPlayer
+	upt.FinalPercentage = sur.FinalPercentage
+
+	if rateSur != "" {
+		upt.PlayerLoseRateAfterSurplusPool, _ = strconv.ParseFloat(rateSur, 64)
+		sur.PlayerLoseRateAfterSurplusPool = upt.PlayerLoseRateAfterSurplusPool
+	}
+	if percentage != "" {
+		upt.PercentageToTotalWin, _ = strconv.ParseFloat(percentage, 64)
+		sur.PercentageToTotalWin = upt.PercentageToTotalWin
+	}
+	if coefficient != "" {
+		upt.CoefficientToTotalPlayer, _ = strconv.ParseInt(coefficient, 10, 64)
+		sur.CoefficientToTotalPlayer = upt.CoefficientToTotalPlayer
+	}
+	if final != "" {
+		upt.FinalPercentage, _ = strconv.ParseFloat(final, 64)
+		sur.FinalPercentage = upt.FinalPercentage
+	}
+
+	// 更新盈余池数据
+	_ = db.UpdateSurPool(&sur)
+
+	js, err := json.Marshal(NewResp(SuccCode, "", upt))
 	if err != nil {
 		fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
 		return

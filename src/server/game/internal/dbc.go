@@ -213,13 +213,25 @@ func (m *MgoC) FindSurPool(data *SurPool) {
 
 	//collection.DeleteMany(ctx, bson.M{}, nil)
 
-	count, _ := collection.CountDocuments(ctx, bson.M{})
-	log.Debug("FindSurPool 数量:%v", count)
-	if count == 0 {
+	opt := options.Find()
+
+	cur, err := collection.Find(ctx, bson.M{}, opt)
+	if err != nil {
+		log.Debug("获取用户數據错误 %+v", err)
 		_ = m.InsertSurPool(data)
 	} else {
+		var sur SurPool
+		_ = cur.Decode(&sur)
+		log.Debug("FindSurPool 更新数据:%v", sur)
+		data.FinalPercentage = sur.FinalPercentage
+		data.PercentageToTotalWin = sur.PercentageToTotalWin
+		data.CoefficientToTotalPlayer = sur.CoefficientToTotalPlayer
+		data.PlayerLoseRateAfterSurplusPool = sur.PlayerLoseRateAfterSurplusPool
 		_ = m.UpdateSurPool(data)
 	}
+
+	//count, _ := collection.CountDocuments(ctx, bson.M{})
+	//log.Debug("FindSurPool 数量:%v", count)
 }
 
 func (m *MgoC) InsertSurPool(data *SurPool) error {
