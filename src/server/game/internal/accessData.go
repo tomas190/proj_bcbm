@@ -248,7 +248,11 @@ func uptSurplusOne(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Debug("uptSurplusOne 获取用户數據错误 %+v", err)
 	} else {
-		_ = cur.Decode(&sur)
+		for cur.Next(ctx) {
+			var wts SurPool
+			_ = cur.Decode(&wts)
+			sur = wts
+		}
 	}
 
 	var upt UpSurPool
