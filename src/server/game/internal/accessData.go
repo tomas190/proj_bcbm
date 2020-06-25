@@ -55,6 +55,18 @@ const (
 	ErrCode  = -1
 )
 
+type GetSurPool struct {
+	PlayerTotalLose                float64 `json:"player_total_lose" bson:"player_total_lose"`
+	PlayerTotalWin                 float64 `json:"player_total_win" bson:"player_total_win"`
+	PercentageToTotalWin           float64 `json:"percentage_to_total_win" bson:"percentage_to_total_win"`
+	TotalPlayer                    int64   `json:"total_player" bson:"total_player"`
+	CoefficientToTotalPlayer       int64   `json:"coefficient_to_total_player" bson:"coefficient_to_total_player"`
+	FinalPercentage                float64 `json:"final_percentage" bson:"final_percentage"`
+	PlayerTotalLoseWin             float64 `json:"player_total_lose_win" bson:"player_total_lose_win" `
+	SurplusPool                    float64 `json:"surplus_pool" bson:"surplus_pool"`
+	PlayerLoseRateAfterSurplusPool float64 `json:"player_lose_rate_after_surplus_pool" bson:"player_lose_rate_after_surplus_pool"`
+}
+
 type UpSurPool struct {
 	PlayerLoseRateAfterSurplusPool float64 `json:"player_lose_rate_after_surplus_pool" bson:"player_lose_rate_after_surplus_pool"`
 	PercentageToTotalWin           float64 `json:"percentage_to_total_win" bson:"percentage_to_total_win"`
@@ -222,7 +234,18 @@ func getSurplusOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	js, err := json.Marshal(NewResp(SuccCode, "", result))
+	var getSur GetSurPool
+	getSur.PlayerTotalLose = result.PlayerTotalLose
+	getSur.PlayerTotalWin = result.PlayerTotalWin
+	getSur.PercentageToTotalWin = result.PercentageToTotalWin
+	getSur.TotalPlayer = result.TotalPlayer
+	getSur.CoefficientToTotalPlayer = result.CoefficientToTotalPlayer
+	getSur.FinalPercentage = result.FinalPercentage
+	getSur.PlayerTotalLoseWin = result.PlayerTotalLoseWin
+	getSur.SurplusPool = result.SurplusPool
+	getSur.PlayerLoseRateAfterSurplusPool = result.PlayerLoseRateAfterSurplusPool
+
+	js, err := json.Marshal(NewResp(SuccCode, "", getSur))
 	if err != nil {
 		fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
 		return
@@ -278,6 +301,7 @@ func uptSurplusOne(w http.ResponseWriter, r *http.Request) {
 		sur.FinalPercentage = upt.FinalPercentage
 	}
 
+	sur.SurplusPool = (sur.PlayerTotalLose - (sur.PlayerTotalWin * sur.PercentageToTotalWin)) * sur.FinalPercentage
 	// 更新盈余池数据
 	_ = db.UpdateSurPool(&sur)
 

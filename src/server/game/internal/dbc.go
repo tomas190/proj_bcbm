@@ -226,6 +226,7 @@ func (m *MgoC) FindSurPool(data *SurPool) {
 			_ = cur.Decode(&wts)
 			sur = wts
 		}
+		data.SurplusPool = (data.PlayerTotalLose - (data.PlayerTotalWin * sur.PercentageToTotalWin)) * sur.FinalPercentage
 		data.FinalPercentage = sur.FinalPercentage
 		data.PercentageToTotalWin = sur.PercentageToTotalWin
 		data.CoefficientToTotalPlayer = sur.CoefficientToTotalPlayer
@@ -312,13 +313,13 @@ func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string
 }
 
 //GetDownRecodeList 获取盈余池数据
-func (m *MgoC) GetSurPoolData(selector bson.M) ([]SurPool, error) {
+func (m *MgoC) GetSurPoolData(selector bson.M) (SurPool, error) {
 	collection := m.Database(constant.DBName).Collection("surplus-pool")
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
 	opt := options.Find()
 
-	var wts []SurPool
+	var sur SurPool
 
 	cur, err2 := collection.Find(ctx, selector, opt)
 	if err2 != nil {
@@ -326,12 +327,12 @@ func (m *MgoC) GetSurPoolData(selector bson.M) ([]SurPool, error) {
 	}
 
 	for cur.Next(ctx) {
-		var sur SurPool
-		err := cur.Decode(&sur)
+		var wts SurPool
+		err := cur.Decode(&wts)
 		if err != nil {
 			//log.Debug("数据库数据解码错误 %+v", err)
 		}
-		wts = append(wts, sur)
+		sur = wts
 	}
-	return wts, nil
+	return sur, nil
 }
