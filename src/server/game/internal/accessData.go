@@ -1,15 +1,12 @@
 package internal
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/name5566/leaf/log"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
 	"proj_bcbm/src/server/conf"
-	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/msg"
 	"strconv"
 	"time"
@@ -222,7 +219,7 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 func getSurplusOne(w http.ResponseWriter, r *http.Request) {
 	var req GameDataReq
 	req.GameId = r.FormValue("game_id")
-	log.Debug("game_id :%v",req.GameId)
+	log.Debug("game_id :%v", req.GameId)
 
 	selector := bson.M{}
 	if req.GameId != "" {
@@ -262,20 +259,16 @@ func uptSurplusOne(w http.ResponseWriter, r *http.Request) {
 	final := r.PostFormValue("final_percentage")
 	log.Debug("uptSurplusOne~ :%v", final)
 
-	m := &MgoC{}
-	collection := m.Database(constant.DBName).Collection("surplus-pool")
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	opt := options.Find()
-	cur, err := collection.Find(ctx, bson.M{}, opt)
-	var sur SurPool
+	var req GameDataReq
+	req.GameId = r.FormValue("game_id")
+
+	selector := bson.M{}
+	if req.GameId != "" {
+		selector["game_id"] = req.GameId
+	}
+	sur, err := db.GetSurPoolData(selector)
 	if err != nil {
-		log.Debug("uptSurplusOne 获取用户數據错误 %+v", err)
-	} else {
-		for cur.Next(ctx) {
-			var wts SurPool
-			_ = cur.Decode(&wts)
-			sur = wts
-		}
+		return
 	}
 
 	var upt UpSurPool
@@ -300,7 +293,7 @@ func uptSurplusOne(w http.ResponseWriter, r *http.Request) {
 		upt.FinalPercentage, _ = strconv.ParseFloat(final, 64)
 		sur.FinalPercentage = upt.FinalPercentage
 	}
-	sur.SurplusPool = (sur.PlayerTotalLose - (sur.PlayerTotalWin * sur.PercentageToTotalWin) - float64(sur.TotalPlayer * sur.CoefficientToTotalPlayer)) * sur.FinalPercentage
+	sur.SurplusPool = (sur.PlayerTotalLose - (sur.PlayerTotalWin * sur.PercentageToTotalWin) - float64(sur.TotalPlayer*sur.CoefficientToTotalPlayer)) * sur.FinalPercentage
 	// 更新盈余池数据
 	_ = db.UpdateSurPool(&sur)
 

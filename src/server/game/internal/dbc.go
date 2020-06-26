@@ -226,7 +226,7 @@ func (m *MgoC) FindSurPool(data *SurPool) {
 			_ = cur.Decode(&wts)
 			sur = wts
 		}
-		data.SurplusPool = (data.PlayerTotalLose - (data.PlayerTotalWin * sur.PercentageToTotalWin) - float64(data.TotalPlayer * sur.CoefficientToTotalPlayer)) * sur.FinalPercentage
+		data.SurplusPool = (data.PlayerTotalLose - (data.PlayerTotalWin * sur.PercentageToTotalWin) - float64(data.TotalPlayer*sur.CoefficientToTotalPlayer)) * sur.FinalPercentage
 		data.FinalPercentage = sur.FinalPercentage
 		data.PercentageToTotalWin = sur.PercentageToTotalWin
 		data.CoefficientToTotalPlayer = sur.CoefficientToTotalPlayer
@@ -328,10 +328,7 @@ func (m *MgoC) GetSurPoolData(selector bson.M) (SurPool, error) {
 
 	for cur.Next(ctx) {
 		var wts SurPool
-		err := cur.Decode(&wts)
-		if err != nil {
-			//log.Debug("数据库数据解码错误 %+v", err)
-		}
+		_ = cur.Decode(&wts)
 		sur = wts
 	}
 	return sur, nil
