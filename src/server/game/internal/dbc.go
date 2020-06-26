@@ -226,7 +226,7 @@ func (m *MgoC) FindSurPool(data *SurPool) {
 			_ = cur.Decode(&wts)
 			sur = wts
 		}
-		data.SurplusPool = (data.PlayerTotalLose - (data.PlayerTotalWin * sur.PercentageToTotalWin)) * sur.FinalPercentage
+		data.SurplusPool = (data.PlayerTotalLose - (data.PlayerTotalWin * sur.PercentageToTotalWin) - float64(data.TotalPlayer * sur.CoefficientToTotalPlayer)) * sur.FinalPercentage
 		data.FinalPercentage = sur.FinalPercentage
 		data.PercentageToTotalWin = sur.PercentageToTotalWin
 		data.CoefficientToTotalPlayer = sur.CoefficientToTotalPlayer
