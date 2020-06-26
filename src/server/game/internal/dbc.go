@@ -261,7 +261,7 @@ func (m *MgoC) UpdateSurPool(data *SurPool) error {
 		log.Error("<----- 更新 SurPool数据失败 ~ ----->:%v", err)
 		return err
 	}
-	log.Debug("<----- 更新SurPool数据成功 ~ ----->", res)
+	log.Debug("<----- 更新SurPool数据成功 ~ ----->:%v", res)
 	return nil
 }
 

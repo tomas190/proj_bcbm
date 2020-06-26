@@ -257,7 +257,6 @@ func uptSurplusOne(w http.ResponseWriter, r *http.Request) {
 	percentage := r.PostFormValue("percentage_to_total_win")
 	coefficient := r.PostFormValue("coefficient_to_total_player")
 	final := r.PostFormValue("final_percentage")
-	log.Debug("uptSurplusOne~ :%v", final)
 
 	var req GameDataReq
 	req.GameId = r.FormValue("game_id")
