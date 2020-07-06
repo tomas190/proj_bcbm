@@ -197,7 +197,7 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 	u, _ := Mgr.UserRecord.Load(uint32(userId))
 	if u != nil {
 		au := u.(*User)
-		log.Debug("玩家信息:%v", au)
+		log.Debug("玩家退出信息:%v", au)
 		rid := Mgr.UserRoom[au.UserID]
 		v, _ := Mgr.RoomRecord.Load(rid)
 		if v != nil {
@@ -212,6 +212,21 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 			})
 			au.ConnAgent.Close()
 		}
+		js, err := json.Marshal(NewResp(SuccCode, "", "玩家退出房间成功"))
+		if err != nil {
+			fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	}else {
+		js, err := json.Marshal(NewResp(SuccCode, "", "玩家退出房间失败"))
+		if err != nil {
+			fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
 	}
 }
 
