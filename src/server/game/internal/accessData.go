@@ -202,7 +202,22 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 		v, _ := Mgr.RoomRecord.Load(rid)
 		if v != nil {
 			dl := v.(*Dealer)
+			au.winCount = 0
+			au.betAmount = 0
+			au.IsAction = false
+			leave := &msg.LeaveRoomR{
+				User: &msg.UserInfo{
+					UserID:   au.UserID,
+					Avatar:   au.Avatar,
+					NickName: au.NickName,
+					Money:    au.Balance,
+				},
+				Rooms:      Mgr.GetRoomsInfoResp(),
+				ServerTime: uint32(time.Now().Unix()),
+			}
+			au.ConnAgent.WriteMsg(leave)
 			dl.Users.Delete(au.UserID)
+
 			resp := &msg.Logout{}
 			au.ConnAgent.WriteMsg(resp)
 
