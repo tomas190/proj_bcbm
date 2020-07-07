@@ -197,13 +197,11 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 	u, _ := Mgr.UserRecord.Load(uint32(userId))
 	if u != nil {
 		au := u.(*User)
-		log.Debug("玩家退出信息:%v", au)
 		rid := Mgr.UserRoom[au.UserID]
 		v, _ := Mgr.RoomRecord.Load(rid)
 		if v != nil {
 			dl := v.(*Dealer)
 			au.IsAction = false
-			dl.Users.Delete(au.UserID)
 			leave := &msg.LeaveRoomR{
 				User: &msg.UserInfo{
 					UserID:   au.UserID,
@@ -215,6 +213,8 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 				ServerTime: uint32(time.Now().Unix()),
 			}
 			au.ConnAgent.WriteMsg(leave)
+			dl.Users.Delete(au.UserID)
+			log.Debug("玩家退出房间信息:%v", au)
 		}else {
 			c4c.UserLogoutCenter(au.UserID, func(data *User) {
 				Mgr.UserRecord.Delete(au.UserID)
@@ -222,6 +222,7 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 				au.ConnAgent.WriteMsg(resp)
 				au.ConnAgent.Close()
 			})
+			log.Debug("玩家退出大厅信息:%v", au)
 		}
 		js, err := json.Marshal(NewResp(SuccCode, "", "玩家退出房间成功"))
 		if err != nil {
