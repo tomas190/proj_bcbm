@@ -202,8 +202,6 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 		v, _ := Mgr.RoomRecord.Load(rid)
 		if v != nil {
 			dl := v.(*Dealer)
-			au.winCount = 0
-			au.betAmount = 0
 			au.IsAction = false
 			dl.Users.Delete(au.UserID)
 			leave := &msg.LeaveRoomR{
@@ -217,15 +215,12 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 				ServerTime: uint32(time.Now().Unix()),
 			}
 			au.ConnAgent.WriteMsg(leave)
-
-			time.Sleep(time.Millisecond * 500)
-
+		}else {
 			c4c.UserLogoutCenter(au.UserID, func(data *User) {
-				dl.AutoBetRecord[au.UserID] = nil
 				Mgr.UserRecord.Delete(au.UserID)
 				resp := &msg.LogoutR{}
 				au.ConnAgent.WriteMsg(resp)
-				//au.ConnAgent.Close()
+				au.ConnAgent.Close()
 			})
 		}
 		js, err := json.Marshal(NewResp(SuccCode, "", "玩家退出房间成功"))
