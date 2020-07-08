@@ -201,8 +201,12 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 		v, _ := Mgr.RoomRecord.Load(rid)
 		if v != nil {
 			dl := v.(*Dealer)
+			au.winCount = 0
+			au.betAmount = 0
+			dl.UserIsDownBet[au.UserID] = false
 			au.IsAction = false
-			leave := &msg.LeaveRoomR{
+			dl.UserBets[au.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+			resp := &msg.LeaveRoomR{
 				User: &msg.UserInfo{
 					UserID:   au.UserID,
 					Avatar:   au.Avatar,
@@ -212,27 +216,11 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 				Rooms:      Mgr.GetRoomsInfoResp(),
 				ServerTime: uint32(time.Now().Unix()),
 			}
-			au.ConnAgent.WriteMsg(leave)
+			au.ConnAgent.WriteMsg(resp)
 			dl.Users.Delete(au.UserID)
 			log.Debug("玩家退出房间信息:%v", au)
-		}else {
-			c4c.UserLogoutCenter(au.UserID, func(data *User) {
-				Mgr.UserRecord.Delete(au.UserID)
-				resp := &msg.LogoutR{}
-				au.ConnAgent.WriteMsg(resp)
-				au.ConnAgent.Close()
-			})
-			log.Debug("玩家退出大厅信息:%v", au)
 		}
 		js, err := json.Marshal(NewResp(SuccCode, "", "玩家退出房间成功"))
-		if err != nil {
-			fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-	}else {
-		js, err := json.Marshal(NewResp(SuccCode, "", "玩家退出房间失败"))
 		if err != nil {
 			fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
 			return
