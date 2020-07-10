@@ -276,9 +276,9 @@ func (dl *Dealer) playerSettle() {
 
 		var winFlag bool
 
-		if dl.UserIsDownBet[user.UserID] == false {
-			return true
-		}
+		//if dl.UserIsDownBet[user.UserID] == false {
+		//	return true
+		//}
 
 		if uWin > 0 {
 			winFlag = true
