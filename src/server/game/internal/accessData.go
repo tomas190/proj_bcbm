@@ -194,32 +194,37 @@ func NewResp(code int, msg string, data interface{}) ApiResp {
 func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 	Id := r.FormValue("id")
 	userId, _ := strconv.Atoi(Id)
-	v, ok := Mgr.UserRecord.Load(uint32(userId))
-	if ok {
-		u := v.(*User)
-		u.winCount = 0
-		u.betAmount = 0
-		u.IsAction = false
-		resp := &msg.LeaveRoomR{
-			User: &msg.UserInfo{
-				UserID:   u.UserID,
-				Avatar:   u.Avatar,
-				NickName: u.NickName,
-				Money:    u.Balance,
-			},
-			Rooms:      Mgr.GetRoomsInfoResp(),
-			ServerTime: uint32(time.Now().Unix()),
+	Mgr.UserRecord.Range(func(key, value interface{}) bool {
+		u := value.(*User)
+		if u.UserID == uint32(userId) {
+			u.winCount = 0
+			u.betAmount = 0
+			u.IsAction = false
+			resp := &msg.LeaveRoomR{
+				User: &msg.UserInfo{
+					UserID:   u.UserID,
+					Avatar:   u.Avatar,
+					NickName: u.NickName,
+					Money:    u.Balance,
+				},
+				Rooms:      Mgr.GetRoomsInfoResp(),
+				ServerTime: uint32(time.Now().Unix()),
+			}
+			if u.ConnAgent != nil {
+				log.Debug("玩家退出房间信息:%v", u)
+			}
+			u.ConnAgent.WriteMsg(resp)
+
+			js, err := json.Marshal(NewResp(SuccCode, "", "玩家退出房间成功"))
+			if err != nil {
+				fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
+				//return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(js)
 		}
-		u.ConnAgent.WriteMsg(resp)
-		log.Debug("玩家退出房间信息:%v", u)
-		js, err := json.Marshal(NewResp(SuccCode, "", "玩家退出房间成功"))
-		if err != nil {
-			fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-	}
+		return true
+	})
 }
 
 // 查询子游戏盈余池数据
