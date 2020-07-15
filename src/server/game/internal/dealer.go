@@ -186,7 +186,7 @@ func (dl *Dealer) Settle() {
 					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					log.Debug("玩家的当局总下注2: %v", dl.bankerWin)
 					ResultMoney += preBankerWin - (preBankerWin * taxRate)
-					//////庄家跑马灯
+					//庄家跑马灯
 					//if dl.bankerWin > PaoMaDeng {
 					//	c4c.NoticeWinMoreThan(u.UserID, u.NickName, dl.bankerWin)
 					//}
@@ -233,7 +233,8 @@ func (dl *Dealer) Settle() {
 					log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)
 				}
 			}
-			time.Sleep(200 * time.Millisecond)
+			// todo 
+			//time.Sleep(200 * time.Millisecond)
 		}
 	default:
 		{
