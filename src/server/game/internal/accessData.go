@@ -197,31 +197,40 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 	Mgr.UserRecord.Range(func(key, value interface{}) bool {
 		u := value.(*User)
 		if u.UserID == uint32(userId) {
-			u.winCount = 0
-			u.betAmount = 0
-			u.IsAction = false
-			resp := &msg.LeaveRoomR{
-				User: &msg.UserInfo{
-					UserID:   u.UserID,
-					Avatar:   u.Avatar,
-					NickName: u.NickName,
-					Money:    u.Balance,
-				},
-				Rooms:      Mgr.GetRoomsInfoResp(),
-				ServerTime: uint32(time.Now().Unix()),
-			}
-			if u.ConnAgent != nil {
-				log.Debug("玩家退出房间信息:%v", u)
-			}
-			u.ConnAgent.WriteMsg(resp)
+			rid := Mgr.UserRoom[u.UserID]
+			v, _ := Mgr.RoomRecord.Load(rid)
+			if v != nil {
+				dl := v.(*Dealer)
+				u.winCount = 0
+				u.betAmount = 0
+				u.DownBetTotal = 0
+				u.IsAction = false
+				dl.UserIsDownBet[u.UserID] = false
+				dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+				dl.Users.Delete(u.UserID)
+				resp := &msg.LeaveRoomR{
+					User: &msg.UserInfo{
+						UserID:   u.UserID,
+						Avatar:   u.Avatar,
+						NickName: u.NickName,
+						Money:    u.Balance,
+					},
+					Rooms:      Mgr.GetRoomsInfoResp(),
+					ServerTime: uint32(time.Now().Unix()),
+				}
+				if u.ConnAgent != nil {
+					log.Debug("玩家退出房间信息:%v", u)
+				}
+				u.ConnAgent.WriteMsg(resp)
 
-			js, err := json.Marshal(NewResp(SuccCode, "", "玩家退出房间成功"))
-			if err != nil {
-				fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
-				//return
+				js, err := json.Marshal(NewResp(SuccCode, "", "玩家退出房间成功"))
+				if err != nil {
+					fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
+					//return
+				}
+				w.Header().Set("Content-Type", "application/json")
+				w.Write(js)
 			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(js)
 		}
 		return true
 	})
