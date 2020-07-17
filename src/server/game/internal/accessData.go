@@ -230,6 +230,14 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 				}
 				w.Header().Set("Content-Type", "application/json")
 				w.Write(js)
+			}else {
+				js, err := json.Marshal(NewResp(ErrCode, "", "玩家退出房间失败"))
+				if err != nil {
+					fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
+					//return
+				}
+				w.Header().Set("Content-Type", "application/json")
+				w.Write(js)
 			}
 		}
 		return true
