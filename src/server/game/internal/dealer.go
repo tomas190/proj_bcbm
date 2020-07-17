@@ -234,7 +234,7 @@ func (dl *Dealer) Settle() {
 				}
 			}
 			// todo 
-			time.Sleep(200 * time.Millisecond)
+			//time.Sleep(200 * time.Millisecond)
 		}
 	default:
 		{
