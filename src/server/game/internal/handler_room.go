@@ -239,7 +239,9 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 			NickName:      au.NickName,
 		}
 
+		log.Debug("当前庄家列表数据长度前:%v,%v", len(dl.Bankers), bUser)
 		dl.Bankers = append(dl.Bankers, bUser)
+		log.Debug("当前庄家列表数据长度后:%v,%v", len(dl.Bankers), dl.Bankers)
 
 		resp := &msg.BankersB{
 			Banker:     dl.getBankerInfoResp(),
