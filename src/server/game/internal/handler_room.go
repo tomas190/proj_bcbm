@@ -242,10 +242,11 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		})
 	})
 
+	au.BankerBalance = m.LockMoney
 	bUser := User{
 		UserID:        au.UserID,
-		Balance:       au.Balance - m.LockMoney,
-		BankerBalance: m.LockMoney,
+		Balance:       au.Balance - au.BankerBalance,
+		BankerBalance: au.BankerBalance,
 		Avatar:        au.Avatar,
 		NickName:      au.NickName,
 	}
