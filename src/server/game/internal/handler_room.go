@@ -230,18 +230,6 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 	//log.Debug("<<===== 上庄金额: %v =====>>", m.LockMoney)
 	order := bson.NewObjectId().Hex()
 	c4c.ChangeBankerStatus(au.UserID, constant.BSGrabbingBanker, m.LockMoney, order, dl.RoundID, func(data *User) {
-		bUser := User{
-			UserID:        au.UserID,
-			Balance:       data.Balance,
-			BankerBalance: data.BankerBalance,
-			Avatar:        au.Avatar,
-			NickName:      au.NickName,
-		}
-
-		log.Debug("当前庄家列表数据长度前:%v,%v", len(dl.Bankers), bUser)
-		dl.Bankers = append(dl.Bankers, bUser)
-		log.Debug("当前庄家列表数据长度后:%v,%v", len(dl.Bankers), dl.Bankers)
-
 		// 更新房间玩家列表中的玩家余额
 		dl.Users.Range(func(key, value interface{}) bool {
 			if key == au.UserID {
@@ -253,6 +241,16 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 			return true
 		})
 	})
+
+	bUser := User{
+		UserID:        au.UserID,
+		Balance:       au.Balance,
+		BankerBalance: au.BankerBalance,
+		Avatar:        au.Avatar,
+		NickName:      au.NickName,
+	}
+
+	dl.Bankers = append(dl.Bankers, bUser)
 
 	resp := &msg.BankersB{
 		Banker:     dl.getBankerInfoResp(),
