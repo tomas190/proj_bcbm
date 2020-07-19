@@ -362,7 +362,7 @@ func (dl *Dealer) cancelGrabBanker(userID uint32) {
 					resp := &msg.BankersB{
 						Banker: dl.getBankerInfoResp(),
 						UpdateBanker: &msg.UserInfo{
-							Money:  u.Balance,
+							Money:  u.Balance + u.BankerBalance,
 							UserID: u.UserID,
 						},
 						ServerTime: uint32(time.Now().Unix()),
