@@ -242,9 +242,10 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		})
 	})
 
+	au.BankerBalance = 5000
 	bUser := User{
 		UserID:        au.UserID,
-		Balance:       au.Balance,
+		Balance:       au.Balance - au.BankerBalance,
 		BankerBalance: au.BankerBalance,
 		Avatar:        au.Avatar,
 		NickName:      au.NickName,
