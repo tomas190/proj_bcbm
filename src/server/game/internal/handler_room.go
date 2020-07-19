@@ -359,10 +359,11 @@ func (dl *Dealer) cancelGrabBanker(userID uint32) {
 			dl.Users.Range(func(key, value interface{}) bool {
 				if key == uID {
 					u := value.(*User)
+					log.Debug("上庄金额为：%v,%v", u.BankerBalance, bankerBalance)
 					resp := &msg.BankersB{
 						Banker: dl.getBankerInfoResp(),
 						UpdateBanker: &msg.UserInfo{
-							Money:  u.Balance,
+							Money:  u.Balance + bankerBalance,
 							UserID: u.UserID,
 						},
 						ServerTime: uint32(time.Now().Unix()),
