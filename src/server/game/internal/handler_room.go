@@ -230,7 +230,6 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 	//log.Debug("<<===== 上庄金额: %v =====>>", m.LockMoney)
 	order := bson.NewObjectId().Hex()
 	c4c.ChangeBankerStatus(au.UserID, constant.BSGrabbingBanker, m.LockMoney, order, dl.RoundID, func(data *User) {
-
 		bUser := User{
 			UserID:        au.UserID,
 			Balance:       data.Balance,
@@ -243,14 +242,6 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		dl.Bankers = append(dl.Bankers, bUser)
 		log.Debug("当前庄家列表数据长度后:%v,%v", len(dl.Bankers), dl.Bankers)
 
-		resp := &msg.BankersB{
-			Banker:     dl.getBankerInfoResp(),
-			ServerTime: uint32(time.Now().Unix()),
-		}
-
-		log.Debug("<--- 庄家列表更新 --->")
-		dl.Broadcast(resp)
-
 		// 更新房间玩家列表中的玩家余额
 		dl.Users.Range(func(key, value interface{}) bool {
 			if key == au.UserID {
@@ -262,6 +253,14 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 			return true
 		})
 	})
+
+	resp := &msg.BankersB{
+		Banker:     dl.getBankerInfoResp(),
+		ServerTime: uint32(time.Now().Unix()),
+	}
+
+	log.Debug("<--- 庄家列表更新 --->")
+	dl.Broadcast(resp)
 }
 
 func (dl *Dealer) handleLeaveRoom(args []interface{}) {
@@ -344,7 +343,6 @@ func (dl *Dealer) cancelGrabBanker(userID uint32) {
 			order := bson.NewObjectId().Hex()
 			// 玩家取消申请上庄
 			c4c.ChangeBankerStatus(userID, constant.BSNotBanker, -bankerBalance, order, dl.RoundID, func(data *User) {
-
 				// 更新房间玩家列表中的玩家余额
 				dl.Users.Range(func(key, value interface{}) bool {
 					if key == uID {
@@ -356,18 +354,24 @@ func (dl *Dealer) cancelGrabBanker(userID uint32) {
 					return true
 				})
 				log.Debug("<---玩家取消申请上庄--->")
+			})
 
-				resp := &msg.BankersB{
-					Banker: dl.getBankerInfoResp(),
-					UpdateBanker: &msg.UserInfo{
-						Money:  data.Balance,
-						UserID: data.UserID,
-					},
-					ServerTime: uint32(time.Now().Unix()),
+			// 更新房间玩家列表中的玩家余额
+			dl.Users.Range(func(key, value interface{}) bool {
+				if key == uID {
+					u := value.(*User)
+					resp := &msg.BankersB{
+						Banker: dl.getBankerInfoResp(),
+						UpdateBanker: &msg.UserInfo{
+							Money:  u.Balance,
+							UserID: u.UserID,
+						},
+						ServerTime: uint32(time.Now().Unix()),
+					}
+					log.Debug("<--- 庄家列表更新 --->")
+					dl.Broadcast(resp)
 				}
-
-				log.Debug("<--- 庄家列表更新 --->")
-				dl.Broadcast(resp)
+				return true
 			})
 		}
 	}
