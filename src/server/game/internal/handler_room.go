@@ -227,7 +227,7 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 
 	//uuid := util.UUID{}
 	// 上庄
-	//log.Debug("<<===== 上庄金额: %v =====>>", m.LockMoney)
+	log.Debug("<<===== 上庄金额: %v =====>>", m.LockMoney)
 	order := bson.NewObjectId().Hex()
 	c4c.ChangeBankerStatus(au.UserID, constant.BSGrabbingBanker, m.LockMoney, order, dl.RoundID, func(data *User) {
 		// 更新房间玩家列表中的玩家余额
