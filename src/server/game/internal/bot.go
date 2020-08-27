@@ -88,7 +88,7 @@ func (dl *Dealer) AddBots() {
 		handleNum = 80
 		break
 	}
-	slice := []int32{1, 2} // 1为-,2为+
+	slice := []int32{1, 2, 1, 2} // 1为-,2为+
 	rand.Seed(time.Now().UnixNano())
 	num := rand.Intn(len(slice))
 	if slice[num] == 1 {
@@ -100,25 +100,23 @@ func (dl *Dealer) AddBots() {
 		maNum := math.Floor(float64(getNum))
 		handleNum += int(maNum)
 	}
-	if robotNum > handleNum { // 减
+	if robotNum < handleNum { // 减
 		for {
 			richMan := dl.RichMan()
 			dl.Bots = append(dl.Bots, &richMan)
 			robotNum = len(dl.Bots)
-			if robotNum == handleNum {
+			if robotNum >= handleNum {
 				return
 			}
 		}
 	}
-	if robotNum < handleNum { // 加
-		for {
-			for k, v := range dl.Bots {
-				if v != nil {
-					robotNum = len(dl.Bots)
-					dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
-					if robotNum == handleNum {
-						return
-					}
+	if robotNum > handleNum { // 加
+		for k, v := range dl.Bots {
+			if v != nil {
+				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
+				robotNum = len(dl.Bots)
+				if robotNum <= handleNum {
+					return
 				}
 			}
 		}
@@ -255,7 +253,7 @@ func (dl *Dealer) NextBotBanker() Bot {
 	r := util.Random{}
 	WinCount := uint32(r.RandInRange(0, 3))                   // 获胜局数
 	BetAmount := float64(r.RandInRange(80, 450))              // 下注金额
-	Balance := float64(0 + r.RandInRange(20000, 40000))          // 金币数
+	Balance := float64(0 + r.RandInRange(20000, 40000))       // 金币数
 	UserID := uint32(100000000 + r.RandInRange(0, 200000000)) // 用户ID
 	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
 	randNum := fmt.Sprintf("%06v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000000000))
