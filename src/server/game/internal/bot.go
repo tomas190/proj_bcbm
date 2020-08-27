@@ -95,7 +95,7 @@ func (dl *Dealer) AddBots() {
 				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
 				num2 ++
 				if num2 >= 20 {
-					return
+					break
 				}
 			}
 		}
@@ -105,7 +105,7 @@ func (dl *Dealer) AddBots() {
 				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
 				num2 ++
 				if num2 >= 10 {
-					return
+					break
 				}
 			}
 		}
