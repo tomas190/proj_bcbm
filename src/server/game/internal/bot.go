@@ -88,7 +88,7 @@ func (dl *Dealer) AddBots() {
 		handleNum = 80
 		break
 	}
-	var randNum int
+	//var randNum int
 	slice := []int32{1, 2, 1, 2} // 1为-,2为+
 	rand.Seed(time.Now().UnixNano())
 	num := rand.Intn(len(slice))
@@ -96,14 +96,14 @@ func (dl *Dealer) AddBots() {
 		getNum := handleNum / 10
 		maNum := math.Floor(float64(getNum))
 		handleNum -= int(maNum)
-		randNum = int(maNum)
+		//randNum = int(maNum)
 	} else if slice[num] == 2 {
 		getNum := handleNum / 10
 		maNum := math.Floor(float64(getNum))
-		RNum := float64(handleNum) * 0.25
-		RNNum := math.Floor(RNum)
+		//RNum := float64(handleNum) * 0.25
+		//RNNum := math.Floor(RNum)
 		handleNum += int(maNum)
-		randNum = int(RNNum)
+		//randNum = int(RNNum)
 	}
 
 	if robotNum < handleNum { // 减
@@ -127,18 +127,18 @@ func (dl *Dealer) AddBots() {
 			}
 		}
 	}
-	var num2 int
-	for _, v := range dl.Bots {
-		if v != nil {
-			r := util.Random{}
-			v.UserID = uint32(100000000 + r.RandInRange(0, 200000000))
-			v.Balance = float64(0+r.RandInRange(200, 4600)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
-			num2++
-			if num2 >= randNum {
-				return
-			}
-		}
-	}
+	//var num2 int
+	//for _, v := range dl.Bots {
+	//	if v != nil {
+	//		r := util.Random{}
+	//		v.UserID = uint32(100000000 + r.RandInRange(0, 200000000))
+	//		v.Balance = float64(0+r.RandInRange(200, 4600)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
+	//		num2++
+	//		if num2 >= randNum {
+	//			return
+	//		}
+	//	}
+	//}
 
 	betGod := dl.BetGod()
 	nextBankerBot := dl.NextBotBanker()
