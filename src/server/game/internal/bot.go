@@ -107,16 +107,6 @@ func (dl *Dealer) AddBots() {
 		handleNum += int(maNum)
 		randNum = int(RNNum)
 	}
-	var num3 int
-	for k, v := range dl.Bots {
-		if v != nil {
-			dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
-			robotNum = len(dl.Bots)
-			if num3 >= int(maNum) {
-				break
-			}
-		}
-	}
 
 	if robotNum < handleNum { // 加
 		for {
