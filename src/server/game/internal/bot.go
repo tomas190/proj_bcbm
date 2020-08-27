@@ -113,7 +113,7 @@ func (dl *Dealer) AddBots() {
 			dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
 			robotNum = len(dl.Bots)
 			if num3 >= int(maNum) {
-				return
+				break
 			}
 		}
 	}
@@ -124,7 +124,7 @@ func (dl *Dealer) AddBots() {
 			dl.Bots = append(dl.Bots, &richMan)
 			robotNum = len(dl.Bots)
 			if robotNum >= handleNum {
-				return
+				break
 			}
 		}
 	}
@@ -134,7 +134,7 @@ func (dl *Dealer) AddBots() {
 				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
 				robotNum = len(dl.Bots)
 				if robotNum <= handleNum {
-					return
+					break
 				}
 			}
 		}
