@@ -88,6 +88,29 @@ func (dl *Dealer) AddBots() {
 		handleNum = 80
 		break
 	}
+	var num2 int
+	if len(dl.Bots) > 20 {
+		for k, v := range dl.Bots {
+			if v != nil {
+				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
+				num2 ++
+				if num2 >= 20 {
+					return
+				}
+			}
+		}
+	}else if len(dl.Bots) < 15 {
+		for k, v := range dl.Bots {
+			if v != nil {
+				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
+				num2 ++
+				if num2 >= 10 {
+					return
+				}
+			}
+		}
+	}
+
 	//var randNum int
 	slice := []int32{1, 2, 1, 2} // 1为-,2为+
 	rand.Seed(time.Now().UnixNano())
@@ -106,7 +129,7 @@ func (dl *Dealer) AddBots() {
 		//randNum = int(RNNum)
 	}
 
-	if robotNum < handleNum { // 减
+	if robotNum < handleNum { // 加
 		for {
 			richMan := dl.RichMan()
 			dl.Bots = append(dl.Bots, &richMan)
@@ -116,7 +139,7 @@ func (dl *Dealer) AddBots() {
 			}
 		}
 	}
-	if robotNum > handleNum { // 加
+	if robotNum > handleNum { // 减
 		for k, v := range dl.Bots {
 			if v != nil {
 				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
