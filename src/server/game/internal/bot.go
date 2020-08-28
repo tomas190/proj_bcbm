@@ -5,6 +5,7 @@ import (
 	"math"
 	"math/rand"
 	"proj_bcbm/src/server/constant"
+	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
 	"time"
@@ -107,8 +108,9 @@ func (dl *Dealer) AddBots() {
 		handleNum += int(maNum)
 		randNum = int(RNNum)
 	}
-
+	log.Debug("机器人数量和目标数量:%v,%v", robotNum, handleNum)
 	if robotNum < handleNum { // 加
+		log.Debug("添加机器人")
 		for {
 			richMan := dl.RichMan()
 			dl.Bots = append(dl.Bots, &richMan)
@@ -120,6 +122,7 @@ func (dl *Dealer) AddBots() {
 	}
 	if robotNum > handleNum { // 减
 		for k, v := range dl.Bots {
+			log.Debug("减少机器人")
 			if v != nil {
 				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
 				robotNum = len(dl.Bots)
@@ -130,6 +133,7 @@ func (dl *Dealer) AddBots() {
 		}
 	}
 
+	log.Debug("修改机器人")
 	var num2 int
 	for _, v := range dl.Bots {
 		if v != nil {
@@ -139,7 +143,7 @@ func (dl *Dealer) AddBots() {
 			v.BetAmount = float64(r.RandInRange(20, 500))
 			num2++
 			if num2 >= randNum {
-				return
+				break
 			}
 		}
 	}
