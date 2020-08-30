@@ -66,6 +66,8 @@ func (h *Hall) openRoom(rID uint32) {
 		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
 	} else if num > 33 && num <= 66 {
 		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
+	} else if num > 66 && num <= 100 {
+		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
 		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
 	}
 
