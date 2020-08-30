@@ -72,7 +72,6 @@ func (h *Hall) openRoom(rID uint32) {
 		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
 		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
 	}
-	dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
 
 	dl.bankerMoney = dl.Bankers[0].(Bot).Balance
 
