@@ -514,7 +514,7 @@ func (dl *Dealer) ClearChip() {
 		}
 
 		// 换一批机器人
-		//dl.Bots = nil
+		dl.Bots = nil
 		dl.AddBots()
 
 		for _, b := range dl.Bots {
