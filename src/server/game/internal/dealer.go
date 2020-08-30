@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"github.com/shopspring/decimal"
 	"gopkg.in/mgo.v2/bson"
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/constant"
@@ -177,14 +176,15 @@ func (dl *Dealer) Settle() {
 	case User:
 		{
 			u := dl.Bankers[0].(User)
-			preBankerBalance := dl.bankerMoney
+			//preBankerBalance := dl.bankerMoney
 			order := bson.NewObjectId().Hex()
 
 			if preBankerWin > 0 {
 				log.Debug("玩家的当局总下注1: %v", preBankerWin)
 				c4c.BankerWinScore(u.UserID, preBankerWin, order, dl.RoundID, func(data *User) {
-					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
-					log.Debug("玩家的当局总下注2: %v", dl.bankerWin)
+					//dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
+					//log.Debug("玩家的当局总下注2: %v", dl.bankerWin)
+					dl.bankerWin += preBankerWin - (preBankerWin * taxRate)
 					ResultMoney += preBankerWin - (preBankerWin * taxRate)
 					//庄家跑马灯
 					//if dl.bankerWin > PaoMaDeng {
@@ -199,9 +199,10 @@ func (dl *Dealer) Settle() {
 				})
 			} else {
 				c4c.BankerLoseScore(u.UserID, preBankerWin, order, dl.RoundID, func(data *User) {
-					dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
+					//dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					dl.bankerMoney = data.BankerBalance
 					ResultMoney -= preBankerWin
+					dl.bankerWin -= preBankerWin
 
 					// 玩家坐庄盈余池更新
 					err := db.UProfitPool(-dl.bankerWin, 0, dl.RoomID)

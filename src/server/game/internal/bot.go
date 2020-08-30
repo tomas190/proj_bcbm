@@ -90,6 +90,9 @@ func (dl *Dealer) AddBots() {
 	case 24:
 		handleNum = 80
 		break
+	case 0:
+		handleNum = 80
+		break
 	}
 
 	var randNum int
@@ -133,6 +136,7 @@ func (dl *Dealer) AddBots() {
 				v.UserID = uint32(100000000 + r.RandInRange(0, 200000000))
 				v.Balance = float64(0+r.RandInRange(200, 4600)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
 				v.BetAmount = float64(r.RandInRange(20, 500))
+				v.Avatar = fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
 				num2++
 				if num2 >= randNum {
 					break
