@@ -139,8 +139,8 @@ func (dl *Dealer) AddBots() {
 				v.NickName = fmt.Sprintf("%06v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000000000))
 				v.Balance = float64(0+r.RandInRange(200, 4600)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
 				v.Avatar = fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
-				v.BetAmount = 0
-				v.WinCount = 0
+				v.WinCount = uint32(r.RandInRange(1, 2))                                                // 获胜局数
+				v.BetAmount = float64(r.RandInRange(20, 500))
 				num2++
 				if num2 >= randNum {
 					break
@@ -280,8 +280,8 @@ func (dl *Dealer) BetGod() Bot {
 
 func (dl *Dealer) RichMan() Bot {
 	r := util.Random{}
-	//WinCount := uint32(r.RandInRange(0, 3))                                                // 获胜局数
-	//BetAmount := float64(r.RandInRange(20, 500))                                           // 下注金额
+	WinCount := uint32(r.RandInRange(0, 3))                                                // 获胜局数
+	BetAmount := float64(r.RandInRange(20, 500))                                           // 下注金额
 	Balance := float64(0+r.RandInRange(200, 4600)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
 	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                              // 用户ID
 	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
@@ -291,8 +291,8 @@ func (dl *Dealer) RichMan() Bot {
 		// NickName:  "richMan",
 		Avatar:    avatar,
 		Balance:   Balance,
-		WinCount:  0,
-		BetAmount: 0,
+		WinCount:  WinCount,
+		BetAmount: BetAmount,
 		botType:   constant.BTRichMan,
 	}
 
