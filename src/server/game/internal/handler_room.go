@@ -201,8 +201,8 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 		return
 	}
 
-	var newBankers []Player
-	newBankers = append(newBankers, dl.Bankers[0])
+	//var newBankers []Player
+	//newBankers = append(newBankers, dl.Bankers[0])
 
 	//只清理机器人 不清理真实玩家
 	//for i := range dl.Bankers {
@@ -215,7 +215,7 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 	//	}
 	//}
 
-	dl.Bankers = newBankers
+	//dl.Bankers = newBankers
 
 	// 如果玩家已经在列表中，直接返回
 	for _, b := range dl.Bankers {
