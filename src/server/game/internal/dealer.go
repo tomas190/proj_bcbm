@@ -199,8 +199,8 @@ func (dl *Dealer) Settle() {
 					//dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					dl.bankerMoney = data.BankerBalance
 				})
-				ResultMoney -= preBankerWin
-				dl.bankerWin -= preBankerWin
+				ResultMoney = preBankerWin
+				dl.bankerWin = preBankerWin
 				log.Debug("庄家金额为和庄家赢钱:%v，%v", dl.bankerMoney, dl.bankerWin)
 				// 玩家坐庄盈余池更新
 				err := db.UProfitPool(-dl.bankerWin, 0, dl.RoomID)
@@ -515,12 +515,6 @@ func (dl *Dealer) ClearChip() {
 		//dl.Bots = nil
 		dl.AddBots()
 
-		//resp := &msg.PlayersR{
-		//	Players:    dl.getPlayerInfoResp(),
-		//	ServerTime: uint32(time.Now().Unix()),
-		//}
-		//dl.Broadcast(resp)
-		
 		if len(dl.Bankers) <= 1 {
 			nextB := dl.NextBotBanker()
 			dl.Bankers = append(dl.Bankers, nextB)
