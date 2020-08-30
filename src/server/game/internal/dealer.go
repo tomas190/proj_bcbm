@@ -518,50 +518,57 @@ func (dl *Dealer) ClearChip() {
 		//dl.Bots = nil
 		dl.AddBots()
 
-		ru := util.Random{}
-		num := ru.RandInRange(0, 100)
-		if num >= 0 && num <= 50 {
-			nextB := dl.NextBotBanker()
-			dl.Bankers = append(dl.Bankers, nextB)
-			dl.Bots = append(dl.Bots, &nextB)
-		} else if num > 50 && num <= 100 {
-			var botId uint32
-			for _, b := range dl.Bots {
-				if b.botType == constant.BTNextBanker {
-					botId = b.UserID
-				}
-			}
-
-			for i, b := range dl.Bankers {
-				banker := b
-				uID, _, _, _ := banker.GetPlayerBasic()
-				if uID == botId {
-					dl.Bankers = append(dl.Bankers[:i], dl.Bankers[i+1:]...)
-				}
-			}
-		}
-
 		if len(dl.Bankers) <= 1 {
 			nextB := dl.NextBotBanker()
 			dl.Bankers = append(dl.Bankers, nextB)
 			dl.Bots = append(dl.Bots, &nextB)
-		} else if len(dl.Bankers) >= 4 {
-			var botId uint32
-			for _, b := range dl.Bots {
-				if b.botType == constant.BTNextBanker {
-					botId = b.UserID
-					break
-				}
-			}
-
-			for i, b := range dl.Bankers {
-				banker := b
-				uID, _, _, _ := banker.GetPlayerBasic()
-				if uID == botId {
-					dl.Bankers = append(dl.Bankers[:i], dl.Bankers[i+1:]...)
-				}
-			}
 		}
+
+		//ru := util.Random{}
+		//num := ru.RandInRange(0, 100)
+		//if num >= 0 && num <= 50 {
+		//	nextB := dl.NextBotBanker()
+		//	dl.Bankers = append(dl.Bankers, nextB)
+		//	dl.Bots = append(dl.Bots, &nextB)
+		//} else if num > 50 && num <= 100 {
+		//	var botId uint32
+		//	for _, b := range dl.Bots {
+		//		if b.botType == constant.BTNextBanker {
+		//			botId = b.UserID
+		//		}
+		//	}
+		//
+		//	for i, b := range dl.Bankers {
+		//		banker := b
+		//		uID, _, _, _ := banker.GetPlayerBasic()
+		//		if uID == botId {
+		//			log.Debug("去掉庄家")
+		//			dl.Bankers = append(dl.Bankers[:i], dl.Bankers[i+1:]...)
+		//		}
+		//	}
+		//}
+		//
+		//if len(dl.Bankers) <= 1 {
+		//	nextB := dl.NextBotBanker()
+		//	dl.Bankers = append(dl.Bankers, nextB)
+		//	dl.Bots = append(dl.Bots, &nextB)
+		//} else if len(dl.Bankers) >= 4 {
+		//	var botId uint32
+		//	for _, b := range dl.Bots {
+		//		if b.botType == constant.BTNextBanker {
+		//			botId = b.UserID
+		//			break
+		//		}
+		//	}
+		//
+		//	for i, b := range dl.Bankers {
+		//		banker := b
+		//		uID, _, _, _ := banker.GetPlayerBasic()
+		//		if uID == botId {
+		//			dl.Bankers = append(dl.Bankers[:i], dl.Bankers[i+1:]...)
+		//		}
+		//	}
+		//}
 
 		//for _, b := range dl.Bots {
 		//	if b.botType == constant.BTNextBanker {
