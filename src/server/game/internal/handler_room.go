@@ -205,15 +205,15 @@ func (dl *Dealer) handleGrabBanker(args []interface{}) {
 	newBankers = append(newBankers, dl.Bankers[0])
 
 	//只清理机器人 不清理真实玩家
-	for i := range dl.Bankers {
-		if i != 0 {
-			switch dl.Bankers[i].(type) {
-			case User:
-				newBankers = append(newBankers, dl.Bankers[i])
-			default:
-			}
-		}
-	}
+	//for i := range dl.Bankers {
+	//	if i != 0 {
+	//		switch dl.Bankers[i].(type) {
+	//		case User:
+	//			newBankers = append(newBankers, dl.Bankers[i])
+	//		default:
+	//		}
+	//	}
+	//}
 
 	dl.Bankers = newBankers
 
