@@ -180,14 +180,15 @@ func (dl *Dealer) Settle() {
 			order := bson.NewObjectId().Hex()
 
 			if preBankerWin > 0 {
-				log.Debug("玩家的当局总下注1: %v", preBankerWin)
+				log.Debug("玩家的当局总下注和庄家金额: %v,%v", preBankerWin, dl.bankerMoney)
 				c4c.BankerWinScore(u.UserID, preBankerWin, order, dl.RoundID, func(data *User) {
 					//dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					//log.Debug("玩家的当局总下注2: %v", dl.bankerWin)
+					dl.bankerMoney = data.BankerBalance
 				})
 				ResultMoney += preBankerWin - (preBankerWin * taxRate)
 				dl.bankerWin += preBankerWin - (preBankerWin * taxRate)
-				dl.bankerMoney += preBankerWin - (preBankerWin * taxRate)
+				log.Debug("庄家金额为和庄家赢钱:%v，%v", dl.bankerMoney, dl.bankerWin)
 				// 玩家坐庄盈余池更新
 				err := db.UProfitPool(0, dl.bankerWin, dl.RoomID)
 				if err != nil {
@@ -196,11 +197,11 @@ func (dl *Dealer) Settle() {
 			} else {
 				c4c.BankerLoseScore(u.UserID, preBankerWin, order, dl.RoundID, func(data *User) {
 					//dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
+					dl.bankerMoney = data.BankerBalance
 				})
 				ResultMoney -= preBankerWin
 				dl.bankerWin -= preBankerWin
-				dl.bankerMoney -= preBankerWin
-
+				log.Debug("庄家金额为和庄家赢钱:%v，%v", dl.bankerMoney, dl.bankerWin)
 				// 玩家坐庄盈余池更新
 				err := db.UProfitPool(-dl.bankerWin, 0, dl.RoomID)
 				if err != nil {
@@ -514,6 +515,11 @@ func (dl *Dealer) ClearChip() {
 		//dl.Bots = nil
 		dl.AddBots()
 
+		resp := &msg.PlayersR{
+			Players:    dl.getPlayerInfoResp(),
+			ServerTime: uint32(time.Now().Unix()),
+		}
+		dl.Broadcast(resp)
 		if len(dl.Bankers) <= 1 {
 			nextB := dl.NextBotBanker()
 			dl.Bankers = append(dl.Bankers, nextB)

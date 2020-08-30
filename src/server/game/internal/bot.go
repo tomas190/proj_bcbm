@@ -128,6 +128,7 @@ func (dl *Dealer) AddBots() {
 		}
 	}
 
+
 	if robotNum == handleNum {
 		log.Debug("修改机器人")
 		var num2 int
