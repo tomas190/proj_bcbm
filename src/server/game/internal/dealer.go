@@ -514,7 +514,7 @@ func (dl *Dealer) ClearChip() {
 		}
 
 		// 换一批机器人
-		dl.Bots = nil
+		//dl.Bots = nil
 		dl.AddBots()
 
 		ru := util.Random{}
@@ -540,7 +540,7 @@ func (dl *Dealer) ClearChip() {
 			}
 		}
 
-		if len(dl.Bankers) < 2 {
+		if len(dl.Bankers) <= 1 {
 			nextB := dl.NextBotBanker()
 			dl.Bankers = append(dl.Bankers, nextB)
 			dl.Bots = append(dl.Bots, &nextB)
@@ -549,6 +549,7 @@ func (dl *Dealer) ClearChip() {
 			for _, b := range dl.Bots {
 				if b.botType == constant.BTNextBanker {
 					botId = b.UserID
+					break
 				}
 			}
 
@@ -561,11 +562,11 @@ func (dl *Dealer) ClearChip() {
 			}
 		}
 
-		for _, b := range dl.Bots {
-			if b.botType == constant.BTNextBanker {
-				dl.Bankers = append(dl.Bankers, b)
-			}
-		}
+		//for _, b := range dl.Bots {
+		//	if b.botType == constant.BTNextBanker {
+		//		dl.Bankers = append(dl.Bankers, b)
+		//	}
+		//}
 
 		bankerResp := msg.BankersB{
 			Banker:     dl.getBankerInfoResp(),

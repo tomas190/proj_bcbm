@@ -14,9 +14,9 @@ import (
 func (dl *Dealer) AddBots() {
 	betGod := dl.BetGod()
 	nextBankerBot := dl.NextBotBanker()
+	dl.Bankers = append(dl.Bankers, nextBankerBot)
 	dl.Bots = append(dl.Bots, &betGod, &nextBankerBot)
 
-	robotNum := len(dl.Bots)
 	timeNow := time.Now().Hour()
 	var handleNum int
 	switch timeNow {
@@ -94,28 +94,55 @@ func (dl *Dealer) AddBots() {
 		break
 	}
 
-	//var randNum int
+	var randNum int
 	slice := []int32{1, 2, 1, 2, 1, 2, 1, 2} // 1为-,2为+
 	rand.Seed(time.Now().UnixNano())
 	num := rand.Intn(len(slice))
 	var maNum float64
 	if slice[num] == 1 {
-		getNum := handleNum / 20
-		maNum = math.Floor(float64(getNum))
-		//RNum := float64(handleNum) * 0.1
-		//RNNum := math.Floor(RNum)
+		getNum := float64(handleNum) * 0.2
+		maNum = math.Floor(getNum)
+		RNum := float64(handleNum) * 0.1
+		RNNum := math.Floor(RNum)
 		handleNum -= int(maNum)
-		//randNum = int(RNNum)
+		randNum = int(RNNum)
 
 	} else if slice[num] == 2 {
-		getNum := handleNum / 20
-		maNum = math.Floor(float64(getNum))
-		//RNum := float64(handleNum) * 0.25
-		//RNNum := math.Floor(RNum)
+		getNum := float64(handleNum) * 0.2
+		maNum = math.Floor(getNum)
+		RNum := float64(handleNum) * 0.25
+		RNNum := math.Floor(RNum)
 		handleNum += int(maNum)
-		//randNum = int(RNNum)
+		randNum = int(RNNum)
 	}
+
+	robotNum := len(dl.Bots)
 	log.Debug("机器人数量和目标数量:%v,%v", robotNum, handleNum)
+
+	for _, v := range dl.Bots {
+		if v != nil {
+			r := util.Random{}
+			v.BetAmount += float64(r.RandInRange(0, 30))
+		}
+	}
+
+	if robotNum == handleNum {
+		log.Debug("修改机器人")
+		var num2 int
+		for _, v := range dl.Bots {
+			if v != nil {
+				r := util.Random{}
+				v.UserID = uint32(100000000 + r.RandInRange(0, 200000000))
+				v.Balance = float64(0+r.RandInRange(200, 4600)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
+				v.BetAmount = float64(r.RandInRange(20, 500))
+				num2++
+				if num2 >= randNum {
+					break
+				}
+			}
+		}
+	}
+
 	if robotNum < handleNum { // 加
 		log.Debug("添加机器人")
 		for {
@@ -123,37 +150,25 @@ func (dl *Dealer) AddBots() {
 			dl.Bots = append(dl.Bots, &richMan)
 			robotNum = len(dl.Bots)
 			if robotNum >= handleNum {
-				break
+				return
 			}
 		}
 	}
+	log.Debug("房间:%v,机器人数量:%v", dl.RoomID, len(dl.Bots))
+
 	if robotNum > handleNum { // 减
 		for k, v := range dl.Bots {
 			log.Debug("减少机器人")
-			if v != nil {
+			if v != nil && v.botType != constant.BTNextBanker {
 				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
 				robotNum = len(dl.Bots)
 				if robotNum <= handleNum {
-					break
+					return
 				}
 			}
 		}
 	}
-
-	//log.Debug("修改机器人")
-	//var num2 int
-	//for _, v := range dl.Bots {
-	//	if v != nil {
-	//		r := util.Random{}
-	//		v.UserID = uint32(100000000 + r.RandInRange(0, 200000000))
-	//		v.Balance = float64(0+r.RandInRange(200, 4600)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
-	//		v.BetAmount = float64(r.RandInRange(20, 500))
-	//		num2++
-	//		if num2 >= randNum {
-	//			break
-	//		}
-	//	}
-	//}
+	log.Debug("房间:%v,机器人数量:%v", dl.RoomID, len(dl.Bots))
 }
 
 // 机器人下注，随机下注后把结果赋值到下注结果列表中
