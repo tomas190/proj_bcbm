@@ -12,6 +12,10 @@ import (
 )
 
 func (dl *Dealer) AddBots() {
+	betGod := dl.BetGod()
+	nextBankerBot := dl.NextBotBanker()
+	dl.Bots = append(dl.Bots, &betGod, &nextBankerBot)
+
 	robotNum := len(dl.Bots)
 	timeNow := time.Now().Hour()
 	var handleNum int
@@ -96,12 +100,15 @@ func (dl *Dealer) AddBots() {
 	num := rand.Intn(len(slice))
 	var maNum float64
 	if slice[num] == 1 {
-		getNum := handleNum / 10
+		getNum := handleNum / 20
 		maNum = math.Floor(float64(getNum))
+		RNum := float64(handleNum) * 0.1
+		RNNum := math.Floor(RNum)
 		handleNum -= int(maNum)
-		randNum = int(maNum)
+		randNum = int(RNNum)
+
 	} else if slice[num] == 2 {
-		getNum := handleNum / 10
+		getNum := handleNum / 20
 		maNum = math.Floor(float64(getNum))
 		RNum := float64(handleNum) * 0.25
 		RNNum := math.Floor(RNum)
@@ -147,10 +154,6 @@ func (dl *Dealer) AddBots() {
 			}
 		}
 	}
-
-	betGod := dl.BetGod()
-	nextBankerBot := dl.NextBotBanker()
-	dl.Bots = append(dl.Bots, &betGod, &nextBankerBot)
 }
 
 // 机器人下注，随机下注后把结果赋值到下注结果列表中
