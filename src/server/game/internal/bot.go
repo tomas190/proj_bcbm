@@ -13,9 +13,7 @@ import (
 
 func (dl *Dealer) AddBots() {
 	betGod := dl.BetGod()
-	nextBankerBot := dl.NextBotBanker()
-	dl.Bankers = append(dl.Bankers, nextBankerBot)
-	dl.Bots = append(dl.Bots, &betGod, &nextBankerBot)
+	dl.Bots = append(dl.Bots, &betGod)
 
 	timeNow := time.Now().Hour()
 	var handleNum int
