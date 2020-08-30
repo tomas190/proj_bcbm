@@ -6,6 +6,7 @@ import (
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
+	"proj_bcbm/src/server/util"
 	"sync"
 	"time"
 )
@@ -56,7 +57,21 @@ func (h *Hall) OpenCasino() {
 
 // 大厅开房
 func (h *Hall) openRoom(rID uint32) {
+
 	dl := NewDealer(rID, h.HRChan)
+
+	ru := util.Random{}
+	num := ru.RandInRange(0, 100)
+	if num >= 0 && num <= 33 {
+		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
+	} else if num > 33 && num <= 66 {
+		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
+		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
+	} else if num > 66 && num < 100 {
+		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
+		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
+		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
+	}
 	dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
 
 	dl.bankerMoney = dl.Bankers[0].(Bot).Balance
