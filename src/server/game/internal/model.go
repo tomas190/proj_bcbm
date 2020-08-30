@@ -62,13 +62,9 @@ func (h *Hall) openRoom(rID uint32) {
 
 	ru := util.Random{}
 	num := ru.RandInRange(0, 100)
-	if num >= 0 && num <= 33 {
+	if num >= 0 && num <= 50 {
 		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
-	} else if num > 33 && num <= 66 {
-		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
-		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
-	} else if num > 66 && num < 100 {
-		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
+	} else if num > 50 && num <= 100 {
 		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
 		dl.Bankers = append(dl.Bankers, dl.NextBotBanker(), dl.NextBotBanker())
 	}
