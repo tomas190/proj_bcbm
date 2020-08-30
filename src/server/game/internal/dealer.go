@@ -515,11 +515,12 @@ func (dl *Dealer) ClearChip() {
 		//dl.Bots = nil
 		dl.AddBots()
 
-		resp := &msg.PlayersR{
-			Players:    dl.getPlayerInfoResp(),
-			ServerTime: uint32(time.Now().Unix()),
-		}
-		dl.Broadcast(resp)
+		//resp := &msg.PlayersR{
+		//	Players:    dl.getPlayerInfoResp(),
+		//	ServerTime: uint32(time.Now().Unix()),
+		//}
+		//dl.Broadcast(resp)
+		
 		if len(dl.Bankers) <= 1 {
 			nextB := dl.NextBotBanker()
 			dl.Bankers = append(dl.Bankers, nextB)
