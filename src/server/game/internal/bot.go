@@ -94,47 +94,79 @@ func (dl *Dealer) AddBots() {
 		handleNum = 80
 		break
 	}
-
-	var randNum int
-	slice := []int32{1, 2, 1, 2, 1, 2, 1, 2} // 1为-,2为+
-	rand.Seed(time.Now().UnixNano())
-	num := rand.Intn(len(slice))
-	var maNum float64
-	if slice[num] == 1 {
-		slice := []float64{0.16, 0.17, 0.18, 0.19, 0.20}
-		rand.Seed(time.Now().UnixNano())
-		num := rand.Intn(len(slice))
-		getNum := float64(handleNum) * slice[num]
-		maNum = math.Floor(getNum)
-		RNum := float64(handleNum) * 0.1
-		RNNum := math.Floor(RNum)
-		handleNum -= int(maNum)
-		randNum = int(RNNum)
-
-	} else if slice[num] == 2 {
-		slice := []float64{0.16, 0.17, 0.18, 0.19, 0.20}
-		rand.Seed(time.Now().UnixNano())
-		num := rand.Intn(len(slice))
-		getNum := float64(handleNum) * slice[num]
-		maNum = math.Floor(getNum)
-		RNum := float64(handleNum) * 0.25
-		RNNum := math.Floor(RNum)
-		handleNum += int(maNum)
-		randNum = int(RNNum)
-	}
-
 	r := util.Random{}
 
-	for _, v := range dl.Bots {
-		if v != nil {
-			v.BetAmount += float64(r.RandInRange(1, 100))
-			v.WinCount += uint32(r.RandInRange(0, 2))
+	var randNum int
+
+	var minP int
+	var maxP int
+	getNum := float64(handleNum) * 0.2
+	maNum := math.Floor(getNum)
+	minP = handleNum - int(maNum)
+	maxP = handleNum + int(maNum)
+
+	RNum := []float64{0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25,}
+	rand.Seed(time.Now().UnixNano())
+	rn := rand.Intn(len(RNum))
+	rNNum := float64(handleNum) * RNum[rn]
+	RNNNum := math.Floor(rNNum)
+	randNum = int(RNNNum)
+
+	num := r.RandInRange(0, 100)
+	num2 := r.RandInRange(3, 8)
+	if num >= 0 && num < 50 {
+		var n int
+		for {
+			richMan := dl.RichMan()
+			dl.Bots = append(dl.Bots, &richMan)
+			time.Sleep(time.Millisecond)
+			n++
+			if n == num2 {
+				break
+			}
+		}
+
+	} else if num >= 50 && num < 100 {
+		var n int
+		for k, v := range dl.Bots {
+			log.Debug("减少机器人")
+			if v != nil && v.botType != constant.BTNextBanker {
+				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
+				time.Sleep(time.Millisecond)
+				n++
+				if n == num2 {
+					break
+				}
+			}
 		}
 	}
 
 	robotNum := len(dl.Bots)
 	log.Debug("机器人数量和目标数量:%v,%v", robotNum, handleNum)
 
+	if robotNum >= minP && robotNum <= maxP {
+		num3 := randNum - num2
+		if num3 > 0 {
+			for _, v := range dl.Bots {
+				if v != nil {
+					r := util.Random{}
+					v.UserID = uint32(100000000 + r.RandInRange(0, 200000000))
+					v.NickName = fmt.Sprintf("%06v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000000000))
+					v.Balance = float64(0+r.RandInRange(200, 4600)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
+					v.Avatar = fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
+					v.WinCount = uint32(r.RandInRange(1, 2)) // 获胜局数
+					v.BetAmount = float64(r.RandInRange(20, 500))
+					num3--
+					if num3 == 0 {
+						break
+					}
+				}
+			}
+		}
+		return
+	}
+
+	robotNum = len(dl.Bots)
 	if robotNum < handleNum { // 加
 		log.Debug("添加机器人")
 		for {
