@@ -101,7 +101,10 @@ func (dl *Dealer) AddBots() {
 	num := rand.Intn(len(slice))
 	var maNum float64
 	if slice[num] == 1 {
-		getNum := float64(handleNum) * 0.2
+		slice := []float64{0.16, 0.17, 0.18, 0.19, 0.20}
+		rand.Seed(time.Now().UnixNano())
+		num := rand.Intn(len(slice))
+		getNum := float64(handleNum) * slice[num]
 		maNum = math.Floor(getNum)
 		RNum := float64(handleNum) * 0.1
 		RNNum := math.Floor(RNum)
@@ -109,7 +112,10 @@ func (dl *Dealer) AddBots() {
 		randNum = int(RNNum)
 
 	} else if slice[num] == 2 {
-		getNum := float64(handleNum) * 0.2
+		slice := []float64{0.16, 0.17, 0.18, 0.19, 0.20}
+		rand.Seed(time.Now().UnixNano())
+		num := rand.Intn(len(slice))
+		getNum := float64(handleNum) * slice[num]
 		maNum = math.Floor(getNum)
 		RNum := float64(handleNum) * 0.25
 		RNNum := math.Floor(RNum)
@@ -124,13 +130,6 @@ func (dl *Dealer) AddBots() {
 			v.BetAmount += float64(r.RandInRange(1, 100))
 			v.WinCount += uint32(r.RandInRange(0, 2))
 		}
-	}
-
-	num2 := r.RandInRange(0, 10)
-	if num2 >= 0 && num2 < 5 {
-		handleNum += r.RandInRange(1, 4)
-	} else if num2 >= 5 && num2 < 10 {
-		handleNum -= r.RandInRange(1, 4)
 	}
 
 	robotNum := len(dl.Bots)
