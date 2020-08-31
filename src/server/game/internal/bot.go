@@ -117,37 +117,24 @@ func (dl *Dealer) AddBots() {
 		randNum = int(RNNum)
 	}
 
-	robotNum := len(dl.Bots)
-	log.Debug("机器人数量和目标数量:%v,%v", robotNum, handleNum)
+	r := util.Random{}
 
 	for _, v := range dl.Bots {
 		if v != nil {
-			r := util.Random{}
 			v.BetAmount += float64(r.RandInRange(1, 100))
 			v.WinCount += uint32(r.RandInRange(0, 2))
 		}
 	}
 
-
-	if robotNum == handleNum {
-		log.Debug("修改机器人")
-		var num2 int
-		for _, v := range dl.Bots {
-			if v != nil {
-				r := util.Random{}
-				v.UserID = uint32(100000000 + r.RandInRange(0, 200000000))
-				v.NickName = fmt.Sprintf("%06v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000000000))
-				v.Balance = float64(0+r.RandInRange(200, 4600)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
-				v.Avatar = fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
-				v.WinCount = uint32(r.RandInRange(1, 2))                                                // 获胜局数
-				v.BetAmount = float64(r.RandInRange(20, 500))
-				num2++
-				if num2 >= randNum {
-					break
-				}
-			}
-		}
+	num2 := r.RandInRange(0, 10)
+	if num2 >= 0 && num2 < 5 {
+		handleNum += r.RandInRange(1, 4)
+	} else if num2 >= 5 && num2 < 10 {
+		handleNum -= r.RandInRange(1, 4)
 	}
+
+	robotNum := len(dl.Bots)
+	log.Debug("机器人数量和目标数量:%v,%v", robotNum, handleNum)
 
 	if robotNum < handleNum { // 加
 		log.Debug("添加机器人")
@@ -156,25 +143,59 @@ func (dl *Dealer) AddBots() {
 			dl.Bots = append(dl.Bots, &richMan)
 			robotNum = len(dl.Bots)
 			if robotNum >= handleNum {
-				return
+				break
 			}
 		}
-	}
-	log.Debug("房间:%v,机器人数量:%v", dl.RoomID, len(dl.Bots))
-
-	if robotNum > handleNum { // 减
+		num := handleNum - robotNum
+		if num < randNum {
+			var num2 int
+			for _, v := range dl.Bots {
+				if v != nil {
+					r := util.Random{}
+					v.UserID = uint32(100000000 + r.RandInRange(0, 200000000))
+					v.NickName = fmt.Sprintf("%06v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000000000))
+					v.Balance = float64(0+r.RandInRange(200, 4600)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
+					v.Avatar = fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
+					v.WinCount = uint32(r.RandInRange(1, 2)) // 获胜局数
+					v.BetAmount = float64(r.RandInRange(20, 500))
+					num2++
+					if num2 >= (randNum - num) {
+						break
+					}
+				}
+			}
+		}
+	} else if robotNum > handleNum { // 减
 		for k, v := range dl.Bots {
 			log.Debug("减少机器人")
 			if v != nil && v.botType != constant.BTNextBanker {
 				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
 				robotNum = len(dl.Bots)
 				if robotNum <= handleNum {
-					return
+					break
+				}
+			}
+		}
+		num := robotNum - handleNum
+		if num < randNum {
+			var num2 int
+			for _, v := range dl.Bots {
+				if v != nil {
+					r := util.Random{}
+					v.UserID = uint32(100000000 + r.RandInRange(0, 200000000))
+					v.NickName = fmt.Sprintf("%06v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000000000))
+					v.Balance = float64(0+r.RandInRange(200, 4600)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
+					v.Avatar = fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
+					v.WinCount = uint32(r.RandInRange(1, 2)) // 获胜局数
+					v.BetAmount = float64(r.RandInRange(20, 500))
+					num2++
+					if num2 >= (randNum - num) {
+						break
+					}
 				}
 			}
 		}
 	}
-	log.Debug("房间:%v,机器人数量:%v", dl.RoomID, len(dl.Bots))
 }
 
 // 机器人下注，随机下注后把结果赋值到下注结果列表中
