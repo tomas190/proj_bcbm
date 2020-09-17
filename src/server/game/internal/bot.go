@@ -114,14 +114,6 @@ func (dl *Dealer) AddBots() {
 		handleNum -= num3
 	}
 
-	// 每局机器人随机添加下注筹码和胜率
-	for _, v := range dl.Bots {
-		if v != nil {
-			v.WinCount += uint32(r.RandInRange(0, 2))
-			v.BetAmount += float64(r.RandInRange(0, 1000))
-		}
-	}
-
 	for k, v := range dl.Bots {
 		if v != nil && v.botType != constant.BTNextBanker {
 			rNum := 1 / ((v.WinCount + 1) * 2)
@@ -169,38 +161,45 @@ func (dl *Dealer) BotsBet() {
 	time.Sleep(time.Second * 1)
 	//counter := 0
 	dl.IsDownBet = true
-	for i := 0; i < 100; i++ {
-		if dl.IsDownBet == false {
-			return
+	for {
+		for _, v := range dl.Bots {
+			if v != nil {
+				if dl.IsDownBet == false {
+					return
+				}
+				//counter++
+				//delay := (30 - counter/2) * (30 - counter/2)
+				//time.Sleep(time.Millisecond * time.Duration(rand.Intn(delay+5)))
+				timerSlice := []int32{50, 150, 20, 300, 30,}
+				rand.Seed(time.Now().UnixNano())
+				num2 := rand.Intn(len(timerSlice))
+				time.Sleep(time.Millisecond * time.Duration(timerSlice[num2]))
+
+				chip, area := dl.randBet()
+				cs := constant.ChipSize[chip]
+
+				// 限红
+				if dl.roomBonusLimit(area) < cs || dl.dynamicBonusLimit(area) < cs {
+					//log.Debug("<<===== 机器人下注结束 =====>>")
+					continue
+				}
+
+				v.BetAmount += cs
+
+				// 区域所有玩家投注总数
+				dl.AreaBets[area] = dl.AreaBets[area] + cs
+				// 区域机器人投注总数
+				dl.AreaBotBets[area] = dl.AreaBotBets[area] + cs
+
+				resp := &msg.BetInfoB{
+					Area:      area,
+					Chip:      chip,
+					AreaTotal: dl.AreaBets[area],
+				}
+
+				dl.Broadcast(resp)
+			}
 		}
-		//counter++
-		//delay := (30 - counter/2) * (30 - counter/2)
-		//time.Sleep(time.Millisecond * time.Duration(rand.Intn(delay+5)))
-		timerSlice := []int32{50, 150, 20, 300, 800, 30, 500}
-		rand.Seed(time.Now().UnixNano())
-		num2 := rand.Intn(len(timerSlice))
-		time.Sleep(time.Millisecond * time.Duration(timerSlice[num2]))
-
-		chip, area := dl.randBet()
-		cs := constant.ChipSize[chip]
-
-		// 限红
-		if dl.roomBonusLimit(area) < cs || dl.dynamicBonusLimit(area) < cs {
-			//log.Debug("<<===== 机器人下注结束 =====>>")
-			continue
-		}
-		// 区域所有玩家投注总数
-		dl.AreaBets[area] = dl.AreaBets[area] + cs
-		// 区域机器人投注总数
-		dl.AreaBotBets[area] = dl.AreaBotBets[area] + cs
-
-		resp := &msg.BetInfoB{
-			Area:      area,
-			Chip:      chip,
-			AreaTotal: dl.AreaBets[area],
-		}
-
-		dl.Broadcast(resp)
 	}
 }
 

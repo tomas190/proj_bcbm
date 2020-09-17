@@ -254,6 +254,17 @@ func (dl *Dealer) Settle() {
 	// log.Debug("settle... %+v", dl.RoomID)
 	dl.playerSettle()
 
+	r := util.Random{}
+	for _, v := range dl.Bots {
+		if v != nil {
+			//uWin := dl.Bots[user.UserID][dl.res] * constant.AreaX[dl.res]
+			num := r.RandInRange(0, 100)
+			if num >= 70 {
+				v.WinCount += 1
+			}
+		}
+	}
+
 	dl.ClockReset(constant.SettleTime, dl.ClearChip)
 }
 
@@ -515,6 +526,7 @@ func (dl *Dealer) ClearChip() {
 		//dl.Bots = nil
 		dl.AddBots()
 
+		// 隔几把才变动？
 		if len(dl.Bankers) <= 1 {
 			nextB := dl.NextBotBanker()
 			dl.Bankers = append(dl.Bankers, nextB)
