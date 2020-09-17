@@ -12,8 +12,8 @@ import (
 )
 
 func (dl *Dealer) AddBots() {
-	betGod := dl.BetGod()
-	dl.Bots = append(dl.Bots, &betGod)
+	//betGod := dl.BetGod()  // 赌神
+	//dl.Bots = append(dl.Bots, &betGod)
 
 	timeNow := time.Now().Hour()
 	var handleNum int
@@ -96,8 +96,6 @@ func (dl *Dealer) AddBots() {
 	}
 	r := util.Random{}
 
-	var randNum int
-
 	var minP int
 	var maxP int
 	getNum := float64(handleNum) * 0.2
@@ -105,83 +103,57 @@ func (dl *Dealer) AddBots() {
 	minP = handleNum - int(maNum)
 	maxP = handleNum + int(maNum)
 
-	RNum := []float64{0.1, 0.11, 0.12, 0.13, 0.14, 0.15}
-	rand.Seed(time.Now().UnixNano())
-	rn := rand.Intn(len(RNum))
-	rNNum := float64(handleNum) * RNum[rn]
-	RNNNum := math.Floor(rNNum)
-	randNum = int(RNNNum)
+	num := r.RandInRange(0, 100)
+	if num >= 0 && num < 50 {
+		num2 := handleNum - minP
+		num3 := r.RandInRange(0, num2)
+		handleNum += num3
+	} else if num >= 50 && num < 100 {
+		num2 := maxP - handleNum
+		num3 := r.RandInRange(0, num2)
+		handleNum -= num3
+	}
 
-	var tn int
-	for {
-		n := r.RandInRange(0, len(dl.Bots))
-		if dl.Bots[n] != nil && dl.Bots[n].botType != constant.BTNextBanker {
-			dl.Bots[n].UserID = uint32(100000000 + r.RandInRange(0, 200000000))
-			dl.Bots[n].NickName = fmt.Sprintf("%06v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000000000))
-			dl.Bots[n].Balance = float64(0+r.RandInRange(200, 4600)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
-			dl.Bots[n].Avatar = fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
-			dl.Bots[n].WinCount = uint32(r.RandInRange(0, 3)) // 获胜局数
-			dl.Bots[n].BetAmount = float64(r.RandInRange(20, 500))
-		}
-		time.Sleep(time.Millisecond)
-		tn++
-		if tn == randNum {
-			log.Debug("修改%v:个机器人", randNum)
-			break
+	// 每局机器人随机添加下注筹码和胜率
+	for _, v := range dl.Bots {
+		if v != nil {
+			v.WinCount += uint32(r.RandInRange(0, 2))
+			v.BetAmount += float64(r.RandInRange(0, 1000))
 		}
 	}
 
-	num := r.RandInRange(0, 100)
-	num2 := r.RandInRange(3, 8)
-	if num >= 0 && num < 50 {
-		var n int
-		for {
-			richMan := dl.RichMan()
-			dl.Bots = append(dl.Bots, &richMan)
-			time.Sleep(time.Millisecond)
-			n++
-			if n == num2 {
-				log.Debug("添加%v:个机器人", num2)
-				break
-			}
-		}
-
-	} else if num >= 50 && num < 100 {
-		var n int
-		for k, v := range dl.Bots {
-			if v != nil && v.botType != constant.BTNextBanker {
+	for k, v := range dl.Bots {
+		if v != nil && v.botType != constant.BTNextBanker {
+			rNum := 1 / ((v.WinCount + 1) * 2)
+			rNum2 := int(rNum * 1000)
+			rNum3 := r.RandInRange(0, 1000)
+			if rNum3 <= rNum2 {
 				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
 				time.Sleep(time.Millisecond)
-				n++
-				if n == num2 {
-					log.Debug("减去%v:个机器人", num2)
-					break
-				}
 			}
 		}
 	}
 
 	robotNum := len(dl.Bots)
-	log.Debug("机器人当前数量:%v,最小范围:%v.最大范围:%v", robotNum, minP, maxP)
-
-	if robotNum < minP { // 加
+	log.Debug("机器人当前数量:%v,handleNum当局指定人数:%v", robotNum, handleNum)
+	if robotNum < handleNum { // 加
 		for {
 			richMan := dl.RichMan()
 			dl.Bots = append(dl.Bots, &richMan)
 			time.Sleep(time.Millisecond)
 			robotNum = len(dl.Bots)
-			if robotNum == minP {
+			if robotNum == handleNum {
 				log.Debug("房间:%v,加机器人数量:%v", dl.RoomID, len(dl.Bots))
 				break
 			}
 		}
-	} else if robotNum > maxP { // 减
+	} else if robotNum > handleNum { // 减
 		for k, v := range dl.Bots {
 			if v != nil && v.botType != constant.BTNextBanker {
 				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
 				time.Sleep(time.Millisecond)
-				robotNum =  len(dl.Bots)
-				if robotNum == maxP {
+				robotNum = len(dl.Bots)
+				if robotNum == handleNum {
 					log.Debug("房间:%v,减机器人数量:%v", dl.RoomID, len(dl.Bots))
 					break
 				}
@@ -293,8 +265,8 @@ func (dl *Dealer) BetGod() Bot {
 
 func (dl *Dealer) RichMan() Bot {
 	r := util.Random{}
-	WinCount := uint32(r.RandInRange(0, 3))                                                // 获胜局数
-	BetAmount := float64(r.RandInRange(20, 500))                                           // 下注金额
+	WinCount := uint32(r.RandInRange(0, 0))                                                // 获胜局数
+	BetAmount := float64(r.RandInRange(0, 0))                                              // 下注金额
 	Balance := float64(0+r.RandInRange(200, 4600)) + float64(r.RandInRange(50, 100))/100.0 // 金币数
 	UserID := uint32(100000000 + r.RandInRange(0, 200000000))                              // 用户ID
 	avatar := fmt.Sprintf("%+v", r.RandInRange(1, 21)) + ".png"
