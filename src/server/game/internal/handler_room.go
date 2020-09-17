@@ -396,6 +396,11 @@ func (dl *Dealer) getPlayerInfoResp() []*msg.UserInfo {
 
 	// 先按照获胜局数排序
 	sort.Slice(playerInfoResp, func(i, j int) bool {
+		return playerInfoResp[i].BetAmount > playerInfoResp[j].BetAmount
+	})
+
+	// 先按照获胜局数排序
+	sort.Slice(playerInfoResp, func(i, j int) bool {
 		return playerInfoResp[i].WinCount > playerInfoResp[j].WinCount
 	})
 
