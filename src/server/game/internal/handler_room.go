@@ -10,7 +10,6 @@ import (
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
 	"reflect"
-	"sort"
 	"time"
 )
 
@@ -394,29 +393,121 @@ func (dl *Dealer) getPlayerInfoResp() []*msg.UserInfo {
 		playerInfoResp = append(playerInfoResp, &pInfo)
 	}
 
-	// 先按照获胜局数排序
-	sort.Slice(playerInfoResp, func(i, j int) bool {
-		return playerInfoResp[i].BetAmount > playerInfoResp[j].BetAmount
-	})
+	//// 先按照获胜局数排序
+	//sort.Slice(playerInfoResp, func(i, j int) bool {
+	//	return playerInfoResp[i].BetAmount > playerInfoResp[j].BetAmount
+	//})
+	//
+	//// 先按照获胜局数排序
+	//sort.Slice(playerInfoResp, func(i, j int) bool {
+	//	return playerInfoResp[i].WinCount > playerInfoResp[j].WinCount
+	//})
+	//
+	//// 拿到赌神
+	//betGod := playerInfoResp[0]
+	//
+	//// 再把其余人按照投注数排序
+	//playerInfoResp = playerInfoResp[1:]
+	//sort.Slice(playerInfoResp, func(i, j int) bool {
+	//	return playerInfoResp[i].BetAmount > playerInfoResp[j].BetAmount
+	//})
+	//
+	//// 组合在一起
+	//playerInfoResp = append([]*msg.UserInfo{betGod}, playerInfoResp...)
 
-	// 先按照获胜局数排序
-	sort.Slice(playerInfoResp, func(i, j int) bool {
-		return playerInfoResp[i].WinCount > playerInfoResp[j].WinCount
-	})
-
-	// 拿到赌神
-	betGod := playerInfoResp[0]
-
-	// 再把其余人按照投注数排序
-	playerInfoResp = playerInfoResp[1:]
-	sort.Slice(playerInfoResp, func(i, j int) bool {
-		return playerInfoResp[i].BetAmount > playerInfoResp[j].BetAmount
-	})
-
-	// 组合在一起
-	playerInfoResp = append([]*msg.UserInfo{betGod}, playerInfoResp...)
+	players := dl.UpdatePlayers(playerInfoResp)
+	playerInfoResp = append(playerInfoResp, players...)
 
 	return playerInfoResp
+}
+
+//PlayerListSort 玩家列表排序(进入房间、退出房间、重新开始)
+func (dl *Dealer) UpdatePlayers(PlayerList []*msg.UserInfo) []*msg.UserInfo {
+	//首先
+	GodGambleId := dl.GetGodGableId(PlayerList)
+	//临时切片
+	var playerSlice []*msg.UserInfo
+	//1、赌神
+	for _, v := range PlayerList {
+		if v != nil && v.UserID == GodGambleId {
+			playerSlice = append(playerSlice, v)
+		}
+	}
+	//2、玩家下注总金额
+	var p1 []*msg.UserInfo //所有下注过的用户
+	var p2 []*msg.UserInfo //所有下注金额为0的用户
+	for _, v := range PlayerList {
+		if v != nil && v.UserID != GodGambleId {
+			if v.BetAmount != 0 {
+				p1 = append(p1, v)
+			} else {
+				p2 = append(p2, v)
+			}
+		}
+	}
+	//根据玩家总下注进行排序
+	for i := 0; i < len(p1); i++ {
+		for j := 1; j < len(p1)-i; j++ {
+			if p1[j].BetAmount > p1[j-1].BetAmount {
+				//交换
+				p1[j], p1[j-1] = p1[j-1], p1[j]
+			}
+		}
+	}
+	//将用户总下注金额顺序追加到临时切片
+	playerSlice = append(playerSlice, p1...)
+	//3、玩家金额,总下注为0,按用户金额排序
+	for i := 0; i < len(p2); i++ {
+		for j := 1; j < len(p2)-i; j++ {
+			if p2[j].Money > p2[j-1].Money {
+				//交换
+				p2[j], p2[j-1] = p2[j-1], p2[j]
+			}
+		}
+	}
+	//将用户余额排序追加到临时切片
+	playerSlice = append(playerSlice, p2...)
+
+	//将房间列表置为空,将更新的数据追加到房间列表
+	var players []*msg.UserInfo
+	players = append(players, playerSlice...)
+	return players
+}
+
+//GetGodGableId 获取赌神ID
+func (dl *Dealer) GetGodGableId(PlayerList []*msg.UserInfo) uint32 {
+	var GodSlice []*msg.UserInfo
+	GodSlice = append(GodSlice, PlayerList...)
+
+	var WinCount []*msg.UserInfo
+	for _, v := range GodSlice {
+		if v != nil && v.WinCount != 0 {
+			WinCount = append(WinCount, v)
+		}
+	}
+	if len(WinCount) == 0 {
+		//log.Debug("---------- 没有获取到赌神 ~")
+		return 0
+	}
+
+	for i := 0; i < len(GodSlice); i++ { //todo
+		for j := 1; j < len(GodSlice)-i; j++ {
+			if GodSlice[j].BetAmount > GodSlice[j-1].BetAmount {
+				GodSlice[j], GodSlice[j-1] = GodSlice[j-1], GodSlice[j]
+			}
+		}
+	}
+
+	for i := 0; i < len(GodSlice); i++ {
+		for j := 1; j < len(GodSlice)-i; j++ {
+			if GodSlice[j].WinCount > GodSlice[j-1].WinCount {
+				//交换
+				GodSlice[j], GodSlice[j-1] = GodSlice[j-1], GodSlice[j]
+			}
+		}
+	}
+
+	return GodSlice[0].UserID
 }
 
 // 房间剩余限红
