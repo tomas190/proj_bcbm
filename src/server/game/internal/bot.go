@@ -115,7 +115,7 @@ func (dl *Dealer) AddBots() {
 	}
 
 	for k, v := range dl.Bots {
-		if v != nil && v.botType != constant.BTNextBanker {
+		if v != nil && v.botType == constant.BTRichMan {
 			rNum := 1 / ((v.WinCount + 1) * 2)
 			rNum2 := int(rNum * 1000)
 			rNum3 := r.RandInRange(0, 1000)
@@ -141,7 +141,7 @@ func (dl *Dealer) AddBots() {
 		}
 	} else if robotNum > handleNum { // 减
 		for k, v := range dl.Bots {
-			if v != nil && v.botType != constant.BTNextBanker {
+			if v != nil && v.botType == constant.BTRichMan {
 				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
 				time.Sleep(time.Millisecond)
 				robotNum = len(dl.Bots)
