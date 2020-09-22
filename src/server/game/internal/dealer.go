@@ -257,14 +257,22 @@ func (dl *Dealer) Settle() {
 	r := util.Random{}
 	for _, v := range dl.Bots {
 		if v != nil {
-			//uWin := dl.Bots[user.UserID][dl.res] * constant.AreaX[dl.res]
 			num := r.RandInRange(0, 100)
-			if num >= 70 {
-				v.WinCount += 1
+			if num <= 70 {
+				v.TwentyData = append(v.TwentyData, 0)
+			} else {
+				v.TwentyData = append(v.TwentyData, 1)
+			}
+			if len(v.TwentyData) > 20 {
+				v.TwentyData = append(v.TwentyData[:0], v.TwentyData[1:]...)
+			}
+			for _, d := range v.TwentyData {
+				if d == 1 {
+					v.WinCount += 1
+				}
 			}
 		}
 	}
-
 	dl.ClockReset(constant.SettleTime, dl.ClearChip)
 }
 
