@@ -134,8 +134,8 @@ func (dl *Dealer) AddBots() {
 			dl.Bots = append(dl.Bots, &richMan)
 			time.Sleep(time.Millisecond)
 			robotNum = len(dl.Bots)
-			if robotNum == handleNum {
-				log.Debug("房间:%v,加机器人数量:%v", dl.RoomID, len(dl.Bots))
+			if robotNum >= handleNum {
+				log.Debug("当前房间:%v,加机器人数量:%v", dl.RoomID, len(dl.Bots))
 				break
 			}
 		}
@@ -145,9 +145,8 @@ func (dl *Dealer) AddBots() {
 				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
 				time.Sleep(time.Millisecond)
 				robotNum = len(dl.Bots)
-				log.Debug("减少机器人,当前人数:%v",robotNum)
-				if robotNum == handleNum {
-					log.Debug("房间:%v,减机器人数量:%v", dl.RoomID, len(dl.Bots))
+				if robotNum <= handleNum {
+					log.Debug("当前房间:%v,减机器人数量:%v", dl.RoomID, len(dl.Bots))
 					break
 				}
 			}

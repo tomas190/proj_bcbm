@@ -109,7 +109,7 @@ func (dl *Dealer) StartGame() {
 
 // 下注
 func (dl *Dealer) Bet() {
-	log.Debug("Game 下注阶段~")
+	//log.Debug("Game 下注阶段~")
 	// 时间戳+随机数，每局一个
 	uid := util.UUID{}
 	dl.RoundID = fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
@@ -146,7 +146,7 @@ func (dl *Dealer) Bet() {
 
 // 结算 开奖
 func (dl *Dealer) Settle() {
-	log.Debug("Game 结算阶段~")
+	//log.Debug("Game 结算阶段~")
 
 	res := dl.profitPoolLottery()
 	dl.res = res
@@ -266,11 +266,13 @@ func (dl *Dealer) Settle() {
 			if len(v.TwentyData) > 20 {
 				v.TwentyData = append(v.TwentyData[:0], v.TwentyData[1:]...)
 			}
+			var n uint32
 			for _, d := range v.TwentyData {
 				if d == 1 {
-					v.WinCount += 1
+					n ++
 				}
 			}
+			v.WinCount = n
 		}
 	}
 	dl.ClockReset(constant.SettleTime, dl.ClearChip)
@@ -410,7 +412,7 @@ func (dl *Dealer) playerSettle() {
 
 // 清理筹码
 func (dl *Dealer) ClearChip() {
-	log.Debug("Game 清除筹码~")
+	//log.Debug("Game 清除筹码~")
 
 	dl.Status = constant.RSClear
 	dl.ddl = uint32(time.Now().Unix()) + con.ClearTime
