@@ -269,7 +269,7 @@ func (dl *Dealer) Settle() {
 			var n uint32
 			for _, d := range v.TwentyData {
 				if d == 1 {
-					n ++
+					n++
 				}
 			}
 			v.WinCount = n
@@ -450,11 +450,13 @@ func (dl *Dealer) ClearChip() {
 	dl.Broadcast(&resp)
 
 	// 庄家轮换
+	var rUid uint32
 	if dl.bankerRound >= constant.BankerMaxTimes || dl.bankerMoney < constant.BankerMinBar || dl.DownBanker == true {
 		// 加回玩家的钱
 		switch dl.Bankers[0].(type) {
 		case User:
 			uid, _, _, _ := dl.Bankers[0].GetPlayerBasic()
+			rUid = uid
 			order := bson.NewObjectId().Hex()
 			var balance float64 = 0
 			c4c.ChangeBankerStatus(uid, constant.BSNotBanker, -dl.bankerMoney, order, dl.RoundID, func(data *User) {
@@ -509,6 +511,11 @@ func (dl *Dealer) ClearChip() {
 		// 新庄家
 		if len(dl.Bankers) > 1 {
 			dl.Bankers = dl.Bankers[1:]
+			for k, v := range dl.Bots {
+				if v.UserID == rUid {
+					dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
+				}
+			}
 			dl.bankerMoney = dl.Bankers[0].GetBankerBalance()
 			switch dl.Bankers[0].(type) {
 			case User:

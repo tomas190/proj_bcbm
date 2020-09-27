@@ -184,6 +184,7 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	SurPool.PercentageToTotalWin = 1
 	SurPool.CoefficientToTotalPlayer = userCount * 0
 	SurPool.PlayerLoseRateAfterSurplusPool = 0.7
+	SurPool.DataCorrection = 0
 	m.FindSurPool(SurPool)
 
 	newRecord := ProfitDB{
@@ -226,11 +227,12 @@ func (m *MgoC) FindSurPool(data *SurPool) {
 			_ = cur.Decode(&wts)
 			sur = wts
 		}
-		data.SurplusPool = (data.PlayerTotalLose - (data.PlayerTotalWin * sur.PercentageToTotalWin) - float64(data.TotalPlayer*sur.CoefficientToTotalPlayer)) * sur.FinalPercentage
+		data.SurplusPool = (data.PlayerTotalLose - (data.PlayerTotalWin * sur.PercentageToTotalWin) - float64(data.TotalPlayer*sur.CoefficientToTotalPlayer) + sur.DataCorrection) * sur.FinalPercentage
 		data.FinalPercentage = sur.FinalPercentage
 		data.PercentageToTotalWin = sur.PercentageToTotalWin
 		data.CoefficientToTotalPlayer = sur.CoefficientToTotalPlayer
 		data.PlayerLoseRateAfterSurplusPool = sur.PlayerLoseRateAfterSurplusPool
+		data.DataCorrection = sur.DataCorrection
 		_ = m.UpdateSurPool(data)
 	}
 
