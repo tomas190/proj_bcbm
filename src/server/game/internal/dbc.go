@@ -370,7 +370,6 @@ func (m *MgoC) InsertRobotData(data *RobotDATA) error {
 		return err
 	}
 
-	log.Debug("运营接入数据插入成功: %+v", data)
 	return nil
 }
 

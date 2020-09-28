@@ -117,6 +117,7 @@ func (dl *Dealer) AddBots() {
 	for k, v := range dl.Bots {
 		if v.Status == constant.BSNotBanker {
 			dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
+			break
 		}
 	}
 
