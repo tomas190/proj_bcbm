@@ -30,6 +30,7 @@ type Bot struct {
 	BetAmount     float64
 	botType       uint32
 	TwentyData    []int
+	Status        int
 }
 
 type Player interface {
