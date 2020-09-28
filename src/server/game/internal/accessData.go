@@ -73,6 +73,21 @@ type UpSurPool struct {
 	DataCorrection                 float64 `json:"data_correction" bson:"data_correction"`
 }
 
+type GRobotData struct {
+	RoomId   uint32       `json:"room_id" bson:"room_id"`
+	RoomTime int64        `json:"room_time" bson:"room_time"`
+	RobotNum int          `json:"robot_num" bson:"robot_num"`
+	Players  []uint32     `json:"players" bson:"players"`
+	AreaX1   *ChipDownBet `json:"area_x_1" bson:"area_x_1"`
+	AreaX2   *ChipDownBet `json:"area_x_2" bson:"area_x_2"`
+	AreaX3   *ChipDownBet `json:"area_x_3" bson:"area_x_3"`
+	AreaX4   *ChipDownBet `json:"area_x_4" bson:"area_x_4"`
+	AreaX5   *ChipDownBet `json:"area_x_5" bson:"area_x_5"`
+	AreaX6   *ChipDownBet `json:"area_x_6" bson:"area_x_6"`
+	AreaX7   *ChipDownBet `json:"area_x_7" bson:"area_x_7"`
+	AreaX8   *ChipDownBet `json:"area_x_8" bson:"area_x_8"`
+}
+
 // HTTP端口监听
 func StartHttpServer() {
 	// 运营后台数据接口
@@ -85,6 +100,8 @@ func StartHttpServer() {
 	http.HandleFunc("/api/getSurplusOne", getSurplusOne)
 	// 修改盈余池数据
 	http.HandleFunc("/api/uptSurplusConf", uptSurplusOne)
+	// 获取机器人数据
+	http.HandleFunc("/api/getRobotData", getRobotData)
 
 	err := http.ListenAndServe(":"+conf.Server.HTTPPort, nil)
 	if err != nil {
@@ -337,6 +354,49 @@ func uptSurplusOne(w http.ResponseWriter, r *http.Request) {
 	_ = db.UpdateSurPool(&sur)
 
 	js, err := json.Marshal(NewResp(SuccCode, "", upt))
+	if err != nil {
+		fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+}
+
+func getRobotData(w http.ResponseWriter, r *http.Request) {
+	recodes, err := db.GetRobotData()
+	if err != nil {
+		return
+	}
+
+	var rData []GRobotData
+	for i := 0; i < len(recodes); i++ {
+		var rd GRobotData
+		rd.AreaX1 = new(ChipDownBet)
+		rd.AreaX2 = new(ChipDownBet)
+		rd.AreaX3 = new(ChipDownBet)
+		rd.AreaX4 = new(ChipDownBet)
+		rd.AreaX5 = new(ChipDownBet)
+		rd.AreaX6 = new(ChipDownBet)
+		rd.AreaX7 = new(ChipDownBet)
+		rd.AreaX8 = new(ChipDownBet)
+		pr := recodes[i]
+		log.Debug("获取机器数据:%v", pr)
+		rd.RoomId = pr.RoomId
+		rd.RoomTime = pr.RoomTime
+		rd.RobotNum = pr.RobotNum
+		rd.Players = pr.Players
+		rd.AreaX1 = pr.AreaX1
+		rd.AreaX2 = pr.AreaX2
+		rd.AreaX3 = pr.AreaX3
+		rd.AreaX4 = pr.AreaX4
+		rd.AreaX5 = pr.AreaX5
+		rd.AreaX6 = pr.AreaX6
+		rd.AreaX7 = pr.AreaX7
+		rd.AreaX8 = pr.AreaX8
+		rData = append(rData, rd)
+	}
+
+	js, err := json.Marshal(NewResp(SuccCode, "", rData))
 	if err != nil {
 		fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
 		return

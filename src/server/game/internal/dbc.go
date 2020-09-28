@@ -335,3 +335,73 @@ func (m *MgoC) GetSurPoolData(selector bson.M) (SurPool, error) {
 	}
 	return sur, nil
 }
+
+type ChipDownBet struct {
+	Chip1    int32
+	Chip10   int32
+	Chip100  int32
+	Chip500  int32
+	Chip1000 int32
+}
+
+type RobotDATA struct {
+	RoomId   uint32       `json:"room_id" bson:"room_id"`
+	RoomTime int64        `json:"room_time" bson:"room_time"`
+	RobotNum int          `json:"robot_num" bson:"robot_num"`
+	Players  []uint32     `json:"players" bson:"players"`
+	AreaX1   *ChipDownBet `json:"area_x_1" bson:"area_x_1"`
+	AreaX2   *ChipDownBet `json:"area_x_2" bson:"area_x_2"`
+	AreaX3   *ChipDownBet `json:"area_x_3" bson:"area_x_3"`
+	AreaX4   *ChipDownBet `json:"area_x_4" bson:"area_x_4"`
+	AreaX5   *ChipDownBet `json:"area_x_5" bson:"area_x_5"`
+	AreaX6   *ChipDownBet `json:"area_x_6" bson:"area_x_6"`
+	AreaX7   *ChipDownBet `json:"area_x_7" bson:"area_x_7"`
+	AreaX8   *ChipDownBet `json:"area_x_8" bson:"area_x_8"`
+}
+
+//InsertRobotData 机器人数据插入
+func (m *MgoC) InsertRobotData(data *RobotDATA) error {
+	collection := m.Database(constant.DBName).Collection("robotData")
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+
+	_, err := collection.InsertOne(ctx, data)
+	if err != nil {
+		log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)
+		return err
+	}
+
+	log.Debug("运营接入数据插入成功: %+v", data)
+	return nil
+}
+
+//GetRobotData 获取机器人数据
+func (m *MgoC) GetRobotData() ([]RobotDATA, error) {
+	collection := m.Database(constant.DBName).Collection("robotData")
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+
+	opt := options.Find()
+
+	var wts []RobotDATA
+
+	currentTime := time.Now()
+	startTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 0, 0, 0, 0, currentTime.Location()).Unix()
+	endTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 23, 59, 59, 0, currentTime.Location()).Unix()
+
+	selector := bson.M{}
+	selector["room_time"] = bson.M{"$gte": startTime, "$lte": endTime}
+
+	cur, err2 := collection.Find(ctx, selector, opt)
+	if err2 != nil {
+		log.Debug("获取機器人數據错误 %+v", err2)
+	}
+
+	for cur.Next(ctx) {
+		var PRecode RobotDATA
+		err := cur.Decode(&PRecode)
+		if err != nil {
+		}
+		wts = append(wts, PRecode)
+	}
+
+	return wts, nil
+}

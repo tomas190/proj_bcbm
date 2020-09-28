@@ -167,10 +167,32 @@ func (dl *Dealer) BotsBet() {
 	time.Sleep(time.Second * 1)
 	//counter := 0
 	dl.IsDownBet = true
+	rData := &RobotDATA{}
+	rData.RoomId = dl.RoomID
+	rData.RoomTime = time.Now().Unix()
+	players := dl.getPlayerInfoResp()
+	for _, v := range players {
+		if v != nil {
+			rData.Players = append(rData.Players, v.UserID)
+		}
+	}
+	rData.RobotNum = len(rData.Players)
+	rData.AreaX1 = new(ChipDownBet)
+	rData.AreaX2 = new(ChipDownBet)
+	rData.AreaX3 = new(ChipDownBet)
+	rData.AreaX4 = new(ChipDownBet)
+	rData.AreaX5 = new(ChipDownBet)
+	rData.AreaX6 = new(ChipDownBet)
+	rData.AreaX7 = new(ChipDownBet)
+	rData.AreaX8 = new(ChipDownBet)
 	for {
 		for _, v := range dl.Bots {
 			if v != nil {
 				if dl.IsDownBet == false {
+					err := db.InsertRobotData(rData)
+					if err != nil {
+						log.Debug("插入机器人数据失败:%v", err)
+					}
 					return
 				}
 				//counter++
@@ -190,6 +212,105 @@ func (dl *Dealer) BotsBet() {
 					continue
 				}
 
+				switch area {
+				case 1:
+					if cs == 1 {
+						rData.AreaX1.Chip1 += 1
+					} else if cs == 10 {
+						rData.AreaX1.Chip10 += 1
+					} else if cs == 100 {
+						rData.AreaX1.Chip100 += 1
+					} else if cs == 500 {
+						rData.AreaX1.Chip500 += 1
+					} else if cs == 1000 {
+						rData.AreaX1.Chip1000 += 1
+					}
+				case 2:
+					if cs == 1 {
+						rData.AreaX2.Chip1 += 1
+					} else if cs == 10 {
+						rData.AreaX2.Chip10 += 1
+					} else if cs == 100 {
+						rData.AreaX2.Chip100 += 1
+					} else if cs == 500 {
+						rData.AreaX2.Chip500 += 1
+					} else if cs == 1000 {
+						rData.AreaX2.Chip1000 += 1
+					}
+				case 3:
+					if cs == 1 {
+						rData.AreaX3.Chip1 += 1
+					} else if cs == 10 {
+						rData.AreaX3.Chip10 += 1
+					} else if cs == 100 {
+						rData.AreaX3.Chip100 += 1
+					} else if cs == 500 {
+						rData.AreaX3.Chip500 += 1
+					} else if cs == 1000 {
+						rData.AreaX3.Chip1000 += 1
+					}
+				case 4:
+					if cs == 1 {
+						rData.AreaX4.Chip1 += 1
+					} else if cs == 10 {
+						rData.AreaX4.Chip10 += 1
+					} else if cs == 100 {
+						rData.AreaX4.Chip100 += 1
+					} else if cs == 500 {
+						rData.AreaX4.Chip500 += 1
+					} else if cs == 1000 {
+						rData.AreaX4.Chip1000 += 1
+					}
+				case 5:
+					if cs == 1 {
+						rData.AreaX5.Chip1 += 1
+					} else if cs == 10 {
+						rData.AreaX5.Chip10 += 1
+					} else if cs == 100 {
+						rData.AreaX5.Chip100 += 1
+					} else if cs == 500 {
+						rData.AreaX5.Chip500 += 1
+					} else if cs == 1000 {
+						rData.AreaX5.Chip1000 += 1
+					}
+				case 6:
+					if cs == 1 {
+						rData.AreaX6.Chip1 += 1
+					} else if cs == 10 {
+						rData.AreaX6.Chip10 += 1
+					} else if cs == 100 {
+						rData.AreaX6.Chip100 += 1
+					} else if cs == 500 {
+						rData.AreaX6.Chip500 += 1
+					} else if cs == 1000 {
+						rData.AreaX6.Chip1000 += 1
+					}
+				case 7:
+					if cs == 1 {
+						rData.AreaX7.Chip1 += 1
+					} else if cs == 10 {
+						rData.AreaX7.Chip10 += 1
+					} else if cs == 100 {
+						rData.AreaX7.Chip100 += 1
+					} else if cs == 500 {
+						rData.AreaX7.Chip500 += 1
+					} else if cs == 1000 {
+						rData.AreaX7.Chip1000 += 1
+					}
+				case 8:
+					if cs == 1 {
+						rData.AreaX8.Chip1 += 1
+					} else if cs == 10 {
+						rData.AreaX8.Chip10 += 1
+					} else if cs == 100 {
+						rData.AreaX8.Chip100 += 1
+					} else if cs == 500 {
+						rData.AreaX8.Chip500 += 1
+					} else if cs == 1000 {
+						rData.AreaX8.Chip1000 += 1
+					}
+				}
+
 				v.BetAmount += cs
 
 				// 区域所有玩家投注总数
@@ -207,6 +328,7 @@ func (dl *Dealer) BotsBet() {
 			}
 		}
 	}
+
 }
 
 func (dl *Dealer) randBet() (uint32, uint32) {
@@ -217,7 +339,7 @@ func (dl *Dealer) randBet() (uint32, uint32) {
 
 	areaProb := ru.RandInRange(0, 100)
 	if areaProb >= 0 && areaProb <= 78 {
-		area = uint32(ru.RandInRange(4, 8) + 1)
+		area = uint32(ru.RandInRange(4, 9))
 	} else if areaProb > 78 && areaProb <= 88 {
 		area = 4
 	} else if areaProb > 88 && areaProb <= 94 {
