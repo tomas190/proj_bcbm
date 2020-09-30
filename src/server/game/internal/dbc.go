@@ -348,7 +348,6 @@ type RobotDATA struct {
 	RoomId   uint32       `json:"room_id" bson:"room_id"`
 	RoomTime int64        `json:"room_time" bson:"room_time"`
 	RobotNum int          `json:"robot_num" bson:"robot_num"`
-	Players  []uint32     `json:"players" bson:"players"`
 	AreaX1   *ChipDownBet `json:"area_x_1" bson:"area_x_1"`
 	AreaX2   *ChipDownBet `json:"area_x_2" bson:"area_x_2"`
 	AreaX3   *ChipDownBet `json:"area_x_3" bson:"area_x_3"`

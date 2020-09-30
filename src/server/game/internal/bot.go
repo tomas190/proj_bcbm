@@ -172,12 +172,7 @@ func (dl *Dealer) BotsBet() {
 	rData.RoomId = dl.RoomID
 	rData.RoomTime = time.Now().Unix()
 	players := dl.getPlayerInfoResp()
-	for _, v := range players {
-		if v != nil {
-			rData.Players = append(rData.Players, v.UserID)
-		}
-	}
-	rData.RobotNum = len(rData.Players)
+	rData.RobotNum = len(players)
 	rData.AreaX1 = new(ChipDownBet)
 	rData.AreaX2 = new(ChipDownBet)
 	rData.AreaX3 = new(ChipDownBet)
