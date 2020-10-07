@@ -224,7 +224,8 @@ func (dl *Dealer) Settle() {
 				data.StartTime = timeNow - 16
 				data.EndTime = timeNow + 25
 				data.CardResult = dl.res
-				data.ResultMoney = ResultMoney
+				data.SettlementFunds = ResultMoney
+				data.SpareCash = u.Balance
 				data.TaxRate = taxRate
 				err := db.InsertAccess(data)
 				if err != nil {
@@ -397,7 +398,8 @@ func (dl *Dealer) playerSettle() {
 			data.StartTime = timeNow - 16
 			data.EndTime = timeNow + 25
 			data.CardResult = dl.res
-			data.ResultMoney = ResultMoney
+			data.SettlementFunds = ResultMoney
+			data.SpareCash = user.Balance
 			data.TaxRate = taxRate
 			err := db.InsertAccess(data)
 			if err != nil {
@@ -548,6 +550,7 @@ func (dl *Dealer) ClearChip() {
 
 		// 隔几把才变动？
 		if len(dl.Bankers) <= 1 {
+			log.Debug("添加机器人庄家2")
 			nextB := dl.NextBotBanker()
 			dl.Bankers = append(dl.Bankers, nextB)
 			dl.Bots = append(dl.Bots, &nextB)

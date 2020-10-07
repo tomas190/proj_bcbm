@@ -333,6 +333,7 @@ func (dl *Dealer) cancelGrabBanker(userID uint32) {
 			dl.Bankers = append(dl.Bankers[:i], dl.Bankers[i+1:]...)
 
 			if len(dl.Bankers) < 2 {
+				log.Debug("添加机器人庄家1")
 				nextB := dl.NextBotBanker()
 				dl.Bankers = append(dl.Bankers, nextB)
 				dl.Bots = append(dl.Bots, &nextB)
