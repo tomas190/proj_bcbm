@@ -134,8 +134,9 @@ func getAccessData(w http.ResponseWriter, r *http.Request) {
 		selector["game_id"] = req.GameId
 	}
 
-	if req.RoomId != "" {
-		selector["room_id"] = req.RoomId
+	roomId, _ := strconv.Atoi(req.RoomId)
+	if roomId != 0 {
+		selector["room_id"] = roomId
 	}
 
 	if req.RoundId != "" {
