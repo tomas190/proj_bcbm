@@ -289,10 +289,7 @@ func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string
 
 	var wts []PlayerDownBetRecode
 
-	opt := options.Find()
-	opt.SetSort(sortBy)
-	//opt.SetSkip(int64(skip))
-	//opt.SetLimit(int64(limit))
+	opt := options.Find().SetSkip(int64(skip)).SetLimit(int64(limit)).SetSort(bson.M{sortBy: -1})
 
 	count, err := collection.CountDocuments(ctx, selector)
 	if err != nil {
