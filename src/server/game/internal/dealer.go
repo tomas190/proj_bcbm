@@ -303,8 +303,10 @@ func (dl *Dealer) playerSettle() {
 
 		if uWin > 0 {
 			winFlag = true
-			data += uWin - ((uWin + data) * taxRate)
-			user.Balance += dl.UserBets[user.UserID][dl.res] + data
+			data += uWin - (uWin * taxRate)
+			log.Debug("uWin:%v,data:%v", uWin, data)
+			user.Balance += user.DownBetTotal + data
+			log.Debug("DownBetTotal:%v,Balance:%v", user.DownBetTotal, user.Balance)
 
 			uWin = uWin - dl.UserBets[user.UserID][dl.res]
 			ResultMoney += uWin - (uWin * taxRate)
