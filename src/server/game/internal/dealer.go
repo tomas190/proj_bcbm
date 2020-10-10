@@ -304,12 +304,12 @@ func (dl *Dealer) playerSettle() {
 
 		if uWin > 0 {
 			winFlag = true
+			uWin = uWin - dl.UserBets[user.UserID][dl.res]
 			data += uWin - (uWin * taxRate)
 			log.Debug("uWin:%v,data:%v", uWin, data)
 			user.Balance += dl.UserBets[user.UserID][dl.res] + data
 			log.Debug("res:%v,Balance:%v", dl.UserBets[user.UserID][dl.res], user.Balance)
 
-			uWin = uWin - dl.UserBets[user.UserID][dl.res]
 			ResultMoney += uWin - (uWin * taxRate)
 			winOrder := bson.NewObjectId().Hex()
 			c4c.UserWinScore(uint32(timeNow), user.UserID, uWin, winOrder, dl.RoundID, func(data *User) {
