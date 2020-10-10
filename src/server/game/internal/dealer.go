@@ -289,6 +289,7 @@ func (dl *Dealer) playerSettle() {
 		user := value.(*User)
 		// 中心服需要结算的输赢
 		uWin := dl.UserBets[user.UserID][dl.res] * constant.AreaX[dl.res]
+		log.Debug("res:%v,AreaX:%v", dl.UserBets[user.UserID][dl.res], constant.AreaX[dl.res])
 		timeNow := time.Now().Unix()
 
 		var ResultMoney float64
@@ -305,8 +306,8 @@ func (dl *Dealer) playerSettle() {
 			winFlag = true
 			data += uWin - (uWin * taxRate)
 			log.Debug("uWin:%v,data:%v", uWin, data)
-			user.Balance += user.DownBetTotal + data
-			log.Debug("DownBetTotal:%v,Balance:%v", user.DownBetTotal, user.Balance)
+			user.Balance += dl.UserBets[user.UserID][dl.res] + data
+			log.Debug("res:%v,Balance:%v", dl.UserBets[user.UserID][dl.res], user.Balance)
 
 			uWin = uWin - dl.UserBets[user.UserID][dl.res]
 			ResultMoney += uWin - (uWin * taxRate)
