@@ -3,6 +3,7 @@ package internal
 import (
 	"math/rand"
 	"proj_bcbm/src/server/constant"
+	"proj_bcbm/src/server/util"
 	"time"
 )
 
@@ -17,23 +18,35 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 	//log.Debug("acceptableMaxLose :%v", acceptableMaxLose)
 
 	var area uint32
+
+	sur, _ := db.GetSurPool()
+	randNum := sur.PlayerWinRate * 10
+	r := util.Random{}
+	num := r.RandInRange(1, 11)
+
 	for i := 0; i < 100; i++ {
 		preArea := dl.fairLottery()
 		preLoseAmount := dl.preUserWin(preArea)
 
-		if preLoseAmount > acceptableMaxLose {
+		if num > int(randNum) {
 			area = preArea
 			if preLoseAmount <= 0 {
 				area = preArea
 				break
 			}
-		} else {
-			//log.Debug("preLoseAmount :%v", preLoseAmount)
-			area = preArea
-			break
+		}else {
+			if preLoseAmount > acceptableMaxLose {
+				area = preArea
+				if preLoseAmount <= 0 {
+					area = preArea
+					break
+				}
+			} else {
+				area = preArea
+				break
+			}
 		}
 	}
-
 	return area
 }
 

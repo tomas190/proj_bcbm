@@ -42,6 +42,7 @@ type SurPool struct {
 	SurplusPool                    float64 `json:"surplus_pool" bson:"surplus_pool"`
 	PlayerLoseRateAfterSurplusPool float64 `json:"player_lose_rate_after_surplus_pool" bson:"player_lose_rate_after_surplus_pool"`
 	DataCorrection                 float64 `json:"data_correction" bson:"data_correction"`
+	PlayerWinRate                  float64 `json:"player_win_rate" bson:"player_win_rate"`
 }
 
 // 玩家的记录

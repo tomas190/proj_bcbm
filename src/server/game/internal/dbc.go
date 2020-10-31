@@ -185,6 +185,7 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	SurPool.CoefficientToTotalPlayer = userCount * 0
 	SurPool.PlayerLoseRateAfterSurplusPool = 0.7
 	SurPool.DataCorrection = 0
+	SurPool.PlayerWinRate = 0.6
 	m.FindSurPool(SurPool)
 
 	newRecord := ProfitDB{
@@ -233,12 +234,36 @@ func (m *MgoC) FindSurPool(data *SurPool) {
 		data.CoefficientToTotalPlayer = sur.CoefficientToTotalPlayer
 		data.PlayerLoseRateAfterSurplusPool = sur.PlayerLoseRateAfterSurplusPool
 		data.DataCorrection = sur.DataCorrection
+		data.PlayerWinRate = sur.PlayerWinRate
 		_ = m.UpdateSurPool(data)
 	}
 
 	//count, _ := collection.CountDocuments(ctx, bson.M{})
 	//log.Debug("FindSurPool 数量:%v", count)
 }
+
+//GetDownRecodeList 获取盈余池数据
+func (m *MgoC) GetSurPool() (SurPool, error) {
+	collection := m.Database(constant.DBName).Collection("surplus-pool")
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+
+	opt := options.Find()
+
+	var sur SurPool
+
+	cur, err2 := collection.Find(ctx, bson.M{}, opt)
+	if err2 != nil {
+		log.Debug("获取用户數據错误 %+v", err2)
+	}
+
+	for cur.Next(ctx) {
+		var wts SurPool
+		_ = cur.Decode(&wts)
+		sur = wts
+	}
+	return sur, nil
+}
+
 
 func (m *MgoC) InsertSurPool(data *SurPool) error {
 	collection := m.Database(constant.DBName).Collection("surplus-pool")
