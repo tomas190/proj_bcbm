@@ -24,7 +24,7 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 	r := util.Random{}
 	num := r.RandInRange(1, 11)
 
-	for i := 0; i < 100; i++ {
+	for {
 		preArea := dl.fairLottery()
 		preLoseAmount := dl.preUserWin(preArea)
 
@@ -34,7 +34,7 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 				area = preArea
 				break
 			}
-		}else {
+		} else {
 			if preLoseAmount > acceptableMaxLose {
 				area = preArea
 				if preLoseAmount <= 0 {
