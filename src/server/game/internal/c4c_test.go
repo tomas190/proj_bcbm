@@ -31,7 +31,7 @@ func TestClient4Center_ServerLoginCenter(t *testing.T) {
 
 		time.Sleep(7 * time.Second)
 
-		c.UserLoseScore(userID, -5, uuid.GenUUID(), round,
+		c.UserLoseScore(uint32(time.Now().Unix()), userID, -5, uuid.GenUUID(), round,
 			func(data *User) {
 				log.Debug("<----用户减钱回调---->%+v %+v %+v", data.Balance, data.NickName, data.Avatar)
 			})
@@ -68,7 +68,7 @@ func TestClient4Center_MinusMoney(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 
-	c.UserLoseScore(userID, 0, uuid.GenUUID(), round,
+	c.UserLoseScore(uint32(time.Now().Unix()), userID, 0, uuid.GenUUID(), round,
 		func(data *User) {
 			log.Debug("<----用户减钱回调---->%+v %+v", data.UserID, data.Balance)
 		})
@@ -98,7 +98,7 @@ func TestClient4Center_AddMoney(t *testing.T) {
 
 		time.Sleep(1 * time.Second)
 
-		c.UserWinScore(userID, 20000, winOrder+"-add", round,
+		c.UserWinScore(uint32(time.Now().Unix()), userID, 20000, winOrder+"-add", round,
 			func(data *User) {
 				log.Debug("<----用户加钱回调---->%+v %+v", data.UserID, data.Balance)
 			})
@@ -127,7 +127,7 @@ func TestClient4Center_ChangeBankerStatus(t *testing.T) {
 	time.Sleep(1 * time.Second)
 	//
 	// 投注
-	c.UserLoseScore(userID, -100, uuid.GenUUID(), round, func(data *User) {
+	c.UserLoseScore(uint32(time.Now().Unix()), userID, -100, uuid.GenUUID(), round, func(data *User) {
 		fmt.Println("减钱完成")
 	})
 
