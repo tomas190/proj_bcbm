@@ -185,9 +185,9 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	SurPool.DataCorrection = 0
 	SurPool.PlayerWinRate = 0.6
 	SurPool.RandomCountAfterWin = 0
-	SurPool.RandomCountAfterLose = 0
+	SurPool.RandomCountAfterLose = 100
 	SurPool.RandomPercentageAfterWin = 0
-	SurPool.RandomPercentageAfterLose = 0
+	SurPool.RandomPercentageAfterLose = 1
 	m.FindSurPool(SurPool)
 
 	newRecord := ProfitDB{

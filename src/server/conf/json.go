@@ -35,10 +35,10 @@ func init() {
 	log.Debug("读取配置文件 %v...", fileName)
 	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		log.Fatal("%v", err)
+		//log.Fatal("%v", err)
 	}
 	err = json.Unmarshal(data, &Server)
 	if err != nil {
-		log.Fatal("%v", err)
+		//log.Fatal("%v", err)
 	}
 }

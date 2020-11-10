@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"proj_bcbm/src/server/constant"
 	con "proj_bcbm/src/server/constant"
+	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/util"
 	"time"
 )
@@ -22,10 +23,12 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 	countLose := sur.RandomCountAfterLose
 	surplusPool := sur.SurplusPool
 
+	log.Debug("盈余池开奖1:%v,%v", percentageWin, countWin)
+	log.Debug("盈余池开奖2:%v,%v", percentageLose, countLose)
+
 	r := util.Random{}
 	preArea := dl.fairLottery()
 	settle := dl.preUserWin(preArea)
-
 	if settle >= 0 { // 玩家赢钱
 		for {
 			loseRateNum := r.RandInRange(1, 101)
