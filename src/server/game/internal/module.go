@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"github.com/name5566/leaf/module"
 	"github.com/patrickmn/go-cache"
 	_ "net/http/pprof"
@@ -9,7 +8,6 @@ import (
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
-	"proj_bcbm/src/server/util"
 	"time"
 )
 

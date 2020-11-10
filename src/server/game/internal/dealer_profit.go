@@ -3,7 +3,6 @@ package internal
 import (
 	"math/rand"
 	"proj_bcbm/src/server/constant"
-	con "proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/util"
 	"time"
@@ -18,8 +17,8 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 	sur, _ := db.GetSurPool()
 	loseRate := sur.PlayerLoseRateAfterSurplusPool * 100
 	percentageWin := sur.RandomPercentageAfterWin * 100
-	percentageLose := sur.RandomPercentageAfterLose * 100
 	countWin := sur.RandomCountAfterWin
+	percentageLose := sur.RandomPercentageAfterLose * 100
 	countLose := sur.RandomCountAfterLose
 	surplusPool := sur.SurplusPool
 	log.Debug("当前开奖盈余数据为:%v", sur)
@@ -168,10 +167,10 @@ func (dl *Dealer) preUserWin(preArea uint32) float64 {
 	// 玩家投注开奖
 	userWin := dl.DownBetArea[preArea] * constant.AreaX[preArea]
 	// 庄家开奖
-	math := util.Math{}
-	preBankerWin, _ := math.SumSliceFloat64(dl.AreaBets).Sub(math.MultiFloat64(con.AreaX[preArea], dl.AreaBets[preArea])).Float64()
-
-	return (userWin - dl.TotalDownMoney) + preBankerWin
+	//math := util.Math{}
+	//preBankerWin, _ := math.SumSliceFloat64(dl.AreaBets).Sub(math.MultiFloat64(con.AreaX[preArea], dl.AreaBets[preArea])).Float64()
+	//return (userWin - dl.TotalDownMoney) + preBankerWin
+	return userWin - dl.TotalDownMoney
 }
 
 // 盈余池 = 玩家总输 - 玩家总赢 * 杀数 - (玩家数量 * 6)
