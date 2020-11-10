@@ -160,7 +160,7 @@ func (dl *Dealer) Settle() {
 	dl.HRChan <- HRMsg{
 		RoomID:        dl.RoomID,
 		RoomStatus:    dl.Status,
-		LotteryResult: res,
+		LotteryResult: dl.res,
 	}
 
 	// 结算

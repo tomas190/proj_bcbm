@@ -169,13 +169,11 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	newLost := lastProfit.PlayerAllLost + lose
 	newWin := lastProfit.PlayerAllWin + win
 	newCount := userCount
-	newProfit := (newLost - (newWin * 1)) * 0.5
 	log.Debug("newProfit:%v", newLost-(newWin*1))
-	log.Debug("盈余数据为： %+v", newProfit)
 
 	SurPool := &SurPool{}
 	SurPool.GameId = conf.Server.GameID
-	SurPool.SurplusPool = newProfit
+	SurPool.SurplusPool = lastProfit.Profit
 	SurPool.PlayerTotalLoseWin = newLost - newWin
 	SurPool.PlayerTotalLose = newLost
 	SurPool.PlayerTotalWin = newWin
@@ -186,6 +184,10 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	SurPool.PlayerLoseRateAfterSurplusPool = 0.7
 	SurPool.DataCorrection = 0
 	SurPool.PlayerWinRate = 0.6
+	SurPool.RandomCountAfterWin = 0
+	SurPool.RandomCountAfterLose = 0
+	SurPool.RandomPercentageAfterWin = 0
+	SurPool.RandomPercentageAfterLose = 0
 	m.FindSurPool(SurPool)
 
 	newRecord := ProfitDB{
@@ -195,7 +197,7 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 		PlayerThisWin:  win,
 		PlayerAllWin:   newWin,
 		PlayerAllLost:  newLost,
-		Profit:         newProfit,
+		Profit:         lastProfit.Profit,
 		RoomID:         rid,
 		PlayerNum:      uint32(newCount),
 	}
@@ -235,6 +237,10 @@ func (m *MgoC) FindSurPool(data *SurPool) {
 		data.PlayerLoseRateAfterSurplusPool = sur.PlayerLoseRateAfterSurplusPool
 		data.DataCorrection = sur.DataCorrection
 		data.PlayerWinRate = sur.PlayerWinRate
+		data.RandomCountAfterWin = sur.RandomCountAfterWin
+		data.RandomCountAfterLose = sur.RandomCountAfterLose
+		data.RandomPercentageAfterWin = sur.RandomPercentageAfterWin
+		data.RandomPercentageAfterLose = sur.RandomPercentageAfterLose
 		_ = m.UpdateSurPool(data)
 	}
 

@@ -3,6 +3,7 @@ package internal
 import (
 	"math/rand"
 	"proj_bcbm/src/server/constant"
+	con "proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/util"
 	"time"
 )
@@ -13,53 +14,121 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 	//randomUtil := util.Random{}
 	//profitPoolRatePercent := randomUtil.RandInRange(constant.ProfitPoolMinPercent, constant.ProfitPoolMaxPercent)
 
-	acceptableMaxLose := dl.profitPool()
-	//log.Debug("dl.profitPool() :%v", dl.profitPool())
-	//log.Debug("acceptableMaxLose :%v", acceptableMaxLose)
-
-	var area uint32
-
 	sur, _ := db.GetSurPool()
-	winRate := sur.PlayerWinRate * 100
-	rateAfter := sur.PlayerLoseRateAfterSurplusPool * 100
+	loseRate := sur.PlayerLoseRateAfterSurplusPool * 100
+	percentageWin := sur.RandomPercentageAfterWin * 100
+	percentageLose := sur.RandomPercentageAfterLose * 100
+	countWin := sur.RandomCountAfterWin
+	countLose := sur.RandomCountAfterLose
+	surplusPool := sur.SurplusPool
 
 	r := util.Random{}
-	winRateNum := r.RandInRange(1, 101)
-	rateAfterNum := r.RandInRange(1, 101)
+	preArea := dl.fairLottery()
+	settle := dl.preUserWin(preArea)
 
-	for {
-		preArea := dl.fairLottery()
-		preWinAmount := dl.preUserWin(preArea)
-
-		if winRateNum > int(winRate) {
-			area = preArea
-			if preWinAmount <= 0 {
-				area = preArea
-				break
-			}
-		} else {
-			if preWinAmount > acceptableMaxLose {
-				area = preArea
-				if rateAfterNum > int(rateAfter) {
-					if preWinAmount >= 0 {
-						area = preArea
+	if settle >= 0 { // 玩家赢钱
+		for {
+			loseRateNum := r.RandInRange(1, 101)
+			percentageWinNum := r.RandInRange(1, 101)
+			if countWin > 0 {
+				if percentageWinNum > int(percentageWin) { // 盈余池判定
+					if surplusPool > settle { // 盈余池足够
 						break
+					} else {                             // 盈余池不足
+						if loseRateNum > int(loseRate) { // 30%玩家赢钱
+							break
+						} else { // 70%玩家输钱
+							for {
+								preArea = dl.fairLottery()
+								settle = dl.preUserWin(preArea)
+								if settle <= 0 {
+									break
+								}
+							}
+							break
+						}
 					}
-				} else {
-					if preWinAmount <= 0 {
-						area = preArea
+				} else { // 又随机生成牌型
+					preArea = dl.fairLottery()
+					settle = dl.preUserWin(preArea)
+					if settle > 0 { // 玩家赢
+						countWin--
+					} else {
 						break
 					}
 				}
 			} else {
-				if preWinAmount >= 0 {
-					area = preArea
+				// 盈余池判定
+				if surplusPool > settle { // 盈余池足够
 					break
+				} else {                             // 盈余池不足
+					if loseRateNum > int(loseRate) { // 30%玩家赢钱
+						break
+					} else { // 70%玩家输钱
+						for {
+							preArea = dl.fairLottery()
+							settle = dl.preUserWin(preArea)
+							if settle <= 0 {
+								break
+							}
+						}
+						break
+					}
 				}
 			}
 		}
+	} else { // 玩家输钱
+		for {
+			loseRateNum := r.RandInRange(1, 101)
+			percentageLoseNum := r.RandInRange(1, 101)
+			if countLose > 0 {
+				if percentageLoseNum > int(percentageLose) {
+					break
+				} else { // 又随机生成牌型
+					preArea = dl.fairLottery()
+					settle = dl.preUserWin(preArea)
+					if settle > 0 { // 玩家赢
+						// 盈余池判定
+						if surplusPool > settle { // 盈余池足够
+							break
+						} else {                             // 盈余池不足
+							if loseRateNum > int(loseRate) { // 30%玩家赢钱
+								for {
+									preArea = dl.fairLottery()
+									settle = dl.preUserWin(preArea)
+									if settle >= 0 {
+										break
+									}
+								}
+								break
+							} else { // 70%玩家输钱
+								for {
+									preArea = dl.fairLottery()
+									settle = dl.preUserWin(preArea)
+									if settle <= 0 {
+										break
+									}
+								}
+								break
+							}
+						}
+					} else {
+						countLose--
+					}
+				}
+			} else { // 玩家输钱
+				for {
+					preArea = dl.fairLottery()
+					settle = dl.preUserWin(preArea)
+					if settle <= 0 {
+						break
+					}
+				}
+				break
+			}
+		}
 	}
-	return area
+	return preArea
 }
 
 // 公平开奖
@@ -95,9 +164,13 @@ func (dl *Dealer) fairLottery() uint32 {
 // userBets 玩家投注
 // preArea 预开奖区域
 func (dl *Dealer) preUserWin(preArea uint32) float64 {
+	// 玩家投注开奖
 	userWin := dl.DownBetArea[preArea] * constant.AreaX[preArea]
+	// 庄家开奖
+	math := util.Math{}
+	preBankerWin, _ := math.SumSliceFloat64(dl.AreaBets).Sub(math.MultiFloat64(con.AreaX[preArea], dl.AreaBets[preArea])).Float64()
 
-	return userWin - dl.TotalDownMoney
+	return (userWin - dl.TotalDownMoney) + preBankerWin
 }
 
 // 盈余池 = 玩家总输 - 玩家总赢 * 杀数 - (玩家数量 * 6)
