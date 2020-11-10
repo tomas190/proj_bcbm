@@ -185,9 +185,9 @@ func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
 	SurPool.DataCorrection = 0
 	SurPool.PlayerWinRate = 0.6
 	SurPool.RandomCountAfterWin = 0
-	SurPool.RandomCountAfterLose = 100
+	SurPool.RandomCountAfterLose = 0
 	SurPool.RandomPercentageAfterWin = 0
-	SurPool.RandomPercentageAfterLose = 1
+	SurPool.RandomPercentageAfterLose = 0
 	m.FindSurPool(SurPool)
 
 	newRecord := ProfitDB{
@@ -241,6 +241,7 @@ func (m *MgoC) FindSurPool(data *SurPool) {
 		data.RandomCountAfterLose = sur.RandomCountAfterLose
 		data.RandomPercentageAfterWin = sur.RandomPercentageAfterWin
 		data.RandomPercentageAfterLose = sur.RandomPercentageAfterLose
+		log.Debug("更新玩家数据:%v", data)
 		_ = m.UpdateSurPool(data)
 	}
 
@@ -269,7 +270,6 @@ func (m *MgoC) GetSurPool() (SurPool, error) {
 	}
 	return sur, nil
 }
-
 
 func (m *MgoC) InsertSurPool(data *SurPool) error {
 	collection := m.Database(constant.DBName).Collection("surplus-pool")
