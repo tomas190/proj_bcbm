@@ -23,6 +23,7 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 	countLose := sur.RandomCountAfterLose
 	surplusPool := sur.SurplusPool
 
+	log.Debug("当前盈余池:%v", surplusPool)
 	log.Debug("盈余池开奖1:%v,%v", percentageWin, countWin)
 	log.Debug("盈余池开奖2:%v,%v", percentageLose, countLose)
 
