@@ -314,12 +314,13 @@ func (m *MgoC) InsertAccess(data *PlayerDownBetRecode) error {
 }
 
 //GetDownRecodeList 获取运营数据接入
-func (m *MgoC) GetDownRecodeList(skip, limit int, selector bson.M, sortBy string) ([]PlayerDownBetRecode, int, error) {
+func (m *MgoC) GetDownRecodeList(page, limit int, selector bson.M, sortBy string) ([]PlayerDownBetRecode, int, error) {
 	collection := m.Database(constant.DBName).Collection("accessData")
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
 	var wts []PlayerDownBetRecode
 
+	skip := (page - 1) * limit
 	opt := options.Find().SetSkip(int64(skip)).SetLimit(int64(limit)).SetSort(bson.M{sortBy: -1})
 
 	count, err := collection.CountDocuments(ctx, selector)
