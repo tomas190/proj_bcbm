@@ -328,8 +328,8 @@ func (dl *Dealer) playerSettle() {
 			winFlag = false
 		}
 
-		loseOrder := bson.NewObjectId().Hex()
 		if user.DownBetTotal > 0 {
+			loseOrder := bson.NewObjectId().Hex()
 			if uWin > 0 {
 				uBet = user.DownBetTotal - dl.UserBets[user.UserID][dl.res]
 				ResultMoney -= user.DownBetTotal - dl.UserBets[user.UserID][dl.res]

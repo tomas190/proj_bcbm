@@ -185,7 +185,7 @@ func (c4c *Client4Center) onServerLogin(msg []byte) {
 
 	err := json.Unmarshal(msg, &sLogin)
 	if err != nil {
-		log.Error("解析服务器登录返回数据错误", err)
+		log.Error("解析服务器登录返回数据错误:%v", err)
 	}
 
 	data := sLogin.Data
@@ -274,7 +274,7 @@ func (c4c *Client4Center) onUserWinScore(msg []byte) {
 	winResp := SyncScoreResp{}
 	err := json.Unmarshal(msg, &winResp)
 	if err != nil {
-		log.Error("解析加钱返回错误", err)
+		log.Error("解析加钱返回错误:%v", err)
 	}
 
 	syncData := winResp.Data
@@ -299,7 +299,7 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 	loseResp := SyncScoreResp{}
 	err := json.Unmarshal(msg, &loseResp)
 	if err != nil {
-		log.Error("解析减钱返回错误", err)
+		log.Error("解析减钱返回错误:%v", err)
 	}
 
 	syncData := loseResp.Data
@@ -324,7 +324,7 @@ func (c4c *Client4Center) onChangeBankerStatus(msg []byte) {
 	bankerResp := BankerResp{}
 	err := json.Unmarshal(msg, &bankerResp)
 	if err != nil {
-		log.Error("解析庄家状态返回错误", err)
+		log.Error("解析庄家状态返回错误:%v", err)
 	}
 
 	syncData := bankerResp.Data
@@ -348,7 +348,7 @@ func (c4c *Client4Center) onBankerLoseScore(msg []byte) {
 	loseResp := SyncScoreResp{}
 	err := json.Unmarshal(msg, &loseResp)
 	if err != nil {
-		log.Error("解析减钱返回错误", err)
+		log.Error("解析减钱返回错误:%v", err)
 	}
 
 	syncData := loseResp.Data

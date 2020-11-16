@@ -95,7 +95,7 @@ func handleLogin(args []interface{}) {
 			if rID, ok := Mgr.UserRoom[userID]; ok {
 				resp.RoomID = rID // 如果用户之前在房间里后来退出，返回房间号
 			}
-			log.Debug("<----login 登录 resp---->%+v %+v", resp.User.UserID)
+			log.Debug("<----login 登录 resp---->%+v", resp.User.UserID)
 			a.WriteMsg(resp)
 		}
 	} else if !Mgr.agentExist(a) { // 正常大多数情况
