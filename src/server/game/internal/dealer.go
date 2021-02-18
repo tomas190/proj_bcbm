@@ -55,6 +55,8 @@ type Dealer struct {
 
 const taxRate = 0.05
 
+var packageTax map[uint16]uint8
+
 var downBankerChan chan bool
 
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
@@ -208,6 +210,7 @@ func (dl *Dealer) Settle() {
 					log.Debug("更新盈余池失败 %+v", err)
 				}
 			}
+
 			log.Debug("庄家当局的输赢:%v", dl.bankerWin)
 			if preBankerWin != 0 {
 				timeNow := time.Now().Unix()
@@ -699,4 +702,8 @@ func (dl *Dealer) ClearData() {
 	dl.bankerWin = 0
 	dl.bankerRound += 1
 
+}
+
+func SetPackageTaxM(packageT uint16, tax uint8) {
+	packageTax[packageT] = tax
 }

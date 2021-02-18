@@ -7,6 +7,7 @@ import (
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -151,6 +152,7 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 				switch msg.Event {
 				case constant.CEventServerLogin:
 					c4c.onServerLogin(message)
+					c4c.onPackageTax(message)
 				case constant.CEventUserLogin:
 					c4c.onUserLogin(message)
 				case constant.CEventUserLogout:
@@ -194,7 +196,57 @@ func (c4c *Client4Center) onServerLogin(msg []byte) {
 	taxPercent := data.Msg.PlatformTaxPercent
 
 	c4c.isServerLogin = true
+
 	log.Debug("服务器登陆 %+v 税率 %%%+v ...", status, taxPercent)
+}
+
+// 收到用户登录返回之后
+func (c4c *Client4Center) onPackageTax(msgBody interface{}) {
+	data, ok := msgBody.(map[string]interface{})
+	if ok {
+		code, err := data["code"].(json.Number).Int64()
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+
+		fmt.Println(code, reflect.TypeOf(code))
+		if data["status"] == "SUCCESS" && code == 200 {
+
+			msginfo := data["msg"].(map[string]interface{})
+			fmt.Println("globals:", msginfo["globals"], reflect.TypeOf(msginfo["globals"]))
+
+			globals := msginfo["globals"].([]interface{})
+			fmt.Println("allList", globals)
+			for k, v := range globals {
+				fmt.Println(k, v)
+				info := v.(map[string]interface{})
+				fmt.Println("package_id", info["package_id"])
+
+				var nPackage uint16
+				var nTax uint8
+
+				jsonPackageId, err := info["package_id"].(json.Number).Int64()
+				if err != nil {
+					log.Fatal(err.Error())
+				} else {
+					fmt.Println("nPackage", uint16(jsonPackageId))
+					nPackage = uint16(jsonPackageId)
+				}
+				jsonTax, err := info["platform_tax_percent"].(json.Number).Int64()
+
+				if err != nil {
+					log.Fatal(err.Error())
+				} else {
+					fmt.Println("tax", uint8(jsonTax))
+					nTax = uint8(jsonTax)
+				}
+
+				SetPackageTaxM(nPackage, nTax)
+
+				log.Debug("packageId:%v,tax:%v", nPackage, nTax)
+			}
+		}
+	}
 }
 
 // 收到用户登录返回之后
