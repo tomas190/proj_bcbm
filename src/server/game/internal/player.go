@@ -13,11 +13,12 @@ type User struct {
 	Status        int          // 上庄状态
 	NickName      string       // 用户昵称
 	Avatar        string       // 用户头像
-	ConnAgent     gate.Agent   // 网络连接代理
-	DownBetTotal  float64      // 玩家总下注
-	winCount      uint32       // 玩家赢的次数
-	betAmount     float64      // 玩家总投注金额
-	IsAction      bool         // 玩家是否行动
+	PackageId     uint16
+	ConnAgent     gate.Agent // 网络连接代理
+	DownBetTotal  float64    // 玩家总下注
+	winCount      uint32     // 玩家赢的次数
+	betAmount     float64    // 玩家总投注金额
+	IsAction      bool       // 玩家是否行动
 }
 
 type Bot struct {

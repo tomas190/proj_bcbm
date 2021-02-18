@@ -188,8 +188,11 @@ func (dl *Dealer) Settle() {
 					//log.Debug("玩家的当局总下注2: %v", dl.bankerWin)
 					dl.bankerMoney = data.BankerBalance
 				})
-				ResultMoney += preBankerWin - (preBankerWin * taxRate)
-				dl.bankerWin += preBankerWin - (preBankerWin * taxRate)
+				pac := packageTax[u.PackageId]
+				taxR := float64(pac) / 100
+
+				ResultMoney += preBankerWin - (preBankerWin * taxR)
+				dl.bankerWin += preBankerWin - (preBankerWin * taxR)
 				log.Debug("庄家金额为和庄家赢钱:%v，%v", dl.bankerMoney, dl.bankerWin)
 				// 玩家坐庄盈余池更新
 				err := db.UProfitPool(0, dl.bankerWin, dl.RoomID)
@@ -308,12 +311,15 @@ func (dl *Dealer) playerSettle() {
 		if uWin > 0 {
 			winFlag = true
 			uWin = uWin - dl.UserBets[user.UserID][dl.res]
-			data += uWin - (uWin * taxRate)
+
+			pac := packageTax[user.PackageId]
+			taxR := float64(pac) / 100
+			data += uWin - (uWin * taxR)
 			log.Debug("uWin:%v,data:%v", uWin, data)
 			user.Balance += dl.UserBets[user.UserID][dl.res] + data
 			log.Debug("res:%v,Balance:%v", dl.UserBets[user.UserID][dl.res], user.Balance)
 
-			ResultMoney += uWin - (uWin * taxRate)
+			ResultMoney += uWin - (uWin * taxR)
 			winOrder := bson.NewObjectId().Hex()
 			c4c.UserWinScore(uint32(timeNow), user.UserID, uWin, winOrder, dl.RoundID, func(data *User) {
 				// 赢钱之后更新余额

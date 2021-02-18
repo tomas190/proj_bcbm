@@ -81,6 +81,7 @@ type GameUser struct {
 	UUID         string `json:"uuid"`
 	GameNick     string `json:"game_nick"`
 	GameIMG      string `json:"game_img"`
+	PackageId    uint16 `json:"package_id"`
 	GameUserType uint32 `json:"game_user_type"`
 }
 

@@ -271,6 +271,7 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 				UserID:        gameUser.UserID,
 				NickName:      gameUser.GameNick,
 				Avatar:        gameUser.GameIMG,
+				PackageId:     gameUser.PackageId,
 				Balance:       gameAccount.Balance,
 				BankerBalance: gameAccount.BankerBalance,
 				Status:        gameAccount.Status,
