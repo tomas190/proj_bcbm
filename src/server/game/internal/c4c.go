@@ -16,12 +16,20 @@ import (
 
 type UserCallback func(data *User)
 
+//UserCallback 用户登录回调函数保存
+type UserBack struct {
+	Data     User
+	Callback func(data *User)
+}
+
 type Client4Center struct {
 	//token         string
 	//tokenLock     sync.RWMutex
 	conn          *websocket.Conn
 	isServerLogin bool
 	userWaitEvent sync.Map
+
+	waitUser map[uint32]*UserBack
 }
 
 var winChan chan bool
@@ -40,6 +48,7 @@ func NewClient4Center() *Client4Center {
 		isServerLogin: false,
 		conn:          c,
 		userWaitEvent: sync.Map{},
+		waitUser:      make(map[uint32]*UserBack),
 	}
 }
 
@@ -155,6 +164,7 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 					c4c.onPackageTax(message)
 				case constant.CEventUserLogin:
 					c4c.onUserLogin(message)
+					c4c.onUserLoginPac(message)
 				case constant.CEventUserLogout:
 					c4c.onUserLogout(message)
 				case constant.CEventUserLoseScore:
@@ -284,6 +294,51 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 
 	} else {
 		log.Error("中心服务器状态码", code)
+	}
+}
+
+func (c4c *Client4Center) onUserLoginPac(msgBody interface{}) {
+	data, ok := msgBody.(map[string]interface{})
+	if !ok {
+		log.Debug("onUserLogout Error")
+	}
+
+	code, err := data["code"].(json.Number).Int64()
+	if err != nil {
+		log.Error(err.Error())
+		return
+	}
+
+	if data["status"] == "SUCCESS" && code == 200 {
+		log.Debug("data:%v,ok:%v", data, ok)
+
+		userInfo, ok := data["msg"].(map[string]interface{})
+		var userData *UserBack
+		if ok {
+			gameUser, uok := userInfo["game_user"].(map[string]interface{})
+			if uok {
+				userId := gameUser["id"]
+				packageId := gameUser["package_id"]
+
+				intID, err := userId.(json.Number).Int64()
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+
+				pckId, err2 := packageId.(json.Number).Int64()
+				if err2 != nil {
+					log.Fatal(err2.Error())
+				}
+
+				log.Debug("packageID :%v", pckId)
+				log.Debug("获取玩家的税率 :%v", packageTax[uint16(pckId)])
+				//找到等待登录玩家
+				userData, ok = c4c.waitUser[uint32(intID)]
+				if ok {
+					userData.Data.PackageId = uint16(pckId)
+				}
+			}
+		}
 	}
 }
 
@@ -525,6 +580,11 @@ func (c4c *Client4Center) UserLoginCenter(userID uint32, pass, token string, cal
 
 	c4c.sendMsg2Center(userLoginMsg)
 	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-login", userID), callback)
+
+	//加入待处理map，等待处理
+	c4c.waitUser[userID] = &UserBack{}
+	c4c.waitUser[userID].Data.UserID = userID
+	c4c.waitUser[userID].Callback = callback
 }
 
 // UserLogoutCenter 用户登出
