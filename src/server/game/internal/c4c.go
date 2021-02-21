@@ -153,6 +153,15 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 			if msgType == websocket.TextMessage {
 				//log.Debug("Msg from center %v", string(message))
 
+				var msgData Server2CenterMsg
+				decoder := json.NewDecoder(strings.NewReader(string(message)))
+				decoder.UseNumber()
+
+				err := decoder.Decode(&msgData)
+				if err != nil {
+					log.Error(err.Error())
+				}
+
 				var msg Server2CenterMsg
 				err = json.Unmarshal(message, &msg)
 				if err != nil {
@@ -161,10 +170,10 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 				switch msg.Event {
 				case constant.CEventServerLogin:
 					c4c.onServerLogin(message)
-					c4c.onPackageTax(message)
+					c4c.onPackageTax(msgData.Data)
 				case constant.CEventUserLogin:
 					c4c.onUserLogin(message)
-					c4c.onUserLoginPac(message)
+					c4c.onUserLoginPac(msgData.Data)
 				case constant.CEventUserLogout:
 					c4c.onUserLogout(message)
 				case constant.CEventUserLoseScore:
@@ -256,6 +265,8 @@ func (c4c *Client4Center) onPackageTax(msgBody interface{}) {
 				log.Debug("packageId:%v,tax:%v", nPackage, nTax)
 			}
 		}
+	}else {
+		log.Debug("onPackageTax error!!!")
 	}
 }
 
@@ -300,7 +311,8 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 func (c4c *Client4Center) onUserLoginPac(msgBody interface{}) {
 	data, ok := msgBody.(map[string]interface{})
 	if !ok {
-		log.Debug("onUserLogout Error")
+		log.Debug("onUserLoginPac Error")
+		return
 	}
 
 	code, err := data["code"].(json.Number).Int64()
