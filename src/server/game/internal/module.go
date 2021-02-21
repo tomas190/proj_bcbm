@@ -47,7 +47,6 @@ func (m *Module) OnInit() {
 	winChan = make(chan bool)
 	loseChan = make(chan bool)
 	downBankerChan = make(chan bool)
-	packageTax = make(map[uint16]uint8)
 	// 缓存
 	ca = cache.New(5*time.Minute, 10*time.Minute)
 
