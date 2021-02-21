@@ -61,8 +61,6 @@ var downBankerChan chan bool
 
 func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 
-	packageTax = make(map[uint16]uint8)
-
 	return &Dealer{
 		Users:          sync.Map{},
 		UserLeave:      make([]uint32, 0),

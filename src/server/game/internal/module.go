@@ -29,6 +29,8 @@ type Module struct {
 func (m *Module) OnInit() {
 	m.Skeleton = skeleton
 
+	packageTax = make(map[uint16]uint8)
+
 	// 中心服务器
 	c4c = NewClient4Center()
 	//c4c.ReqToken()
