@@ -114,9 +114,9 @@ func (c *DAOConverter) U2DB(u User) UserDB {
 }
 
 // 玩家结算记录
-func (c *DAOConverter) Settle2DB(u User, winOrder, rID string, isWin bool, betAmount, winAmount float64, betMoney []msg.Bet) SettleDB {
+func (c *DAOConverter) Settle2DB(u User, winOrder, rID string, isWin bool, betAmount, winAmount float64) SettleDB {
 	user := c.U2DB(u)
-	sdb := SettleDB{User: user, WinOrder: winOrder, RoundID: rID, IsWin: isWin, BetAmount: betAmount, WinAmount: winAmount, BetMoney: betMoney}
+	sdb := SettleDB{User: user, WinOrder: winOrder, RoundID: rID, IsWin: isWin, BetAmount: betAmount, WinAmount: winAmount}
 	return sdb
 }
 
