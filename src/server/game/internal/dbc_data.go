@@ -1,14 +1,18 @@
 package internal
 
-import "time"
+import (
+	"proj_bcbm/src/server/msg"
+	"time"
+)
 
 type SettleDB struct {
-	User      UserDB  `bson:"User"`
-	WinOrder  string  `bson:"WinOrder"`
-	RoundID   string  `bson:"RoundID"`
-	IsWin     bool    `bson:"IsWin"`
-	BetAmount float64 `bson:"BetAmount"`
-	WinAmount float64 `bson:"WinAmount"`
+	User      UserDB    `bson:"User"`
+	WinOrder  string    `bson:"WinOrder"`
+	RoundID   string    `bson:"RoundID"`
+	IsWin     bool      `bson:"IsWin"`
+	BetAmount float64   `bson:"BetAmount"`
+	WinAmount float64   `bson:"WinAmount"`
+	BetMoney  []msg.Bet `bson:"bet_money"`
 }
 
 type UserDB struct {

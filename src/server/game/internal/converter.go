@@ -26,7 +26,7 @@ func (c *DTOConverter) U2Msg(p Player) msg.UserInfo {
 
 func (c *DTOConverter) Banker2Msg(p Player) msg.UserInfo {
 	id, name, img, money := p.GetPlayerBasic()
-	bankerMoney:= p.GetBankerBalance()
+	bankerMoney := p.GetBankerBalance()
 	win, bet := p.GetPlayerAccount()
 	uMsg := msg.UserInfo{
 		UserID:      id,
@@ -114,9 +114,9 @@ func (c *DAOConverter) U2DB(u User) UserDB {
 }
 
 // 玩家结算记录
-func (c *DAOConverter) Settle2DB(u User, winOrder, rID string, isWin bool, betAmount, winAmount float64) SettleDB {
+func (c *DAOConverter) Settle2DB(u User, winOrder, rID string, isWin bool, betAmount, winAmount float64, betMoney []msg.Bet) SettleDB {
 	user := c.U2DB(u)
-	sdb := SettleDB{User: user, WinOrder: winOrder, RoundID: rID, IsWin: isWin, BetAmount: betAmount, WinAmount: winAmount}
+	sdb := SettleDB{User: user, WinOrder: winOrder, RoundID: rID, IsWin: isWin, BetAmount: betAmount, WinAmount: winAmount, BetMoney: betMoney}
 	return sdb
 }
 

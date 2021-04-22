@@ -388,7 +388,7 @@ func (dl *Dealer) playerSettle() {
 			//log.Debug("空数据,不插入")
 		} else {
 			order := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05")
-			sdb := daoC.Settle2DB(*user, order, dl.RoundID, winFlag, uBet, uWin)
+			sdb := daoC.Settle2DB(*user, order, dl.RoundID, winFlag, uBet, uWin, dl.UserBetsDetail[user.UserID])
 			err := db.CUserSettle(sdb)
 			if err != nil {
 				log.Debug("保存用户结算数据错误 %+v", err)
