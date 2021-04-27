@@ -322,7 +322,7 @@ func (dl *Dealer) playerSettle() {
 
 			ResultMoney += uWin - (uWin * taxR)
 			winOrder := bson.NewObjectId().Hex()
-			c4c.UserWinScore(uint32(timeNow), user.UserID, uWin, dl.UserBetsDetail[user.UserID], winOrder, dl.RoundID, func(data *User) {
+			c4c.UserWinScore(uint32(timeNow), user.UserID, uWin, user.DownBetTotal, winOrder, dl.RoundID, func(data *User) {
 				// 赢钱之后更新余额
 				user.BalanceLock.Lock()
 				user.Balance = data.Balance
@@ -347,7 +347,7 @@ func (dl *Dealer) playerSettle() {
 
 				result := -user.DownBetTotal + dl.UserBets[user.UserID][dl.res]
 				if result != 0 {
-					c4c.UserLoseScore(uint32(timeNow), user.UserID, result, dl.UserBetsDetail[user.UserID], loseOrder, dl.RoundID, func(data *User) {
+					c4c.UserLoseScore(uint32(timeNow), user.UserID, result, user.DownBetTotal, loseOrder, dl.RoundID, func(data *User) {
 						user.BalanceLock.Lock()
 						user.Balance = data.Balance
 						user.BalanceLock.Unlock()
@@ -362,7 +362,7 @@ func (dl *Dealer) playerSettle() {
 			} else {
 				uBet = user.DownBetTotal
 				ResultMoney -= user.DownBetTotal
-				c4c.UserLoseScore(uint32(timeNow), user.UserID, -user.DownBetTotal, dl.UserBetsDetail[user.UserID], loseOrder, dl.RoundID, func(data *User) {
+				c4c.UserLoseScore(uint32(timeNow), user.UserID, -user.DownBetTotal, user.DownBetTotal, loseOrder, dl.RoundID, func(data *User) {
 					user.BalanceLock.Lock()
 					user.Balance = data.Balance
 					user.BalanceLock.Unlock()

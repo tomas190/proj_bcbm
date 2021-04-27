@@ -7,7 +7,6 @@ import (
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
-	"proj_bcbm/src/server/msg"
 	"reflect"
 	"strconv"
 	"strings"
@@ -624,7 +623,7 @@ func (c4c *Client4Center) UserLogoutCenter(userID uint32, callback UserCallback)
 	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-logout", userID), callback)
 }
 
-func (c4c *Client4Center) UserWinScore(timeNow, userID uint32, money float64, UserBetsDetail []msg.Bet, order, roundID string, callback UserCallback) {
+func (c4c *Client4Center) UserWinScore(timeNow, userID uint32, money float64, DownBetTotal float64, order, roundID string, callback UserCallback) {
 	if !c4c.isServerLogin {
 		log.Debug("Game Server NOT Ready! Need login to Center Server!")
 		return
@@ -646,7 +645,7 @@ func (c4c *Client4Center) UserWinScore(timeNow, userID uint32, money float64, Us
 				CreateTime: timeNow,
 				PayReason:  "玩家赢钱",
 				Money:      money,
-				BetMoney:   UserBetsDetail,
+				BetMoney:   DownBetTotal,
 				Order:      order,
 				GameID:     conf.Server.GameID,
 				RoundID:    roundID,
@@ -658,7 +657,7 @@ func (c4c *Client4Center) UserWinScore(timeNow, userID uint32, money float64, Us
 	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-win-%+v", userID, order), callback)
 }
 
-func (c4c *Client4Center) UserLoseScore(timeNow, userID uint32, money float64, UserBetsDetail []msg.Bet, order, roundID string, callback UserCallback) {
+func (c4c *Client4Center) UserLoseScore(timeNow, userID uint32, money float64, DownBetTotal float64, order, roundID string, callback UserCallback) {
 	if !c4c.isServerLogin {
 		log.Debug("Game Server NOT Ready! Need login to Center Server!")
 		return
@@ -680,7 +679,7 @@ func (c4c *Client4Center) UserLoseScore(timeNow, userID uint32, money float64, U
 				CreateTime: timeNow,
 				PayReason:  "玩家输钱",
 				Money:      money,
-				BetMoney:   UserBetsDetail,
+				BetMoney:   DownBetTotal,
 				Order:      order,
 				GameID:     conf.Server.GameID,
 				RoundID:    roundID,

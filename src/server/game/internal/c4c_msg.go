@@ -1,7 +1,5 @@
 package internal
 
-import "proj_bcbm/src/server/msg"
-
 // 游戏服务器<--->中心服 消息基本格式
 type Server2CenterMsg struct {
 	Event string      `json:"event"`
@@ -163,16 +161,16 @@ type ServerAuth struct {
 
 // 请求信息
 type SyncScoreReqDataInfo struct {
-	UserID     uint32    `json:"id"`
-	CreateTime uint32    `json:"create_time"`
-	PayReason  string    `json:"pay_reason"`
-	Money      float64   `json:"money"`
-	BetMoney   []msg.Bet `json:"bet_money"`
-	LockMoney  float64   `json:"lock_money"`
-	PreMoney   float64   `json:"pre_money"`
-	Order      string    `json:"order"`
-	GameID     string    `json:"game_id"`
-	RoundID    string    `json:"round_id"`
+	UserID     uint32  `json:"id"`
+	CreateTime uint32  `json:"create_time"`
+	PayReason  string  `json:"pay_reason"`
+	Money      float64 `json:"money"`
+	BetMoney   float64 `json:"bet_money"`
+	LockMoney  float64 `json:"lock_money"`
+	PreMoney   float64 `json:"pre_money"`
+	Order      string  `json:"order"`
+	GameID     string  `json:"game_id"`
+	RoundID    string  `json:"round_id"`
 }
 
 type SyncScoreResp struct {
