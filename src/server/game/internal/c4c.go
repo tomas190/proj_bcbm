@@ -242,22 +242,21 @@ func (c4c *Client4Center) onPackageTax(msgBody interface{}) {
 				fmt.Println("package_id", info["package_id"])
 
 				var nPackage uint16
-				var nTax uint8
+				var nTax float64
 
 				jsonPackageId, err := info["package_id"].(json.Number).Int64()
 				if err != nil {
-					log.Fatal(err.Error())
+					log.Fatal("onPackageTax jsonPackageId:%v", err.Error())
 				} else {
 					fmt.Println("nPackage", uint16(jsonPackageId))
 					nPackage = uint16(jsonPackageId)
 				}
-				jsonTax, err := info["platform_tax_percent"].(json.Number).Int64()
-
+				jsonTax, err := info["platform_tax_percent"].(json.Number).Float64()
 				if err != nil {
-					log.Fatal(err.Error())
+					log.Fatal("onPackageTax jsonTax:%v", err.Error())
 				} else {
-					fmt.Println("tax", uint8(jsonTax))
-					nTax = uint8(jsonTax)
+					fmt.Println("tax", jsonTax)
+					nTax = jsonTax
 				}
 
 				SetPackageTaxM(nPackage, nTax)

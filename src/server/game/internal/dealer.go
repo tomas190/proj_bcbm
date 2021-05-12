@@ -55,7 +55,7 @@ type Dealer struct {
 
 const taxRate = 0.05
 
-var packageTax map[uint16]uint8
+var packageTax map[uint16]float64
 
 var downBankerChan chan bool
 
@@ -711,6 +711,6 @@ func (dl *Dealer) ClearData() {
 
 }
 
-func SetPackageTaxM(packageT uint16, tax uint8) {
+func SetPackageTaxM(packageT uint16, tax float64) {
 	packageTax[packageT] = tax
 }
