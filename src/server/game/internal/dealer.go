@@ -449,6 +449,10 @@ func (dl *Dealer) ClearChip() {
 				player.ConnAgent.Close()
 				log.Debug("投注后离开房间的玩家已登出")
 			})
+			order := bson.NewObjectId().Hex()
+			uid := util.UUID{}
+			roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
+			c4c.UnlockSettlement(player.UserID, player.Balance, order, roundId)
 		}
 	}
 
@@ -522,6 +526,10 @@ func (dl *Dealer) ClearChip() {
 			if !ok {
 				c4c.UserLogoutCenter(uid, func(data *User) {
 					log.Debug("庄家已不在游戏中，下庄后自动登出 %+v", uid)
+					order := bson.NewObjectId().Hex()
+					uid := util.UUID{}
+					roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
+					c4c.UnlockSettlement(data.UserID, data.Balance, order, roundId)
 				})
 			}
 		}

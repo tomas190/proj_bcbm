@@ -10,6 +10,8 @@ const (
 	CEventBankerWinScore     string = "/GameServer/GameUser/bankerWinSettlement"
 	CEventBankerLoseScore    string = "/GameServer/GameUser/bankerLoseSettlement"
 	CEventNotice             string = "/GameServer/Notice/notice"
+	MsgLockSettlement        string = "/GameServer/GameUser/lockSettlement"   //锁钱
+	MsgUnlockSettlement      string = "/GameServer/GameUser/unlockSettlement" //解锁
 
 	CEventError string = "error"
 

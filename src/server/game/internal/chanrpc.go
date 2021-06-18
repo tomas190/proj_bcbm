@@ -1,11 +1,14 @@
 package internal
 
 import (
+	"fmt"
 	"github.com/name5566/leaf/gate"
+	"gopkg.in/mgo.v2/bson"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
+	"time"
 )
 
 func init() {
@@ -49,6 +52,10 @@ func rpcCloseAgent(args []interface{}) {
 					a.WriteMsg(resp)
 					a.Close()
 				})
+				order := bson.NewObjectId().Hex()
+				uid := util.UUID{}
+				roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
+				c4c.UnlockSettlement(au.UserID, au.Balance, order, roundId)
 			} else {
 				var exist bool
 				for _, v := range dl.UserLeave {
@@ -68,6 +75,10 @@ func rpcCloseAgent(args []interface{}) {
 				a.WriteMsg(resp)
 				a.Close()
 			})
+			order := bson.NewObjectId().Hex()
+			uid := util.UUID{}
+			roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
+			c4c.UnlockSettlement(au.UserID, au.Balance, order, roundId)
 		}
 	}
 }

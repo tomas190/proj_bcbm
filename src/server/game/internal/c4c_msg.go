@@ -277,3 +277,18 @@ type NoticeRespData struct {
 	Status string `json:"status"`
 	Msg    string `json:"msg"`
 }
+
+type LockSettle struct {
+	Event string           `json:"event"`
+	Data  LockChangeSettle `json:"data"`
+}
+
+type UnLockSettle struct {
+	Event string           `json:"event"`
+	Data  LockChangeSettle `json:"data"`
+}
+
+type LockChangeSettle struct {
+	Auth ServerAuth           `json:"auth"`
+	Info SyncScoreReqDataInfo `json:"info"`
+}

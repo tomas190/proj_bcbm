@@ -190,6 +190,10 @@ func (c4c *Client4Center) HeartBeatAndListen() {
 					c4c.onNotice(message)
 				case constant.CEventError:
 					c4c.onError(message)
+				case constant.MsgLockSettlement:
+					c4c.onLockSettlement(message)
+				case constant.MsgUnlockSettlement:
+					c4c.onUnlockSettlement(message)
 				default:
 					c4c.onDefault(message)
 				}
@@ -531,6 +535,38 @@ func (c4c *Client4Center) onError(msg []byte) {
 	}
 }
 
+//onWinMoreThanNotice 加锁金额
+func (c4c *Client4Center) onLockSettlement(msgBody interface{}) {
+	data, ok := msgBody.(map[string]interface{})
+	if ok {
+		code, err := data["code"].(json.Number).Int64()
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+
+		fmt.Println(code, reflect.TypeOf(code))
+		if data["status"] == "SUCCESS" && code == 200 {
+			log.Debug("<-------- onLockSettlement SUCCESS~!!! -------->")
+		}
+	}
+}
+
+//onWinMoreThanNotice 解锁金额
+func (c4c *Client4Center) onUnlockSettlement(msgBody interface{}) {
+	data, ok := msgBody.(map[string]interface{})
+	if ok {
+		code, err := data["code"].(json.Number).Int64()
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+
+		fmt.Println(code, reflect.TypeOf(code))
+		if data["status"] == "SUCCESS" && code == 200 {
+			log.Debug("<-------- onUnlockSettlement SUCCESS~!!! -------->")
+		}
+	}
+}
+
 func (c4c *Client4Center) onDefault(msg []byte) {
 	log.Error("中心服务器事件无法识别 %+v", string(msg))
 }
@@ -786,6 +822,54 @@ func (c4c *Client4Center) BankerLoseScore(userID uint32, money float64, order, r
 
 	c4c.sendMsg2Center(loseSettleMsg)
 	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-banker-lose-%+v", userID, order), callback)
+}
+
+//锁钱
+func (c4c *Client4Center) LockSettlement(userID uint32, account float64, order, roundID string) {
+	lockSettle := LockSettle{
+		Event: constant.MsgLockSettlement,
+		Data: LockChangeSettle{
+			Auth: ServerAuth{
+				DevName: conf.Server.DevName,
+				DevKey:  conf.Server.DevKey,
+			},
+
+			Info: SyncScoreReqDataInfo{
+				UserID:     userID,
+				CreateTime: uint32(time.Now().Unix()),
+				PayReason:  "LockMoney",
+				LockMoney:  account,
+				Order:      order,
+				GameID:     conf.Server.GameID,
+				RoundID:    roundID,
+			},
+		},
+	}
+	c4c.sendMsg2Center(lockSettle)
+}
+
+//解锁
+func (c4c *Client4Center) UnlockSettlement(userID uint32, account float64, order, roundID string) {
+	unLockSettle := UnLockSettle{
+		Event: constant.MsgUnlockSettlement,
+		Data: LockChangeSettle{
+			Auth: ServerAuth{
+				DevName: conf.Server.DevName,
+				DevKey:  conf.Server.DevKey,
+			},
+
+			Info: SyncScoreReqDataInfo{
+				UserID:     userID,
+				CreateTime: uint32(time.Now().Unix()),
+				PayReason:  "UnLockMoney",
+				LockMoney:  account,
+				Order:      order,
+				GameID:     conf.Server.GameID,
+				RoundID:    roundID,
+			},
+		},
+	}
+	c4c.sendMsg2Center(unLockSettle)
 }
 
 // todo
