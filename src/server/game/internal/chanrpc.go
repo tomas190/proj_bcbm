@@ -52,10 +52,6 @@ func rpcCloseAgent(args []interface{}) {
 					a.WriteMsg(resp)
 					a.Close()
 				})
-				order := bson.NewObjectId().Hex()
-				uid := util.UUID{}
-				roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
-				c4c.UnlockSettlement(au.UserID, au.Balance, order, roundId)
 			} else {
 				var exist bool
 				for _, v := range dl.UserLeave {
@@ -75,10 +71,6 @@ func rpcCloseAgent(args []interface{}) {
 				a.WriteMsg(resp)
 				a.Close()
 			})
-			order := bson.NewObjectId().Hex()
-			uid := util.UUID{}
-			roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
-			c4c.UnlockSettlement(au.UserID, au.Balance, order, roundId)
 		}
 	}
 }

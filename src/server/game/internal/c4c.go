@@ -825,7 +825,8 @@ func (c4c *Client4Center) BankerLoseScore(userID uint32, money float64, order, r
 }
 
 //锁钱
-func (c4c *Client4Center) LockSettlement(userID uint32, account float64, order, roundID string) {
+func (c4c *Client4Center) LockSettlement(au *User, lockAccount float64, order, roundID string) {
+	au.LockMoney += lockAccount
 	lockSettle := LockSettle{
 		Event: constant.MsgLockSettlement,
 		Data: LockChangeSettle{
@@ -835,10 +836,10 @@ func (c4c *Client4Center) LockSettlement(userID uint32, account float64, order, 
 			},
 
 			Info: SyncScoreReqDataInfo{
-				UserID:     userID,
+				UserID:     au.UserID,
 				CreateTime: uint32(time.Now().Unix()),
 				PayReason:  "LockMoney",
-				LockMoney:  account,
+				LockMoney:  lockAccount,
 				Order:      order,
 				GameID:     conf.Server.GameID,
 				RoundID:    roundID,
@@ -849,7 +850,7 @@ func (c4c *Client4Center) LockSettlement(userID uint32, account float64, order, 
 }
 
 //解锁
-func (c4c *Client4Center) UnlockSettlement(userID uint32, account float64, order, roundID string) {
+func (c4c *Client4Center) UnlockSettlement(au *User, order, roundID string) {
 	unLockSettle := UnLockSettle{
 		Event: constant.MsgUnlockSettlement,
 		Data: LockChangeSettle{
@@ -859,10 +860,10 @@ func (c4c *Client4Center) UnlockSettlement(userID uint32, account float64, order
 			},
 
 			Info: SyncScoreReqDataInfo{
-				UserID:     userID,
+				UserID:     au.UserID,
 				CreateTime: uint32(time.Now().Unix()),
 				PayReason:  "UnLockMoney",
-				LockMoney:  account,
+				LockMoney:  au.LockMoney,
 				Order:      order,
 				GameID:     conf.Server.GameID,
 				RoundID:    roundID,

@@ -59,6 +59,11 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		time.Sleep(time.Millisecond * time.Duration(delay))
 		ca.Set(fmt.Sprintf("%+v-bet", au.UserID), order, cache.DefaultExpiration)
 
+		orderId := bson.NewObjectId().Hex()
+		uid := util.UUID{}
+		roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
+		// 锁钱
+		c4c.LockSettlement(au, cs, orderId, roundId)
 		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
 		dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
 		dl.DownBetArea[m.Area] = dl.DownBetArea[m.Area] + cs

@@ -1,9 +1,7 @@
 package internal
 
 import (
-	"fmt"
 	"github.com/name5566/leaf/gate"
-	"gopkg.in/mgo.v2/bson"
 	"math/rand"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
@@ -133,12 +131,6 @@ func handleLogin(args []interface{}) {
 			Mgr.UserRecord.Store(u.UserID, u)
 			log.Debug("<----login 登录 resp---->%+v", resp.User.UserID)
 			a.WriteMsg(resp)
-
-			// 锁钱
-			order := bson.NewObjectId().Hex()
-			uid := util.UUID{}
-			roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
-			c4c.LockSettlement(u.UserID, u.Balance, order, roundId)
 		})
 	} // 同一连接上不同用户的情况对第二个用户的请求不做处理
 }
@@ -164,10 +156,6 @@ func handleLogout(args []interface{}) {
 					a.WriteMsg(resp)
 					a.Close()
 				})
-				order := bson.NewObjectId().Hex()
-				uid := util.UUID{}
-				roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
-				c4c.UnlockSettlement(au.UserID, au.Balance, order, roundId)
 			} else {
 				log.Debug("进来了")
 

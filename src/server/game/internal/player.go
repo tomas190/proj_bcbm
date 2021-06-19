@@ -18,6 +18,7 @@ type User struct {
 	DownBetTotal  float64    // 玩家总下注
 	winCount      uint32     // 玩家赢的次数
 	betAmount     float64    // 玩家总投注金额
+	LockMoney     float64    // 下注锁定的钱
 	IsAction      bool       // 玩家是否行动
 }
 
