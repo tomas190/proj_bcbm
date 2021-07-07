@@ -435,3 +435,51 @@ func (m *MgoC) GetRobotData() ([]RobotDATA, error) {
 
 	return wts, nil
 }
+
+type StatementData struct {
+	Id                 string  `json:"id" bson:"id"`
+	GameId             string  `json:"game_id" bson:"game_id"`
+	GameName           string  `json:"game_name" bson:"game_name"`
+	StartTime          int64   `json:"start_time" bson:"start_time"`
+	EndTime            int64   `json:"end_time" bson:"end_time"`
+	DownBetTime        int64   `json:"down_bet_time" bson:"down_bet_time"`
+	PackageId          uint16  `json:"package_id" bson:"package_id"`
+	WinStatementTotal  float64 `json:"win_statement_total" bson:"win_statement_total"`
+	LoseStatementTotal float64 `json:"lose_statement_total" bson:"lose_statement_total"`
+	BetMoney           float64 `json:"bet_money" bson:"bet_money"`
+}
+
+func (m *MgoC) InsertStatementDB(data *StatementData) error {
+	collection := m.Database(constant.DBName).Collection("StatementDB")
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+
+	_, err := collection.InsertOne(ctx, data)
+	if err != nil {
+		log.Error("<----- 插入游戏统计数据失败 ~ ----->:%+v", err)
+		return err
+	}
+	return nil
+}
+
+func (m *MgoC) GetStatementDB(selector bson.M) ([]StatementData, error) {
+	collection := m.Database(constant.DBName).Collection("StatementDB")
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+
+	var wts []StatementData
+
+	cur, err2 := collection.Find(ctx, selector)
+	if err2 != nil {
+		log.Debug("获取用户數據错误 %+v", err2)
+	}
+
+	for cur.Next(ctx) {
+		var PRecode StatementData
+		err := cur.Decode(&PRecode)
+		if err != nil {
+			//log.Debug("数据库数据解码错误 %+v", err)
+		}
+		wts = append(wts, PRecode)
+	}
+
+	return wts, nil
+}

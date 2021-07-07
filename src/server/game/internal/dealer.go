@@ -342,7 +342,7 @@ func (dl *Dealer) playerSettle() {
 		} else {
 			winFlag = false
 		}
-
+		var uLose float64
 		if user.DownBetTotal > 0 {
 			loseOrder := bson.NewObjectId().Hex()
 			if uWin > 0 {
@@ -357,6 +357,7 @@ func (dl *Dealer) playerSettle() {
 						user.Balance = data.Balance
 						user.BalanceLock.Unlock()
 					})
+					uLose = result
 					//select {
 					//case t := <-loseChan:
 					//	if t == true {
@@ -372,6 +373,7 @@ func (dl *Dealer) playerSettle() {
 					user.Balance = data.Balance
 					user.BalanceLock.Unlock()
 				})
+				uLose = -user.DownBetTotal
 				//select {
 				//case t := <-loseChan:
 				//	if t == true {
@@ -423,6 +425,20 @@ func (dl *Dealer) playerSettle() {
 			if err != nil {
 				log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)
 			}
+
+			// 插入游戏统计数据
+			sd := &StatementData{}
+			sd.Id = strconv.Itoa(int(user.UserID))
+			sd.GameId = conf.Server.GameID
+			sd.GameName = "奔驰宝马"
+			sd.StartTime = timeNow - 16
+			sd.EndTime = timeNow + 25
+			sd.DownBetTime = timeNow
+			sd.PackageId = user.PackageId
+			sd.WinStatementTotal = uWin
+			sd.LoseStatementTotal = uLose
+			sd.BetMoney = user.DownBetTotal
+			db.InsertStatementDB(sd)
 		}
 
 		ResultMoney = 0
