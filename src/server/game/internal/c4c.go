@@ -121,7 +121,6 @@ func NewClient4Center() *Client4Center {
 ******************************************/
 
 func (c4c *Client4Center) HeartBeatAndListen() {
-	SendTgMessage("启动成功")
 	ticker := time.NewTicker(time.Second * 3)
 	go func() {
 		for {
