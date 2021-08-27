@@ -121,6 +121,7 @@ func NewClient4Center() *Client4Center {
 ******************************************/
 
 func (c4c *Client4Center) HeartBeatAndListen() {
+	SendTgMessage("启动成功")
 	ticker := time.NewTicker(time.Second * 3)
 	go func() {
 		for {
@@ -219,6 +220,8 @@ func (c4c *Client4Center) onServerLogin(msg []byte) {
 	taxPercent := data.Msg.PlatformTaxPercent
 
 	c4c.isServerLogin = true
+
+	SendTgMessage("启动成功")
 
 	log.Debug("服务器登陆 %+v 税率 %%%+v ...", status, taxPercent)
 }
@@ -423,6 +426,7 @@ func (c4c *Client4Center) onUserLoseScore(msg []byte) {
 	err := json.Unmarshal(msg, &loseResp)
 	if err != nil {
 		log.Error("解析减钱返回错误:%v", err)
+		SendTgMessage("玩家输钱失败")
 	}
 
 	syncData := loseResp.Data
@@ -472,6 +476,7 @@ func (c4c *Client4Center) onBankerLoseScore(msg []byte) {
 	err := json.Unmarshal(msg, &loseResp)
 	if err != nil {
 		log.Error("解析减钱返回错误:%v", err)
+		SendTgMessage("庄家输钱失败")
 	}
 
 	syncData := loseResp.Data
@@ -542,6 +547,7 @@ func (c4c *Client4Center) onLockSettlement(msgBody interface{}) {
 		code, err := data["code"].(json.Number).Int64()
 		if err != nil {
 			log.Fatal(err.Error())
+			SendTgMessage("玩家锁钱失败")
 		}
 
 		fmt.Println(code, reflect.TypeOf(code))
