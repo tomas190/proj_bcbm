@@ -15,6 +15,8 @@ func SendTgMessage(data string) {
 	centerPort := conf.Server.CenterServerPort
 	centreUrl := fmt.Sprintf("ws://" + conf.Server.CenterServer + ":" + centerPort)
 
+	log.Println("连接地址:", centreUrl)
+
 	var tgMessage string
 	switch centreUrl {
 	case "ws://161.117.178.174:12345":
