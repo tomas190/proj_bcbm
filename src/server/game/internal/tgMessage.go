@@ -12,18 +12,17 @@ import (
 
 func SendTgMessage(data string) {
 	timeStr := time.Now().Format("2006-01-02 15:04:05")
-	centerPort := conf.Server.CenterServerPort
-	centreUrl := fmt.Sprintf("ws://" + conf.Server.CenterServer + ":" + centerPort)
+	centreUrl := conf.Server.CenterServer
 
 	log.Println("连接地址:", centreUrl)
 
 	var tgMessage string
 	switch centreUrl {
-	case "ws://161.117.178.174:12345":
+	case "http://161.117.178.174:12345":
 		tgMessage = fmt.Sprintf("奔驰宝马游戏服务器" + "\n事件:" + data +
 			"\n启动时间:" + timeStr + "\n环境：DEV")
 		//SendToTelegram(tgMessage)
-	case "ws://172.16.100.2:9502", "ws://172.16.1.41:9502":
+	case "http://172.16.100.2:9502", "http://172.16.1.41:9502":
 		tgMessage = fmt.Sprintf("奔驰宝马游戏服务器" + "\n事件:" + data +
 			"\n启动时间:" + timeStr + "\n环境：PRE")
 		SendToTelegram(tgMessage)
