@@ -130,6 +130,18 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		}
 	}
 
+	var lockBet float64
+	for _, b := range dl.AutoBetRecord[au.UserID] {
+		bet := b
+		cs := constant.ChipSize[bet.Chip]
+		lockBet += cs
+	}
+
+	orderId := bson.NewObjectId().Hex()
+	uid := util.UUID{}
+	roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
+	c4c.LockSettlement(au, lockBet, orderId, roundId)
+
 	for _, b := range dl.AutoBetRecord[au.UserID] {
 		bet := b
 		cs := constant.ChipSize[bet.Chip]
