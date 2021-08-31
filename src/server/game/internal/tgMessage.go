@@ -18,11 +18,11 @@ func SendTgMessage(data string) {
 
 	var tgMessage string
 	switch centreUrl {
-	case "http://161.117.178.174:12345":
+	case "http://172.16.100.2:9502":
 		tgMessage = fmt.Sprintf("奔驰宝马游戏服务器" + "\n事件:" + data +
 			"\n启动时间:" + timeStr + "\n环境：DEV")
 		//SendToTelegram(tgMessage)
-	case "http://172.16.100.2:9502", "http://172.16.1.41:9502":
+	case "http://172.16.1.41:9502":
 		tgMessage = fmt.Sprintf("奔驰宝马游戏服务器" + "\n事件:" + data +
 			"\n启动时间:" + timeStr + "\n环境：PRE")
 		SendToTelegram(tgMessage)

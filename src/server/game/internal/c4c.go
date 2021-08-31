@@ -7,6 +7,7 @@ import (
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
+	"proj_bcbm/src/server/msg"
 	"reflect"
 	"strconv"
 	"strings"
@@ -420,19 +421,35 @@ func (c4c *Client4Center) onUserWinScore(msg []byte) {
 	}
 }
 
-func (c4c *Client4Center) onUserLoseScore(msg []byte) {
+func (c4c *Client4Center) onUserLoseScore(msgData []byte) {
 	loseResp := SyncScoreResp{}
-	err := json.Unmarshal(msg, &loseResp)
+	err := json.Unmarshal(msgData, &loseResp)
 	if err != nil {
 		log.Error("解析减钱返回错误:%v", err)
-		SendTgMessage("玩家输钱失败")
 	}
 
 	syncData := loseResp.Data
+	order := syncData.Msg.Order
+	if syncData.Code != constant.CRespStatusSuccess {
+		id, _ := Mgr.OrderIDRecord.Load(order)
+		v, ok := Mgr.UserRecord.Load(id)
+		if ok {
+			u := v.(*User)
+			c4c.UserLogoutCenter(u.UserID, func(data *User) {
+				Mgr.UserRecord.Delete(u.UserID)
+				resp := &msg.LogoutR{}
+				u.ConnAgent.WriteMsg(resp)
+				u.ConnAgent.Close()
+				Mgr.OrderIDRecord.Delete(order)
+				SendTgMessage("玩家输钱失败并登出")
+			})
+		}
+	}
+
 	if syncData.Code == constant.CRespStatusSuccess {
 		log.Debug("onUserLoseScore SUCCESS :%v", loseResp)
 		//loseChan <- true
-
+		Mgr.OrderIDRecord.Delete(order)
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order)); ok {
 			loginCallBack.(UserCallback)(&User{UserID: syncData.Msg.ID, Balance: syncData.Msg.FinalBalance})
 			c4c.userWaitEvent.Delete(fmt.Sprintf("%+v-lose-%+v", syncData.Msg.ID, syncData.Msg.Order))
@@ -470,15 +487,31 @@ func (c4c *Client4Center) onChangeBankerStatus(msg []byte) {
 	}
 }
 
-func (c4c *Client4Center) onBankerLoseScore(msg []byte) {
+func (c4c *Client4Center) onBankerLoseScore(msgData []byte) {
 	loseResp := SyncScoreResp{}
-	err := json.Unmarshal(msg, &loseResp)
+	err := json.Unmarshal(msgData, &loseResp)
 	if err != nil {
 		log.Error("解析减钱返回错误:%v", err)
-		SendTgMessage("庄家输钱失败")
 	}
 
 	syncData := loseResp.Data
+	order := syncData.Msg.Order
+	if syncData.Code != constant.CRespStatusSuccess {
+		id, _ := Mgr.OrderIDRecord.Load(order)
+		v, ok := Mgr.UserRecord.Load(id)
+		if ok {
+			u := v.(*User)
+			c4c.UserLogoutCenter(u.UserID, func(data *User) {
+				Mgr.UserRecord.Delete(u.UserID)
+				resp := &msg.LogoutR{}
+				u.ConnAgent.WriteMsg(resp)
+				u.ConnAgent.Close()
+				Mgr.OrderIDRecord.Delete(order)
+				SendTgMessage("庄家输钱失败并登出")
+			})
+		}
+	}
+
 	if syncData.Code == constant.CRespStatusSuccess {
 		log.Debug("onBankerLoseScore SUCCESS :%v", loseResp)
 
@@ -546,12 +579,31 @@ func (c4c *Client4Center) onLockSettlement(msgBody interface{}) {
 		code, err := data["code"].(json.Number).Int64()
 		if err != nil {
 			log.Fatal(err.Error())
-			SendTgMessage("玩家锁钱失败")
 		}
 
-		fmt.Println(code, reflect.TypeOf(code))
-		if data["status"] == "SUCCESS" && code == 200 {
-			log.Debug("<-------- onLockSettlement SUCCESS~!!! -------->")
+		msgData, ok := data["msg"].(map[string]interface{})
+		if ok {
+			order := msgData["order"]
+			if code != 200 {
+				log.Debug("锁钱失败:%v", data)
+				v, ok := Mgr.OrderIDRecord.Load(order)
+				if ok {
+					p := v.(*User)
+					p.LockChan <- false
+					Mgr.OrderIDRecord.Delete(order)
+				}
+				return
+			}
+			if data["status"] == "SUCCESS" && code == 200 {
+				log.Debug("<-------- onLockSettlement SUCCESS~!!! -------->")
+				v, ok := Mgr.OrderIDRecord.Load(order)
+				if ok {
+					p := v.(*User)
+					p.LockChan <- true
+					Mgr.OrderIDRecord.Delete(order)
+				}
+				return
+			}
 		}
 	}
 }
@@ -726,7 +778,7 @@ func (c4c *Client4Center) UserLoseScore(timeNow, userID uint32, money float64, D
 			},
 		},
 	}
-
+	Mgr.OrderIDRecord.Store(order, userID)
 	c4c.sendMsg2Center(loseSettleMsg)
 	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-lose-%+v", userID, order), callback)
 }
@@ -824,7 +876,7 @@ func (c4c *Client4Center) BankerLoseScore(userID uint32, money float64, order, r
 			},
 		},
 	}
-
+	Mgr.OrderIDRecord.Store(order, userID)
 	c4c.sendMsg2Center(loseSettleMsg)
 	c4c.userWaitEvent.Store(fmt.Sprintf("%+v-banker-lose-%+v", userID, order), callback)
 }
@@ -852,6 +904,7 @@ func (c4c *Client4Center) LockSettlement(au *User, lockAccount float64, order, r
 		},
 	}
 	c4c.sendMsg2Center(lockSettle)
+	Mgr.OrderIDRecord.Store(order, au.UserID)
 }
 
 //解锁

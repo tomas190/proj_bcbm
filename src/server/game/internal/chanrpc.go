@@ -18,6 +18,7 @@ func rpcNewAgent(args []interface{}) {
 	log.Debug("<----新连接---->")
 
 	u := &User{}
+	u.Init()
 	u.ConnAgent = a  // 保存连接到用户信息
 	a.SetUserData(u) // 附加用户信息到连接
 }

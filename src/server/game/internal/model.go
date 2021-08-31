@@ -25,15 +25,18 @@ type Hall struct {
 	UserRoom   map[uint32]uint32   // 用户房间
 	History    map[uint32][]uint32 // 各房间历史记录
 	HRChan     chan HRMsg          // 房间大厅通信
+
+	OrderIDRecord sync.Map // orderID对应user
 }
 
 func NewHall() *Hall {
 	return &Hall{
-		UserRecord: sync.Map{},
-		RoomRecord: sync.Map{},
-		UserRoom:   make(map[uint32]uint32),
-		History:    make(map[uint32][]uint32),
-		HRChan:     make(chan HRMsg, 6),
+		UserRecord:    sync.Map{},
+		RoomRecord:    sync.Map{},
+		UserRoom:      make(map[uint32]uint32),
+		History:       make(map[uint32][]uint32),
+		HRChan:        make(chan HRMsg, 6),
+		OrderIDRecord: sync.Map{},
 	}
 }
 

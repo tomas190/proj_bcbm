@@ -50,51 +50,64 @@ func (dl *Dealer) handleBet(args []interface{}) {
 			return
 		}
 
-		uuid := util.UUID{}
-		order := uuid.GenUUID()
-
-		// fixme 暂时延迟处理
-		rd := util.Random{}
-		delay := rd.RandInRange(0, 100)
-		time.Sleep(time.Millisecond * time.Duration(delay))
-		ca.Set(fmt.Sprintf("%+v-bet", au.UserID), order, cache.DefaultExpiration)
-
 		orderId := bson.NewObjectId().Hex()
 		uid := util.UUID{}
 		roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
-		// 锁钱
 		c4c.LockSettlement(au, cs, orderId, roundId)
-		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
-		dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
-		dl.DownBetArea[m.Area] = dl.DownBetArea[m.Area] + cs
-		// 当前用户在该区域的历史投注+当前用户投注
-		dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
-		// 用户具体投注信息
-		dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], *m)
 
-		au.DownBetTotal += constant.ChipSize[m.Chip]
-		dl.TotalDownMoney += constant.ChipSize[m.Chip]
-		au.Balance -= constant.ChipSize[m.Chip]
+		go func() {
+			timeout := time.NewTimer(time.Second * 2)
+			for {
+				select {
+				case Act := <-au.LockChan:
+					if Act {
+						uuid := util.UUID{}
+						order := uuid.GenUUID()
+						// fixme 暂时延迟处理
+						rd := util.Random{}
+						delay := rd.RandInRange(0, 100)
+						time.Sleep(time.Millisecond * time.Duration(delay))
+						ca.Set(fmt.Sprintf("%+v-bet", au.UserID), order, cache.DefaultExpiration)
 
-		dl.UserIsDownBet[au.UserID] = true
-		au.IsAction = true
+						// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
+						dl.AreaBets[m.Area] = dl.AreaBets[m.Area] + cs
+						dl.DownBetArea[m.Area] = dl.DownBetArea[m.Area] + cs
+						// 当前用户在该区域的历史投注+当前用户投注
+						dl.UserBets[au.UserID][m.Area] = dl.UserBets[au.UserID][m.Area] + cs
+						// 用户具体投注信息
+						dl.UserBetsDetail[au.UserID] = append(dl.UserBetsDetail[au.UserID], *m)
 
-		resp := &msg.BetInfoB{
-			Area:        m.Area,
-			Chip:        m.Chip,
-			AreaTotal:   dl.AreaBets[m.Area],
-			PlayerTotal: dl.UserBets[au.UserID][m.Area],
-			PlayerID:    au.UserID,
-			Money:       au.Balance,
-		}
-		dl.Broadcast(resp)
+						au.DownBetTotal += constant.ChipSize[m.Chip]
+						dl.TotalDownMoney += constant.ChipSize[m.Chip]
+						au.Balance -= constant.ChipSize[m.Chip]
 
-		//log.Debug("<<=====>>玩家金额: %v", au.Balance)
-		// fixme 暂时延迟处理
-		time.Sleep(6 * time.Millisecond)
-		ca.Delete(fmt.Sprintf("%+v-bet", au.UserID))
-		// 记录玩家投注信息
-		return
+						dl.UserIsDownBet[au.UserID] = true
+						au.IsAction = true
+
+						resp := &msg.BetInfoB{
+							Area:        m.Area,
+							Chip:        m.Chip,
+							AreaTotal:   dl.AreaBets[m.Area],
+							PlayerTotal: dl.UserBets[au.UserID][m.Area],
+							PlayerID:    au.UserID,
+							Money:       au.Balance,
+						}
+						dl.Broadcast(resp)
+
+						// fixme 暂时延迟处理
+						time.Sleep(6 * time.Millisecond)
+						ca.Delete(fmt.Sprintf("%+v-bet", au.UserID))
+						return
+					} else {
+						SendTgMessage("玩家锁钱失败并下注失败")
+						return
+					}
+				case <-timeout.C:
+					log.Debug("超时处理锁钱")
+					return
+				}
+			}
+		}()
 	}
 }
 
@@ -133,38 +146,65 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		}
 	}
 
+	var autoBet float64
 	for _, b := range dl.AutoBetRecord[au.UserID] {
 		bet := b
 		cs := constant.ChipSize[bet.Chip]
-
-		// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
-		dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
-		dl.DownBetArea[bet.Area] = dl.DownBetArea[bet.Area] + cs
-		// 当前用户在该区域的历史投注+当前用户投注
-		dl.UserBets[au.UserID][bet.Area] = dl.UserBets[au.UserID][bet.Area] + cs
-
-		autoBetAmounts[bet.Area] += cs
-
-		au.DownBetTotal += cs
-		dl.TotalDownMoney += cs
-		au.Balance -= cs
-
-		//log.Debug("续投成功 ~~~~: %v", au.DownBetTotal)
+		autoBet += cs
 	}
 
-	resp := &msg.AutoBetB{
-		UserID:      au.UserID,
-		Amounts:     autoBetAmounts,
-		AreaTotal:   dl.AreaBets,
-		PlayerTotal: dl.UserBets[au.UserID],
-		Money:       au.Balance,
-	}
+	orderId := bson.NewObjectId().Hex()
+	uid := util.UUID{}
+	roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
+	c4c.LockSettlement(au, autoBet, orderId, roundId)
 
-	dl.Broadcast(resp)
+	go func() {
+		timeout := time.NewTimer(time.Second * 2)
+		for {
+			select {
+			case Act := <-au.LockChan:
+				if Act {
+					for _, b := range dl.AutoBetRecord[au.UserID] {
+						bet := b
+						cs := constant.ChipSize[bet.Chip]
 
-	dl.UserIsDownBet[au.UserID] = true
-	au.IsAction = true
-	dl.UserAutoBet[au.UserID] = true
+						// 所有用户在该区域历史投注+机器人在该区域历史投注+当前用户投注
+						dl.AreaBets[bet.Area] = dl.AreaBets[bet.Area] + cs
+						dl.DownBetArea[bet.Area] = dl.DownBetArea[bet.Area] + cs
+						// 当前用户在该区域的历史投注+当前用户投注
+						dl.UserBets[au.UserID][bet.Area] = dl.UserBets[au.UserID][bet.Area] + cs
+
+						autoBetAmounts[bet.Area] += cs
+
+						au.DownBetTotal += cs
+						dl.TotalDownMoney += cs
+						au.Balance -= cs
+					}
+
+					resp := &msg.AutoBetB{
+						UserID:      au.UserID,
+						Amounts:     autoBetAmounts,
+						AreaTotal:   dl.AreaBets,
+						PlayerTotal: dl.UserBets[au.UserID],
+						Money:       au.Balance,
+					}
+
+					dl.Broadcast(resp)
+
+					dl.UserIsDownBet[au.UserID] = true
+					au.IsAction = true
+					dl.UserAutoBet[au.UserID] = true
+					return
+				} else {
+					SendTgMessage("玩家锁钱失败并下注失败")
+					return
+				}
+			case <-timeout.C:
+				log.Debug("超时处理锁钱")
+				return
+			}
+		}
+	}()
 }
 
 func (dl *Dealer) handlePlayers(args []interface{}) {
