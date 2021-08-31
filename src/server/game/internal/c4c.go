@@ -587,22 +587,21 @@ func (c4c *Client4Center) onLockSettlement(msgData []byte) {
 		id, _ := Mgr.OrderIDRecord.Load(order)
 		v, ok := Mgr.UserRecord.Load(id)
 		if ok {
-			p := v.(*User)
-			p.LockSucc = -1
-			Mgr.OrderIDRecord.Delete(order)
+			u := v.(*User)
+			c4c.UserLogoutCenter(u.UserID, func(data *User) {
+				Mgr.UserRecord.Delete(u.UserID)
+				resp := &msg.LogoutR{}
+				u.ConnAgent.WriteMsg(resp)
+				u.ConnAgent.Close()
+				Mgr.OrderIDRecord.Delete(order)
+				SendTgMessage("玩家输钱失败并登出")
+			})
 		}
 		return
 	}
 	if syncData.Code == constant.CRespStatusSuccess {
 		log.Debug("<-------- onLockSettlement SUCCESS~!!! -------->")
-		id, _ := Mgr.OrderIDRecord.Load(order)
-		v, ok := Mgr.UserRecord.Load(id)
-		if ok {
-			p := v.(*User)
-			p.LockSucc = 1
-			log.Debug("玩家锁钱成功:%v", p)
-			Mgr.OrderIDRecord.Delete(order)
-		}
+		Mgr.OrderIDRecord.Delete(order)
 		return
 	}
 }
