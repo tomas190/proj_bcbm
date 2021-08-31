@@ -309,10 +309,12 @@ func (dl *Dealer) playerSettle() {
 		//	return true
 		//}
 
-		order := bson.NewObjectId().Hex()
-		uid := util.UUID{}
-		roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
-		c4c.UnlockSettlement(user, order, roundId)
+		if user.LockMoney > 0 {
+			order := bson.NewObjectId().Hex()
+			uid := util.UUID{}
+			roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
+			c4c.UnlockSettlement(user, order, roundId)
+		}
 
 		if uWin > 0 {
 			winFlag = true

@@ -20,7 +20,7 @@ type User struct {
 	betAmount     float64    // 玩家总投注金额
 	LockMoney     float64    // 下注锁定的钱
 	IsAction      bool       // 玩家是否行动
-	LockChan      chan bool  // 是否锁钱成功
+	LockSucc      int        // 是否锁钱成功
 }
 
 func (u *User) Init() {
@@ -30,7 +30,7 @@ func (u *User) Init() {
 	u.winCount = 0
 	u.betAmount = 0
 	u.IsAction = false
-	u.LockChan = make(chan bool)
+	u.LockSucc = 0
 }
 
 type Bot struct {

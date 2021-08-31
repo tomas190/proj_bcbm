@@ -588,7 +588,7 @@ func (c4c *Client4Center) onLockSettlement(msgData []byte) {
 		v, ok := Mgr.UserRecord.Load(id)
 		if ok {
 			p := v.(*User)
-			p.LockChan <- false
+			p.LockSucc = -1
 			Mgr.OrderIDRecord.Delete(order)
 		}
 		return
@@ -599,7 +599,8 @@ func (c4c *Client4Center) onLockSettlement(msgData []byte) {
 		v, ok := Mgr.UserRecord.Load(id)
 		if ok {
 			p := v.(*User)
-			p.LockChan <- true
+			p.LockSucc = 1
+			log.Debug("玩家锁钱成功:%v", p)
 			Mgr.OrderIDRecord.Delete(order)
 		}
 		return
