@@ -573,54 +573,52 @@ func (c4c *Client4Center) onError(msg []byte) {
 }
 
 //onWinMoreThanNotice 加锁金额
-func (c4c *Client4Center) onLockSettlement(msgBody interface{}) {
-	data, ok := msgBody.(map[string]interface{})
-	if ok {
-		code, err := data["code"].(json.Number).Int64()
-		if err != nil {
-			log.Fatal(err.Error())
-		}
+func (c4c *Client4Center) onLockSettlement(msgData []byte) {
+	loseResp := LockSettleResp{}
+	err := json.Unmarshal(msgData, &loseResp)
+	if err != nil {
+		log.Error("解析锁钱返回错误:%v", err)
+	}
 
-		msgData, ok := data["msg"].(map[string]interface{})
+	syncData := loseResp.Data
+	order := syncData.Msg.Order
+	if syncData.Code != constant.CRespStatusSuccess {
+		log.Debug("锁钱失败:%v", syncData)
+		id, _ := Mgr.OrderIDRecord.Load(order)
+		v, ok := Mgr.UserRecord.Load(id)
 		if ok {
-			order := msgData["order"]
-			if code != 200 {
-				log.Debug("锁钱失败:%v", data)
-				v, ok := Mgr.OrderIDRecord.Load(order)
-				if ok {
-					p := v.(*User)
-					p.LockChan <- false
-					Mgr.OrderIDRecord.Delete(order)
-				}
-				return
-			}
-			if data["status"] == "SUCCESS" && code == 200 {
-				log.Debug("<-------- onLockSettlement SUCCESS~!!! -------->")
-				v, ok := Mgr.OrderIDRecord.Load(order)
-				if ok {
-					p := v.(*User)
-					p.LockChan <- true
-					Mgr.OrderIDRecord.Delete(order)
-				}
-				return
-			}
+			p := v.(*User)
+			p.LockChan <- false
+			Mgr.OrderIDRecord.Delete(order)
 		}
+		return
+	}
+	if syncData.Code == constant.CRespStatusSuccess {
+		log.Debug("<-------- onLockSettlement SUCCESS~!!! -------->")
+		id, _ := Mgr.OrderIDRecord.Load(order)
+		v, ok := Mgr.UserRecord.Load(id)
+		if ok {
+			p := v.(*User)
+			p.LockChan <- true
+			Mgr.OrderIDRecord.Delete(order)
+		}
+		return
 	}
 }
 
 //onWinMoreThanNotice 解锁金额
-func (c4c *Client4Center) onUnlockSettlement(msgBody interface{}) {
-	data, ok := msgBody.(map[string]interface{})
-	if ok {
-		code, err := data["code"].(json.Number).Int64()
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-
-		fmt.Println(code, reflect.TypeOf(code))
-		if data["status"] == "SUCCESS" && code == 200 {
-			log.Debug("<-------- onUnlockSettlement SUCCESS~!!! -------->")
-		}
+func (c4c *Client4Center) onUnlockSettlement(msgData []byte) {
+	onUnlockResp := LockSettleResp{}
+	err := json.Unmarshal(msgData, &onUnlockResp)
+	if err != nil {
+		log.Error("解析减钱返回错误:%v", err)
+	}
+	syncData := onUnlockResp.Data
+	if syncData.Code == constant.CRespStatusSuccess {
+		log.Debug("<-------- onUnlockSettlement SUCCESS~!!! -------->")
+		return
+	} else {
+		log.Debug("解锁金额失败:%v", syncData)
 	}
 }
 

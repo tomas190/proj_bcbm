@@ -292,3 +292,27 @@ type LockChangeSettle struct {
 	Auth ServerAuth           `json:"auth"`
 	Info SyncScoreReqDataInfo `json:"info"`
 }
+
+type LockSettleResp struct {
+	Event string             `json:"event"`
+	Data  LockSettleRespData `json:"data"`
+}
+
+type LockSettleRespData struct {
+	Code   int          `json:"code"`
+	Status string       `json:"status"`
+	Msg    SyncScoreMsg `json:"msg"`
+}
+
+type LockSettleMsg struct {
+	UserID     uint32  `json:"id"`
+	CreateTime uint32  `json:"create_time"`
+	PayReason  string  `json:"pay_reason"`
+	Money      float64 `json:"money"`
+	BetMoney   float64 `json:"bet_money"`
+	LockMoney  float64 `json:"lock_money"`
+	PreMoney   float64 `json:"pre_money"`
+	Order      string  `json:"order"`
+	GameID     string  `json:"game_id"`
+	RoundID    string  `json:"round_id"`
+}
