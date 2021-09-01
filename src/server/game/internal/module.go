@@ -1,13 +1,16 @@
 package internal
 
 import (
+	"fmt"
 	"github.com/name5566/leaf/module"
 	"github.com/patrickmn/go-cache"
+	"gopkg.in/mgo.v2/bson"
 	_ "net/http/pprof"
 	"proj_bcbm/src/server/base"
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
+	"proj_bcbm/src/server/util"
 	"time"
 )
 
@@ -72,4 +75,16 @@ func (m *Module) OnDestroy() {
 		Code: msg.ErrorCode_ServerClosed,
 	}
 	log.Debug("踢出所有客户端 %+v...", data)
+
+	Mgr.UserRecord.Range(func(key, value interface{}) bool {
+		p := value.(*User)
+		if p.LockMoney > 0 {
+			order := bson.NewObjectId().Hex()
+			uid := util.UUID{}
+			roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
+			c4c.UnlockSettlement(p, order, roundId)
+		}
+		c4c.UserLogoutCenter(p.UserID, func(data *User) {})
+		return true
+	})
 }
