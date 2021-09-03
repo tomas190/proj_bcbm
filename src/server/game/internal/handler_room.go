@@ -58,6 +58,13 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		time.Sleep(time.Millisecond * time.Duration(delay))
 		ca.Set(fmt.Sprintf("%+v-bet", au.UserID), order, cache.DefaultExpiration)
 
+		if cs == 1 || cs == 10 || cs == 100 ||
+			cs == 500 || cs == 1000 {
+			log.Debug("玩家下注金额:%v", cs)
+		} else {
+			log.Debug("玩家下注金额错误:%v", cs)
+			return
+		}
 		orderId := bson.NewObjectId().Hex()
 		uid := util.UUID{}
 		roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
@@ -137,6 +144,10 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		lockBet += cs
 	}
 
+	if lockBet < 0 {
+		log.Debug("续投金额失败:%v", lockBet)
+		return
+	}
 	orderId := bson.NewObjectId().Hex()
 	uid := util.UUID{}
 	roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())

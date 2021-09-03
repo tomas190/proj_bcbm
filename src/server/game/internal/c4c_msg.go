@@ -193,6 +193,7 @@ type SyncScoreMsg struct {
 	Income             float64 `json:"income"`
 	Order              string  `json:"order"`
 	RoundID            string  `json:"round_id"`
+	LockMoney          float64 `json:"lock_money"`
 }
 
 /***************************************************

@@ -601,7 +601,13 @@ func (c4c *Client4Center) onLockSettlement(msgData []byte) {
 	}
 	if syncData.Code == constant.CRespStatusSuccess {
 		log.Debug("<-------- onLockSettlement SUCCESS~!!! -------->")
-		Mgr.OrderIDRecord.Delete(order)
+		id, _ := Mgr.OrderIDRecord.Load(order)
+		v, ok := Mgr.UserRecord.Load(id)
+		if ok {
+			u := v.(*User)
+			u.LockMoney += syncData.Msg.LockMoney
+			Mgr.OrderIDRecord.Delete(order)
+		}
 		return
 	}
 }
@@ -881,7 +887,6 @@ func (c4c *Client4Center) BankerLoseScore(userID uint32, money float64, order, r
 
 //锁钱
 func (c4c *Client4Center) LockSettlement(au *User, lockAccount float64, order, roundID string) {
-	au.LockMoney += lockAccount
 	lockSettle := LockSettle{
 		Event: constant.MsgLockSettlement,
 		Data: LockChangeSettle{
