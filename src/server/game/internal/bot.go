@@ -127,8 +127,10 @@ func (dl *Dealer) AddBots() {
 			rNum2 := int(rNum * 1000)
 			rNum3 := r.RandInRange(0, 1000)
 			if rNum3 <= rNum2 {
-				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
-				time.Sleep(time.Millisecond)
+				if k < len(dl.Bots) {
+					dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
+					time.Sleep(time.Millisecond)
+				}
 			}
 		}
 	}
@@ -149,12 +151,14 @@ func (dl *Dealer) AddBots() {
 	} else if robotNum > handleNum { // 减
 		for k, v := range dl.Bots {
 			if v != nil {
-				dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
-				time.Sleep(time.Millisecond)
-				robotNum = len(dl.Bots)
-				if robotNum <= handleNum {
-					log.Debug("当前房间:%v,减机器人数量:%v", dl.RoomID, len(dl.Bots))
-					break
+				if k < len(dl.Bots) {
+					dl.Bots = append(dl.Bots[:k], dl.Bots[k+1:]...)
+					time.Sleep(time.Millisecond)
+					robotNum = len(dl.Bots)
+					if robotNum <= handleNum {
+						log.Debug("当前房间:%v,减机器人数量:%v", dl.RoomID, len(dl.Bots))
+						break
+					}
 				}
 			}
 		}

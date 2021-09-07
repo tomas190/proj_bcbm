@@ -738,3 +738,4 @@ func (dl *Dealer) ClearData() {
 func SetPackageTaxM(packageT uint16, tax float64) {
 	packageTax[packageT] = tax
 }
+
