@@ -313,7 +313,7 @@ func (dl *Dealer) playerSettle() {
 			order := bson.NewObjectId().Hex()
 			uid := util.UUID{}
 			roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
-			c4c.UnlockSettlement(user, order, roundId)
+			c4c.UnlockSettlement(user.UserID, user.LockMoney, order, roundId)
 		}
 
 		if uWin > 0 {
@@ -738,4 +738,3 @@ func (dl *Dealer) ClearData() {
 func SetPackageTaxM(packageT uint16, tax float64) {
 	packageTax[packageT] = tax
 }
-

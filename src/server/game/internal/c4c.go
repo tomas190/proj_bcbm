@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"gopkg.in/mgo.v2/bson"
 	"proj_bcbm/src/server/conf"
 	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
+	"proj_bcbm/src/server/util"
 	"reflect"
 	"strconv"
 	"strings"
@@ -292,6 +294,15 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 
 		gameUser := userData.Msg.GameUser
 		gameAccount := userData.Msg.GameAccount
+		lockBalance := userData.Msg.GameAccount.LockBalance
+
+		if lockBalance > 0 {
+			order := bson.NewObjectId().Hex()
+			uid := util.UUID{}
+			roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
+			c4c.UnlockSettlement(gameUser.UserID, lockBalance, order, roundId)
+			log.Debug("玩家登入时锁资金:%v", lockBalance)
+		}
 
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-login", gameUser.UserID)); ok {
 			loginCallBack.(UserCallback)(&User{
@@ -911,7 +922,7 @@ func (c4c *Client4Center) LockSettlement(au *User, lockAccount float64, order, r
 }
 
 //解锁
-func (c4c *Client4Center) UnlockSettlement(au *User, order, roundID string) {
+func (c4c *Client4Center) UnlockSettlement(UserId uint32, LockMoney float64, order, roundID string) {
 	unLockSettle := UnLockSettle{
 		Event: constant.MsgUnlockSettlement,
 		Data: LockChangeSettle{
@@ -921,10 +932,10 @@ func (c4c *Client4Center) UnlockSettlement(au *User, order, roundID string) {
 			},
 
 			Info: SyncScoreReqDataInfo{
-				UserID:     au.UserID,
+				UserID:     UserId,
 				CreateTime: uint32(time.Now().Unix()),
 				PayReason:  "UnLockMoney",
-				LockMoney:  au.LockMoney,
+				LockMoney:  LockMoney,
 				Order:      order,
 				GameID:     conf.Server.GameID,
 				RoundID:    roundID,

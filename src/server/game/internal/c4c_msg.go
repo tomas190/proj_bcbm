@@ -88,6 +88,7 @@ type GameUser struct {
 type GameAccount struct {
 	Balance       float64 `json:"balance"`
 	BankerBalance float64 `json:"banker_balance"`
+	LockBalance   float64 `json:"lock_balance"`
 	Status        int     `json:"status"`
 	GameName      string  `json:"game_name"`
 }

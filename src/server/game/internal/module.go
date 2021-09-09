@@ -82,7 +82,7 @@ func (m *Module) OnDestroy() {
 			order := bson.NewObjectId().Hex()
 			uid := util.UUID{}
 			roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
-			c4c.UnlockSettlement(p, order, roundId)
+			c4c.UnlockSettlement(p.UserID, p.LockMoney, order, roundId)
 		}
 		c4c.UserLogoutCenter(p.UserID, func(data *User) {})
 		return true
