@@ -452,7 +452,9 @@ func (c4c *Client4Center) onUserLoseScore(msgData []byte) {
 				u.ConnAgent.WriteMsg(resp)
 				u.ConnAgent.Close()
 				Mgr.OrderIDRecord.Delete(order)
-				SendTgMessage("玩家输钱失败并登出")
+				id := strconv.FormatUint(uint64(u.UserID), 10)
+				message := fmt.Sprintf("玩家" + id + "输钱失败并登出")
+				SendTgMessage(message)
 			})
 		}
 	}
@@ -518,7 +520,9 @@ func (c4c *Client4Center) onBankerLoseScore(msgData []byte) {
 				u.ConnAgent.WriteMsg(resp)
 				u.ConnAgent.Close()
 				Mgr.OrderIDRecord.Delete(order)
-				SendTgMessage("庄家输钱失败并登出")
+				id := strconv.FormatUint(uint64(u.UserID), 10)
+				message := fmt.Sprintf("庄家" + id + "输钱失败并登出")
+				SendTgMessage(message)
 			})
 		}
 	}
@@ -605,7 +609,9 @@ func (c4c *Client4Center) onLockSettlement(msgData []byte) {
 				u.ConnAgent.WriteMsg(resp)
 				u.ConnAgent.Close()
 				Mgr.OrderIDRecord.Delete(order)
-				SendTgMessage("玩家输钱失败并登出")
+				id := strconv.FormatUint(uint64(u.UserID), 10)
+				message := fmt.Sprintf("玩家" + id + "锁钱失败")
+				SendTgMessage(message)
 			})
 		}
 		return
