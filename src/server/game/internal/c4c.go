@@ -604,6 +604,17 @@ func (c4c *Client4Center) onLockSettlement(msgData []byte) {
 		if ok {
 			u := v.(*User)
 			c4c.UserLogoutCenter(u.UserID, func(data *User) {
+				rid := Mgr.UserRoom[u.UserID]
+				v, _ := Mgr.RoomRecord.Load(rid)
+				if v != nil {
+					dl := v.(*Dealer)
+					u.winCount = 0
+					u.betAmount = 0
+					dl.UserIsDownBet[u.UserID] = false
+					u.IsAction = false
+					dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+					dl.Users.Delete(u.UserID)
+				}
 				Mgr.UserRecord.Delete(u.UserID)
 				resp := &msg.LogoutR{}
 				u.ConnAgent.WriteMsg(resp)
