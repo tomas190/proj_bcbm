@@ -144,8 +144,13 @@ func (dl *Dealer) handleAutoBet(args []interface{}) {
 		lockBet += cs
 	}
 
-	if lockBet < 0 {
+	if lockBet <= 0 {
 		log.Debug("续投金额失败:%v", lockBet)
+		errorResp(a, msg.ErrorCode_InsufficientBalanceBet, "余额不足")
+		return
+	}
+	if au.Balance < lockBet {
+		errorResp(a, msg.ErrorCode_InsufficientBalanceBet, "余额不足")
 		return
 	}
 	orderId := bson.NewObjectId().Hex()
