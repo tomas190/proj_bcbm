@@ -65,6 +65,7 @@ func rpcCloseAgent(args []interface{}) {
 			}
 		} else {
 			c4c.UserLogoutCenter(au.UserID, func(data *User) {
+				Mgr.UserRecord.Delete(au.UserID)
 				resp := &msg.LogoutR{}
 				a.WriteMsg(resp)
 				a.Close()

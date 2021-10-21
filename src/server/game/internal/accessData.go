@@ -577,6 +577,7 @@ func getOnlineTotal(w http.ResponseWriter, r *http.Request) {
 			user := value.(*User)
 			if user.PackageId == uint16(packId) {
 				data.PlayerList = append(data.PlayerList, user.UserID)
+				log.Debug("获取玩家信息:%v", user)
 			}
 			return true
 		})
