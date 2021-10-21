@@ -117,9 +117,9 @@ type StatementResp struct {
 }
 
 type OnlineTotal struct {
-	GameId     string          `json:"game_id" bson:"game_id"`
-	GameName   string          `json:"game_name" bson:"game_name"`
-	OnlineData []*OnlinePlayer `json:"online_data" bson:"online_data"`
+	GameId   string          `json:"game_id" bson:"game_id"`
+	GameName string          `json:"game_name" bson:"game_name"`
+	GameData []*OnlinePlayer `json:"game_data" bson:"game_data"`
 }
 
 type OnlinePlayer struct {
@@ -567,7 +567,7 @@ func getOnlineTotal(w http.ResponseWriter, r *http.Request) {
 				}
 				return true
 			})
-			total.OnlineData = append(total.OnlineData, data)
+			total.GameData = append(total.GameData, data)
 		}
 	} else {
 		packId, _ := strconv.Atoi(packageId)
@@ -580,7 +580,7 @@ func getOnlineTotal(w http.ResponseWriter, r *http.Request) {
 			}
 			return true
 		})
-		total.OnlineData = append(total.OnlineData, data)
+		total.GameData = append(total.GameData, data)
 	}
 
 	js, err := json.Marshal(NewResp(SuccCode, "", total))
