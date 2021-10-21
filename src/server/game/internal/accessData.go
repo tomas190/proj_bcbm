@@ -116,6 +116,17 @@ type StatementResp struct {
 	Count              []int   `json:"count" json:"count"`
 }
 
+type OnlineTotal struct {
+	GameId     string          `json:"game_id" bson:"game_id"`
+	GameName   string          `json:"game_name" bson:"game_name"`
+	OnlineData []*OnlinePlayer `json:"online_data" bson:"online_data"`
+}
+
+type OnlinePlayer struct {
+	PackageId  uint16   `json:"package_id" bson:"package_id"`
+	PlayerList []uint32 `json:"player_list" bson:"player_list"`
+}
+
 // HTTP端口监听
 func StartHttpServer() {
 	// 运营后台数据接口
@@ -132,6 +143,8 @@ func StartHttpServer() {
 	http.HandleFunc("/api/getRobotData", getRobotData)
 	// 获取游戏统计数据接口
 	http.HandleFunc("/api/getStatementTotal", getStatementTotal)
+	// 获取实时在线人数
+	http.HandleFunc("/api/getOnlineTotal", getOnlineTotal)
 
 	err := http.ListenAndServe(":"+conf.Server.HTTPPort, nil)
 	if err != nil {
@@ -526,6 +539,69 @@ func getStatementTotal(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
+}
+
+func getOnlineTotal(w http.ResponseWriter, r *http.Request) {
+	packageId := r.FormValue("package_id")
+	log.Debug("获取getOnlineTotal接口 packageId:%v", packageId)
+
+	total := &OnlineTotal{}
+	total.GameId = conf.Server.GameID
+	total.GameName = "奔驰宝马"
+	if packageId == "" {
+		packageIds := make([]uint16, 0)
+		Mgr.UserRecord.Range(func(key, value interface{}) bool {
+			user := value.(*User)
+			packageIds = append(packageIds, user.PackageId)
+			return true
+		})
+		packageIds = removeDuplicateElement(packageIds)
+
+		for _, v := range packageIds {
+			data := &OnlinePlayer{}
+			data.PackageId = v
+			Mgr.UserRecord.Range(func(key, value interface{}) bool {
+				user := value.(*User)
+				if v == user.PackageId {
+					data.PlayerList = append(data.PlayerList, user.UserID)
+				}
+				return true
+			})
+			total.OnlineData = append(total.OnlineData, data)
+		}
+	} else {
+		packId, _ := strconv.Atoi(packageId)
+		data := &OnlinePlayer{}
+		data.PackageId = uint16(packId)
+		Mgr.UserRecord.Range(func(key, value interface{}) bool {
+			user := value.(*User)
+			if user.PackageId == uint16(packId) {
+				data.PlayerList = append(data.PlayerList, user.UserID)
+			}
+			return true
+		})
+		total.OnlineData = append(total.OnlineData, data)
+	}
+
+	js, err := json.Marshal(NewResp(SuccCode, "", total))
+	if err != nil {
+		fmt.Fprintf(w, "%+v", ApiResp{Code: ErrCode, Msg: "", Data: nil})
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+}
+
+func removeDuplicateElement(languages []uint16) []uint16 {
+	result := make([]uint16, 0, len(languages))
+	temp := map[uint16]struct{}{}
+	for _, item := range languages {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+	return result
 }
 
 func uniqueArr(m []int) []int {
