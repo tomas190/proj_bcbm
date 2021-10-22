@@ -123,8 +123,8 @@ type OnlineTotal struct {
 }
 
 type OnlinePlayer struct {
-	PackageId  uint16   `json:"package_id" bson:"package_id"`
-	PlayerList []uint32 `json:"player_list" bson:"player_list"`
+	PackageId uint16   `json:"packageID" bson:"packageID"`
+	UserData  []uint32 `json:"userData" bson:"userData"`
 }
 
 // HTTP端口监听
@@ -563,7 +563,7 @@ func getOnlineTotal(w http.ResponseWriter, r *http.Request) {
 			Mgr.UserRecord.Range(func(key, value interface{}) bool {
 				user := value.(*User)
 				if v == user.PackageId {
-					data.PlayerList = append(data.PlayerList, user.UserID)
+					data.UserData = append(data.UserData, user.UserID)
 				}
 				return true
 			})
@@ -576,7 +576,7 @@ func getOnlineTotal(w http.ResponseWriter, r *http.Request) {
 		Mgr.UserRecord.Range(func(key, value interface{}) bool {
 			user := value.(*User)
 			if user.PackageId == uint16(packId) {
-				data.PlayerList = append(data.PlayerList, user.UserID)
+				data.UserData = append(data.UserData, user.UserID)
 				log.Debug("获取玩家信息:%v", user)
 			}
 			return true
