@@ -581,10 +581,9 @@ func getOnlineTotal(w http.ResponseWriter, r *http.Request) {
 			}
 			return true
 		})
-		if data.UserData == nil {
-			data.PackageId = 0
+		if data.UserData != nil {
+			total.GameData = append(total.GameData, data)
 		}
-		total.GameData = append(total.GameData, data)
 	}
 
 	js, err := json.Marshal(NewResp(SuccCode, "", total))
