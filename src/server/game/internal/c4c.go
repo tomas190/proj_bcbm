@@ -125,6 +125,7 @@ func NewClient4Center() *Client4Center {
 
 func (c4c *Client4Center) HeartBeatAndListen() {
 	ticker := time.NewTicker(time.Second * 3)
+	log.Debug("发送心跳!")
 	go func() {
 		for {
 			<-ticker.C
