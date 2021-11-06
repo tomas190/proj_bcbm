@@ -38,6 +38,9 @@ type Client4Center struct {
 var winChan chan bool
 var loseChan chan bool
 
+// 添加互斥锁，防止websocket写并发
+var writeMutex sync.Mutex
+
 func NewClient4Center() *Client4Center {
 	wsURL := "ws" + strings.TrimPrefix(conf.Server.CenterServer, "http")
 	c, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
@@ -685,6 +688,8 @@ func (c4c *Client4Center) ServerLoginCenter() {
 }
 
 func (c4c *Client4Center) heartBeat() {
+	writeMutex.Lock()
+	defer writeMutex.Unlock()
 	err := c4c.conn.WriteMessage(websocket.PingMessage, nil)
 
 	if err != nil {
@@ -977,6 +982,8 @@ func (c4c *Client4Center) sendMsg2Center(data interface{}) {
 	}
 	log.Debug("Msg to center %v", string(bs))
 
+	writeMutex.Lock()
+	defer writeMutex.Unlock()
 	err = c4c.conn.WriteMessage(websocket.TextMessage, bs)
 	if err != nil {
 		log.Fatal("发送数据失败", err)
