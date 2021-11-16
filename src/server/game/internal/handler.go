@@ -191,14 +191,13 @@ func handleJoinRoom(args []interface{}) {
 
 	rid := Mgr.UserRoom[au.UserID]
 	v, _ := Mgr.RoomRecord.Load(rid)
-
 	if v != nil {
 		dl := v.(*Dealer)
 		log.Debug("au.Status: %v", au.Status)
 		if au.DownBetTotal > 0 || au.Status == constant.BSGrabbingBanker || au.Status == constant.BSBeingBanker {
 			log.Debug("玩家请求房间ID为:%v,已在当前房间:%v", m.RoomID, rid)
 			if m.RoomID == rid {
-				Mgr.AllocateUser(au, dl)
+				Mgr.AllocateUser(au, dl, false)
 			} else {
 				resp := &msg.RespRoomStatus{
 					InGame: false,
@@ -225,7 +224,7 @@ func handleJoinRoom(args []interface{}) {
 	//	return
 	//}
 
-	Mgr.AllocateUser(au, room)
+	Mgr.AllocateUser(au, room, true)
 }
 
 /*************************************

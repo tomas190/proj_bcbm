@@ -85,11 +85,14 @@ func (h *Hall) openRoom(rID uint32) {
 	dl.StartGame()
 }
 
-func (h *Hall) AllocateUser(u *User, dl *Dealer) {
-	h.UserRoom[u.UserID] = dl.RoomID
-	dl.Users.Store(u.UserID, u)
-	if _, ok := dl.UserBets[u.UserID]; !ok {
-		dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+func (h *Hall) AllocateUser(u *User, dl *Dealer, again bool) {
+
+	if again {
+		h.UserRoom[u.UserID] = dl.RoomID
+		dl.Users.Store(u.UserID, u)
+		if _, ok := dl.UserBets[u.UserID]; !ok {
+			dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+		}
 	}
 
 	for i, lu := range dl.UserLeave {
