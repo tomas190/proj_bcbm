@@ -47,6 +47,7 @@ func (m *MgoC) Init() error {
 	return nil
 }
 
+
 // 插入用户信息
 func (m *MgoC) CUserInfo(u interface{}) error {
 	collection := m.Database(constant.DBName).Collection("users")
