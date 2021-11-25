@@ -157,8 +157,6 @@ func (dl *Dealer) fairLottery() uint32 {
 		area = constant.Area5x4
 	}
 
-	area = constant.Area40x
-
 	return area
 }
 
