@@ -300,12 +300,24 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 		gameAccount := userData.Msg.GameAccount
 		lockBalance := userData.Msg.GameAccount.LockBalance
 
-		if lockBalance > 0 {
-			order := bson.NewObjectId().Hex()
-			uid := util.UUID{}
-			roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
-			c4c.UnlockSettlement(gameUser.UserID, lockBalance, order, roundId)
-			log.Debug("玩家登入时锁资金:%v", lockBalance)
+		// 登入存在锁钱将解锁金额
+		user, _ := Mgr.UserRecord.Load(gameUser.UserID)
+		order := bson.NewObjectId().Hex()
+		uid := util.UUID{}
+		roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
+		if user != nil {
+			u := user.(*User)
+			if u.IsAction == false {
+				if lockBalance > 0 {
+					c4c.UnlockSettlement(gameUser.UserID, lockBalance, order, roundId)
+					log.Debug("玩家登入时锁资金:%v", lockBalance)
+				}
+			}
+		} else {
+			if lockBalance > 0 {
+				c4c.UnlockSettlement(gameUser.UserID, lockBalance, order, roundId)
+				log.Debug("玩家登入时锁资金:%v", lockBalance)
+			}
 		}
 
 		if loginCallBack, ok := c4c.userWaitEvent.Load(fmt.Sprintf("%+v-login", gameUser.UserID)); ok {

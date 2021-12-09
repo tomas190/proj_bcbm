@@ -3,7 +3,6 @@ package internal
 import (
 	"github.com/name5566/leaf/gate"
 	"math/rand"
-	"proj_bcbm/src/server/constant"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
@@ -78,6 +77,8 @@ func handleLogin(args []interface{}) {
 				log.Error("用户连接替换错误", err)
 			}
 
+			c4c.UserLoginCenter(userID, m.Password, m.Token, func(u *User) {})
+
 			v, _ := Mgr.UserRecord.Load(userID)
 			u := v.(*User)
 
@@ -149,7 +150,7 @@ func handleLogout(args []interface{}) {
 			math := util.Math{}
 			uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64() // 获取下注金额
 			log.Debug("玩家下注金额为:%v,是否行動:%v", uBets, au.IsAction)
-			if au.IsAction == false && au.Status == constant.BSNotBanker {
+			if au.IsAction == false {
 				c4c.UserLogoutCenter(au.UserID, func(data *User) {
 					Mgr.UserRecord.Delete(au.UserID)
 					resp := &msg.LogoutR{}
@@ -157,8 +158,6 @@ func handleLogout(args []interface{}) {
 					a.Close()
 				})
 			} else {
-				log.Debug("进来了")
-
 				var exist bool
 				for _, v := range dl.UserLeave {
 					if v == au.UserID {

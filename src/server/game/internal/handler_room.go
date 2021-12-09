@@ -298,27 +298,9 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 
 	au := a.UserData().(*User)
 
-	//if dl.DownBetTotal > 0 {
-	//	resp := &msg.LeaveRoomR{
-	//		User: &msg.UserInfo{
-	//			UserID:   au.UserID,
-	//			Avatar:   au.Avatar,
-	//			NickName: au.NickName,
-	//			Money:    au.Balance,
-	//		},
-	//		Rooms:      Mgr.GetRoomsInfoResp(),
-	//		ServerTime: uint32(time.Now().Unix()),
-	//	}
-	//
-	//	a.WriteMsg(resp)
-	//	return
-	//}
+	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au)
 
-	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au.UserID)
-
-	math := util.Math{}
-	uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64()
-	if uBets == 0 {
+	if au.IsAction == false {
 		au.winCount = 0
 		au.betAmount = 0
 		dl.UserIsDownBet[au.UserID] = false
