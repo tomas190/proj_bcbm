@@ -299,8 +299,9 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 	au := a.UserData().(*User)
 
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au)
-
-	if au.IsAction == false {
+	math := util.Math{}
+	uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64() // 获取下注金额
+	if au.IsAction == false || uBets == 0 {
 		au.winCount = 0
 		au.betAmount = 0
 		dl.UserIsDownBet[au.UserID] = false

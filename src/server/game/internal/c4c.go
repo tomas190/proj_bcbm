@@ -307,10 +307,17 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 		roundId := fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
 		if user != nil {
 			u := user.(*User)
-			if u.IsAction == false {
-				if lockBalance > 0 {
-					c4c.UnlockSettlement(gameUser.UserID, lockBalance, order, roundId)
-					log.Debug("玩家登入时锁资金:%v", lockBalance)
+			rid := Mgr.UserRoom[u.UserID]
+			v, _ := Mgr.RoomRecord.Load(rid)
+			if v != nil {
+				dl := v.(*Dealer)
+				math := util.Math{}
+				uBets, _ := math.SumSliceFloat64(dl.UserBets[u.UserID]).Float64() // 获取下注金额
+				if u.IsAction == false || uBets == 0 {
+					if lockBalance > 0 || uBets == 0 {
+						c4c.UnlockSettlement(gameUser.UserID, lockBalance, order, roundId)
+						log.Debug("玩家登入时锁资金:%v", lockBalance)
+					}
 				}
 			}
 		} else {

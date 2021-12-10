@@ -150,7 +150,7 @@ func handleLogout(args []interface{}) {
 			math := util.Math{}
 			uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64() // 获取下注金额
 			log.Debug("玩家下注金额为:%v,是否行動:%v", uBets, au.IsAction)
-			if au.IsAction == false {
+			if au.IsAction == false || uBets == 0 {
 				c4c.UserLogoutCenter(au.UserID, func(data *User) {
 					Mgr.UserRecord.Delete(au.UserID)
 					resp := &msg.LogoutR{}
