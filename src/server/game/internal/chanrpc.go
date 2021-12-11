@@ -59,8 +59,8 @@ func rpcCloseAgent(args []interface{}) {
 					}
 				}
 				if exist == false {
-					log.Debug("rpcCloseAgent 添加离线UserLeave:%v", au.UserID)
 					dl.UserLeave = append(dl.UserLeave, au.UserID)
+					log.Debug("rpcCloseAgent 添加离线UserLeave:%v,%v", au.UserID, dl.UserLeave)
 				}
 			}
 		} else {

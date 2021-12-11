@@ -707,14 +707,6 @@ func (dl *Dealer) ClearData() {
 		return true
 	})
 
-	// 清空投注详情记录
-	dl.UserBetsDetail = map[uint32][]msg.Bet{}
-	dl.UserLeave = []uint32{}
-
-	dl.res = 0
-	dl.bankerWin = 0
-	dl.bankerRound += 1
-
 	// 处理离开房间的用户
 	for _, uid := range dl.UserLeave {
 		userID := uid
@@ -733,6 +725,14 @@ func (dl *Dealer) ClearData() {
 			})
 		}
 	}
+
+	// 清空投注详情记录
+	dl.UserBetsDetail = map[uint32][]msg.Bet{}
+	dl.UserLeave = []uint32{}
+
+	dl.res = 0
+	dl.bankerWin = 0
+	dl.bankerRound += 1
 }
 
 func SetPackageTaxM(packageT uint16, tax float64) {
