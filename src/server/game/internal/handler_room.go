@@ -308,6 +308,7 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 		au.IsAction = false
 		dl.UserBets[au.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 		dl.Users.Delete(au.UserID)
+		delete(Mgr.UserRoom, au.UserID)
 	} else {
 		var exist bool
 		for _, v := range dl.UserLeave {

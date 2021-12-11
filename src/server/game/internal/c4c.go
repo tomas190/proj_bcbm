@@ -314,7 +314,7 @@ func (c4c *Client4Center) onUserLogin(msg []byte) {
 				math := util.Math{}
 				uBets, _ := math.SumSliceFloat64(dl.UserBets[u.UserID]).Float64() // 获取下注金额
 				if u.IsAction == false || uBets == 0 {
-					if lockBalance > 0 || uBets == 0 {
+					if lockBalance > 0 {
 						c4c.UnlockSettlement(gameUser.UserID, lockBalance, order, roundId)
 						log.Debug("玩家登入时锁资金:%v", lockBalance)
 					}
@@ -637,6 +637,7 @@ func (c4c *Client4Center) onLockSettlement(msgData []byte) {
 					u.IsAction = false
 					dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 					dl.Users.Delete(u.UserID)
+					delete(Mgr.UserRoom, u.UserID)
 				}
 				Mgr.UserRecord.Delete(u.UserID)
 				resp := &msg.LogoutR{}

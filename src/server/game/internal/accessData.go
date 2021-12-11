@@ -263,6 +263,7 @@ func NewResp(code int, msg string, data interface{}) ApiResp {
 }
 
 func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
+	log.Debug("触发reqPlayerLeave接口")
 	Id := r.FormValue("id")
 	userId, _ := strconv.Atoi(Id)
 	user, _ := Mgr.UserRecord.Load(uint32(userId))
@@ -279,6 +280,7 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 			dl.UserIsDownBet[u.UserID] = false
 			dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 			dl.Users.Delete(u.UserID)
+			delete(Mgr.UserRoom, u.UserID)
 			resp := &msg.LeaveRoomR{
 				User: &msg.UserInfo{
 					UserID:   u.UserID,

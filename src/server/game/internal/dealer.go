@@ -457,29 +457,11 @@ func (dl *Dealer) ClearChip() {
 
 	// log.Debug("clear chip... %+v", dl.RoomID)
 
-	// 处理离开房间的用户
-	for _, uid := range dl.UserLeave {
-		userID := uid
-		p, ok := dl.Users.Load(userID)
-		if ok {
-			player := p.(*User)
-			dl.Users.Delete(userID)
-			c4c.UserLogoutCenter(userID, func(data *User) {
-				dl.AutoBetRecord[player.UserID] = nil
-				Mgr.UserRecord.Delete(player.UserID)
-				resp := &msg.LogoutR{}
-				player.ConnAgent.WriteMsg(resp)
-				player.ConnAgent.Close()
-				log.Debug("投注后离开房间的玩家已登出")
-			})
-		}
-	}
+	// 清空数据
+	dl.ClearData()
 
 	// 更新玩家列表数据
 	dl.UpdatePlayerList()
-
-	// 清空数据
-	dl.ClearData()
 
 	converter := DTOConverter{}
 	//uuid := util.UUID{}
@@ -733,6 +715,24 @@ func (dl *Dealer) ClearData() {
 	dl.bankerWin = 0
 	dl.bankerRound += 1
 
+	// 处理离开房间的用户
+	for _, uid := range dl.UserLeave {
+		userID := uid
+		p, ok := dl.Users.Load(userID)
+		if ok {
+			player := p.(*User)
+			dl.Users.Delete(userID)
+			delete(Mgr.UserRoom, userID)
+			c4c.UserLogoutCenter(userID, func(data *User) {
+				dl.AutoBetRecord[player.UserID] = nil
+				Mgr.UserRecord.Delete(player.UserID)
+				resp := &msg.LogoutR{}
+				player.ConnAgent.WriteMsg(resp)
+				player.ConnAgent.Close()
+				log.Debug("投注后离开房间的玩家已登出")
+			})
+		}
+	}
 }
 
 func SetPackageTaxM(packageT uint16, tax float64) {

@@ -42,6 +42,7 @@ func rpcCloseAgent(args []interface{}) {
 			log.Debug("rpcCloseAgent au.IsAction:%v", au.IsAction)
 			if au.IsAction == false || uBets == 0 {
 				dl.Users.Delete(au.UserID)
+				delete(Mgr.UserRoom, au.UserID)
 				c4c.UserLogoutCenter(au.UserID, func(data *User) {
 					dl.AutoBetRecord[au.UserID] = nil
 					Mgr.UserRecord.Delete(au.UserID)
