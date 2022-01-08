@@ -3,7 +3,6 @@ package internal
 import (
 	"math/rand"
 	"proj_bcbm/src/server/constant"
-	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/util"
 	"time"
 )
@@ -25,8 +24,6 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 		percentageLose = 0
 		countLose = 0
 	}
-
-	log.Debug("当前开奖盈余数据为:%v", sur)
 
 	r := util.Random{}
 	preArea := dl.fairLottery()

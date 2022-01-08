@@ -141,7 +141,6 @@ message Bet {
     uint32 Chip = 2; // 筹码
 }
 
-// todo 下注返回
 message BetR {
 }
 

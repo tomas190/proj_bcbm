@@ -93,12 +93,12 @@ func handleLogin(args []interface{}) {
 			}
 
 			if rID, ok := Mgr.UserRoom[userID]; ok {
-				resp.RoomID = rID // 如果用户之前在房间里后来退出，返回房间号
+				resp.RoomID = rID
 			}
 			log.Debug("<----login 登录 resp---->%+v", resp.User.UserID)
 			a.WriteMsg(resp)
 		}
-	} else if !Mgr.agentExist(a) { // 正常大多数情况
+	} else if !Mgr.agentExist(a) {
 		c4c.UserLoginCenter(userID, m.Password, m.Token, func(u *User) {
 			resp := &msg.LoginR{
 				User: &msg.UserInfo{
@@ -110,7 +110,6 @@ func handleLogin(args []interface{}) {
 				Rooms:      Mgr.GetRoomsInfoResp(),
 				ServerTime: uint32(time.Now().Unix()),
 			}
-			//log.Debug("<----login 登录 resp---->%+v", resp)
 
 			// 重新绑定信息
 			u.ConnAgent = a
@@ -132,7 +131,7 @@ func handleLogin(args []interface{}) {
 			log.Debug("<----login 登录 resp---->%+v", resp.User.UserID)
 			a.WriteMsg(resp)
 		})
-	} // 同一连接上不同用户的情况对第二个用户的请求不做处理
+	}
 }
 
 func handleLogout(args []interface{}) {

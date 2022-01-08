@@ -108,7 +108,6 @@ func (dl *Dealer) StartGame() {
 
 // 下注
 func (dl *Dealer) Bet() {
-	//log.Debug("Game 下注阶段~")
 	// 时间戳+随机数，每局一个
 	uid := util.UUID{}
 	dl.RoundID = fmt.Sprintf("%+v-%+v", time.Now().Unix(), uid.GenUUID())
@@ -121,11 +120,9 @@ func (dl *Dealer) Bet() {
 		RoomStatus: dl.Status,
 		EndTime:    uint32(time.Now().Unix() + constant.BetTime),
 	}
-	// log.Debug("bet... %+v", dl.RoomID)
 
 	converter := DTOConverter{}
 
-	// fixme 其实这种消息分开比较好，不然每次会有很多无谓的计算
 	dl.Users.Range(func(key, value interface{}) bool {
 		user := value.(*User)
 		var autoBetSum float64
@@ -188,6 +185,7 @@ func (dl *Dealer) Settle() {
 				ResultMoney += preBankerWin - (preBankerWin * taxR)
 				dl.bankerWin += preBankerWin - (preBankerWin * taxR)
 				log.Debug("庄家金额为和庄家赢钱:%v，%v", dl.bankerMoney, dl.bankerWin)
+
 				// 玩家坐庄盈余池更新
 				err := db.UProfitPool(0, dl.bankerWin, dl.RoomID)
 				if err != nil {
@@ -197,9 +195,11 @@ func (dl *Dealer) Settle() {
 				c4c.BankerLoseScore(u.UserID, preBankerWin, order, dl.RoundID, func(data *User) {
 					dl.bankerMoney = data.BankerBalance
 				})
+
 				ResultMoney = preBankerWin
 				dl.bankerWin = preBankerWin
 				log.Debug("庄家金额为和庄家赢钱:%v，%v", dl.bankerMoney, dl.bankerWin)
+
 				// 玩家坐庄盈余池更新
 				err := db.UProfitPool(-dl.bankerWin, 0, dl.RoomID)
 				if err != nil {

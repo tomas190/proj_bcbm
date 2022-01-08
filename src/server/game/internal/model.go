@@ -215,24 +215,14 @@ func (h *Hall) BroadCast(bMsg interface{}) {
 // 当前房间信息
 func (h *Hall) GetRoomsInfoResp() []*msg.RoomInfo {
 	var roomsInfoResp []*msg.RoomInfo
-	converter := DTOConverter{}
+	converter := &DTOConverter{}
 
-	// 因为前端需要排序
-	var sortedKeys []uint32
-	for i := 0; i < constant.RoomCount; i++ {
-		sortedKeys = append(sortedKeys, uint32(i)+1)
-	}
-
-	for _, k := range sortedKeys {
-		kx := k
-		if v, ok := h.RoomRecord.Load(kx); ok {
-			rMsg := converter.R2Msg(*v.(*Dealer))
-			roomsInfoResp = append(roomsInfoResp, &rMsg)
-		} else {
-			log.Debug("GetRoomsInfoResp 找不到房间id")
-		}
-	}
-
+	Mgr.RoomRecord.Range(func(key, value interface{}) bool {
+		dl := value.(*Dealer)
+		roomMsg := converter.R2Msg(*dl)
+		roomsInfoResp = append(roomsInfoResp, &roomMsg)
+		return true
+	})
 	return roomsInfoResp
 }
 

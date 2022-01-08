@@ -52,7 +52,6 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		uuid := util.UUID{}
 		order := uuid.GenUUID()
 
-		// fixme 暂时延迟处理
 		rd := util.Random{}
 		delay := rd.RandInRange(0, 100)
 		time.Sleep(time.Millisecond * time.Duration(delay))
@@ -95,8 +94,6 @@ func (dl *Dealer) handleBet(args []interface{}) {
 		}
 		dl.Broadcast(resp)
 
-		//log.Debug("<<=====>>玩家金额: %v", au.Balance)
-		// fixme 暂时延迟处理
 		time.Sleep(6 * time.Millisecond)
 		ca.Delete(fmt.Sprintf("%+v-bet", au.UserID))
 	}

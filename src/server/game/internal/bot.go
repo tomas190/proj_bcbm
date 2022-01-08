@@ -195,9 +195,7 @@ func (dl *Dealer) BotsBet() {
 					}
 					return
 				}
-				//counter++
-				//delay := (30 - counter/2) * (30 - counter/2)
-				//time.Sleep(time.Millisecond * time.Duration(rand.Intn(delay+5)))
+
 				timerSlice := []int32{50, 150, 20, 300, 30,}
 				rand.Seed(time.Now().UnixNano())
 				num2 := rand.Intn(len(timerSlice))

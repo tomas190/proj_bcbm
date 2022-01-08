@@ -794,7 +794,7 @@ func (c4c *Client4Center) ChangeBankerStatus(userID uint32, status int, money fl
 				UserID:     userID,
 				Status:     status,
 				CreateTime: uint32(time.Now().Unix()),
-				PayReason:  "玩家上下庄", // todo 上下庄分开？
+				PayReason:  "玩家上下庄",
 				Order:      order,
 				RoundID:    round,
 				Money:      money,
@@ -922,14 +922,8 @@ func (c4c *Client4Center) UnlockSettlement(UserId uint32, LockMoney float64, ord
 	c4c.sendMsg2Center(unLockSettle)
 }
 
-// todo
-func (c4c *Client4Center) PromoNotice() {
-
-}
-
 // 向中心服发送消息的基础函数
 func (c4c *Client4Center) sendMsg2Center(data interface{}) {
-	// todo 写入数据库
 	bs, err := json.Marshal(data)
 	if err != nil {
 		log.Error("解析失败", err)
