@@ -87,9 +87,9 @@ func (h *Hall) openRoom(rID string, hallRoom bool) *Dealer {
 	dl.bankerMoney = dl.Bankers[0].(Bot).Balance
 
 	if hallRoom {
-		h.RoomRecord.Store(rID, dl)
-	} else {
 		h.FakeRoom.Store(rID, dl)
+	} else {
+		h.RoomRecord.Store(rID, dl)
 	}
 	dl.StartGame()
 
@@ -196,6 +196,11 @@ func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 		v, _ := h.FakeRoom.Load(rID)
 		if v != nil {
 			dl := v.(*Dealer)
+			dl.History = h.History[rID]
+		}
+		v2, _ := h.RoomRecord.Load(rID)
+		if v != nil {
+			dl := v2.(*Dealer)
 			dl.History = h.History[rID]
 		}
 	}
