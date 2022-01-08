@@ -61,7 +61,7 @@ func (c *DTOConverter) R2Msg(dl Dealer) msg.RoomInfo {
 	return rMsg
 }
 
-func (c *DTOConverter) RChangeHB(m HRMsg, dl Dealer) msg.RoomChangeHB {
+func (c *DTOConverter) RChangeHB(m HRMsg, dl *Dealer) msg.RoomChangeHB {
 	stat := make([]uint32, 8)
 	for _, his := range dl.History {
 		stat[his-1]++

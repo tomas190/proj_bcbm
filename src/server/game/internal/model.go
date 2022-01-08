@@ -194,13 +194,19 @@ func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 			h.History[rID] = h.History[rID][1:]
 		}
 		v, _ := h.FakeRoom.Load(rID)
-		v.(*Dealer).History = h.History[rID]
+		if v != nil {
+			dl := v.(*Dealer)
+			dl.History = h.History[rID]
+		}
 	}
 
 	converter := &DTOConverter{}
 	v, _ := h.FakeRoom.Load(rID)
-	res := converter.RChangeHB(hrMsg, *(v.(*Dealer)))
-	h.BroadCast(&res)
+	if v != nil {
+		dl := v.(*Dealer)
+		res := converter.RChangeHB(hrMsg, dl)
+		h.BroadCast(&res)
+	}
 }
 
 // 大厅广播
