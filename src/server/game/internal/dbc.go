@@ -47,7 +47,6 @@ func (m *MgoC) Init() error {
 	return nil
 }
 
-
 // 插入用户信息
 func (m *MgoC) CUserInfo(u interface{}) error {
 	collection := m.Database(constant.DBName).Collection("users")
@@ -147,7 +146,7 @@ func (m *MgoC) RProfitPool() ProfitDB {
 	return lastProfit
 }
 
-func (m *MgoC) UProfitPool(lose, win float64, rid uint32) error {
+func (m *MgoC) UProfitPool(lose, win float64, rid string) error {
 	collection := m.Database(constant.DBName).Collection("profits")
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
@@ -378,7 +377,7 @@ type ChipDownBet struct {
 }
 
 type RobotDATA struct {
-	RoomId   uint32       `json:"room_id" bson:"room_id"`
+	RoomId   string       `json:"room_id" bson:"room_id"`
 	RoomTime int64        `json:"room_time" bson:"room_time"`
 	RobotNum int          `json:"robot_num" bson:"robot_num"`
 	AreaX1   *ChipDownBet `json:"area_x_1" bson:"area_x_1"`

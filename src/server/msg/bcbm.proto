@@ -75,7 +75,7 @@ message UserInfo {
 
 // 房间信息
 message RoomInfo {
-    uint32 RoomID = 1;
+    string RoomID = 1;
     double MinBet = 2; // 限红 下限
     double MaxBet = 3; // 限红 上限
     double MinLimit = 4; // 能玩的最低金币
@@ -95,7 +95,7 @@ message Login {
 
 message LoginR {
     UserInfo User = 1;
-    uint32 RoomID = 2;
+    string RoomID = 2;
     repeated RoomInfo Rooms = 3;
     uint32 ServerTime = 4; // 服务器时间
 }
@@ -104,7 +104,7 @@ message LoginR {
 // Status = 2 表示 结算中 此状态时要显示 Result - 即最新的开奖结果
 // Status = 1 表示 下注中 此状态时要显示进度条 - 用EndTime - ServerTime 可计算出进度条时长
 message RoomChangeHB {
-    uint32 RoomID = 1;
+    string RoomID = 1;
     uint32 Status = 2; // 改变之后的状态
     uint32 Counter = 3; // 倒计时条
     uint32 EndTime = 4; // 倒计时结束时间
@@ -122,7 +122,7 @@ message LogoutR {
 
 // 加入房间
 message JoinRoom {
-    uint32 RoomID = 1;
+    string RoomID = 1;
 }
 
 message JoinRoomR {
@@ -160,7 +160,7 @@ message RoomStatusB {
     double AutoBetAmount = 8; // 续投金额，若为0则置灰
     uint32 ServerTime = 10; // 服务器时间
     uint32 Position = 11; // 位置 1-4
-    uint32 RoomId = 12; //房间ID
+    string RoomId = 12; //房间ID
 }
 
 // 下注信息广播
@@ -214,7 +214,7 @@ message LeaveRoom {
 
 message LeaveRoomR {
     UserInfo User = 1;
-    uint32 RoomID = 2;
+    string RoomID = 2;
     repeated RoomInfo Rooms = 3;
     uint32 ServerTime = 4; // 服务器时间
 }
@@ -249,5 +249,5 @@ message Error {
 
 message RespRoomStatus {
     bool InGame = 1;
-    uint32 RoomID = 2;
+    string RoomID = 2;
 }

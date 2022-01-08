@@ -88,7 +88,7 @@ type UpSurPool struct {
 }
 
 type GRobotData struct {
-	RoomId   uint32       `json:"room_id" bson:"room_id"`
+	RoomId   string       `json:"room_id" bson:"room_id"`
 	RoomTime int64        `json:"room_time" bson:"room_time"`
 	RobotNum int          `json:"robot_num" bson:"robot_num"`
 	AreaX1   *ChipDownBet `json:"area_x_1" bson:"area_x_1"`
@@ -281,6 +281,7 @@ func reqPlayerLeave(w http.ResponseWriter, r *http.Request) {
 			dl.UserBets[u.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
 			dl.Users.Delete(u.UserID)
 			delete(Mgr.UserRoom, u.UserID)
+			dl.DeleteRoomRecord()
 			resp := &msg.LeaveRoomR{
 				User: &msg.UserInfo{
 					UserID:   u.UserID,

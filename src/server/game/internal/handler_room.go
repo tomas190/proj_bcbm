@@ -296,45 +296,12 @@ func (dl *Dealer) handleLeaveRoom(args []interface{}) {
 	m := args[0].(*msg.LeaveRoom)
 	a := args[1].(gate.Agent)
 
-	au := a.UserData().(*User)
-
+	au, ok := a.UserData().(*User)
+	if ok {
+		au.PlayerReqExit(dl)
+	}
 	log.Debug("recv %+v, addr %+v, %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m, au)
-	math := util.Math{}
-	uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64() // 获取下注金额
-	if au.IsAction == false || uBets == 0 {
-		au.winCount = 0
-		au.betAmount = 0
-		dl.UserIsDownBet[au.UserID] = false
-		au.IsAction = false
-		dl.UserBets[au.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
-		dl.Users.Delete(au.UserID)
-		delete(Mgr.UserRoom, au.UserID)
-	} else {
-		var exist bool
-		for _, v := range dl.UserLeave {
-			if v == au.UserID {
-				exist = true
-			}
-		}
-		if exist == false {
-			dl.UserLeave = append(dl.UserLeave, au.UserID)
-		}
-	}
 
-	dl.AutoBetRecord[au.UserID] = nil
-
-	resp := &msg.LeaveRoomR{
-		User: &msg.UserInfo{
-			UserID:   au.UserID,
-			Avatar:   au.Avatar,
-			NickName: au.NickName,
-			Money:    au.Balance,
-		},
-		Rooms:      Mgr.GetRoomsInfoResp(),
-		ServerTime: uint32(time.Now().Unix()),
-	}
-
-	a.WriteMsg(resp)
 }
 
 func (dl *Dealer) cancelGrabBanker(userID uint32) {

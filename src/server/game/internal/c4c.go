@@ -26,8 +26,6 @@ type UserBack struct {
 }
 
 type Client4Center struct {
-	//token         string
-	//tokenLock     sync.RWMutex
 	conn          *websocket.Conn
 	isServerLogin bool
 	userWaitEvent sync.Map
@@ -35,8 +33,6 @@ type Client4Center struct {
 	waitUser map[uint32]*UserBack
 }
 
-var winChan chan bool
-var loseChan chan bool
 
 // 添加互斥锁，防止websocket写并发
 var writeMutex sync.Mutex
@@ -57,68 +53,6 @@ func NewClient4Center() *Client4Center {
 		waitUser:      make(map[uint32]*UserBack),
 	}
 }
-
-/***********************************************************
-
-	请求服务器token并连接中心服
-
-************************************************************/
-
-//// 从中心服请求token
-//func (c4c *Client4Center) ReqToken() {
-//	req, err := http.NewRequest("GET", conf.Server.TokenServer, nil)
-//	if err != nil {
-//		log.Fatal("生成请求失败")
-//		panic(err)
-//	}
-//	params := req.URL.Query()
-//	params.Add("dev_key", conf.Server.DevKey)
-//	params.Add("dev_name", conf.Server.DevName)
-//	req.URL.RawQuery = params.Encode()
-//
-//	log.Debug("请求Token %+v", req.URL.String())
-//
-//	client := http.Client{}
-//	resp, err := client.Do(req)
-//	if err != nil || resp.StatusCode != 200 {
-//		log.Debug("请求中心服token失败 %+v", err)
-//	}
-//
-//	bs, err := ioutil.ReadAll(resp.Body)
-//	if err != nil {
-//		log.Fatal("响应体读取失败", err)
-//	}
-//
-//	// log.Debug(string(bs))
-//	tokenResp := TokenResp{}
-//
-//	err = json.Unmarshal(bs, &tokenResp)
-//
-//	if err != nil {
-//		log.Fatal("Token响应解析失败", err)
-//	}
-//
-//	if tokenResp.StatusCode != 200 {
-//		log.Fatal("Token响应码不是200", tokenResp.StatusCode)
-//	}
-//
-//	c4c.tokenLock.Lock()
-//	c4c.token = tokenResp.TokenMsg.Token
-//	c4c.tokenLock.Unlock()
-//
-//	log.Debug("Token更新完成 %+v", c4c.token)
-//}
-//
-//func (c4c *Client4Center) CronUpdateToken() {
-//	// ticker := time.NewTicker(time.Second * 7200)
-//	ticker := time.NewTicker(time.Second * 600)
-//	go func() {
-//		for {
-//			<-ticker.C
-//			c4c.ReqToken()
-//		}
-//	}()
-//}
 
 /*****************************************
 

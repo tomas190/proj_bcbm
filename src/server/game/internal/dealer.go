@@ -57,9 +57,7 @@ const taxRate = 0.05
 
 var packageTax map[uint16]float64
 
-var downBankerChan chan bool
-
-func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
+func NewDealer(rID string, hr chan HRMsg) *Dealer {
 
 	return &Dealer{
 		Users:          sync.Map{},
@@ -86,10 +84,8 @@ func NewDealer(rID uint32, hr chan HRMsg) *Dealer {
 // 重置表
 func (dl *Dealer) ClockReset(duration uint32, next func()) {
 	defer func() { dl.counter = 0 }()
-	// log.Debug("Deadline: %v, Event: %v, RoomID: %+v", duration, util.Function{}.GetFunctionName(next), dl.RoomID)
 	go func() {
 		for t := range dl.clock.C {
-			// log.Debug("ticker：%v", t)
 			_ = t
 			dl.counter++
 			if duration-1 == dl.counter {
@@ -179,18 +175,15 @@ func (dl *Dealer) Settle() {
 	case User:
 		{
 			u := dl.Bankers[0].(User)
-			//preBankerBalance := dl.bankerMoney
 			order := bson.NewObjectId().Hex()
 
 			if preBankerWin > 0 {
 				log.Debug("玩家的当局总下注和庄家金额: %v,%v", preBankerWin, dl.bankerMoney)
 				c4c.BankerWinScore(u.UserID, preBankerWin, order, dl.RoundID, func(data *User) {
-					//dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
-					//log.Debug("玩家的当局总下注2: %v", dl.bankerWin)
 					dl.bankerMoney = data.BankerBalance
 				})
 				pac := packageTax[u.PackageId]
-				taxR := float64(pac) / 100
+				taxR := pac / 100
 
 				ResultMoney += preBankerWin - (preBankerWin * taxR)
 				dl.bankerWin += preBankerWin - (preBankerWin * taxR)
@@ -202,7 +195,6 @@ func (dl *Dealer) Settle() {
 				}
 			} else {
 				c4c.BankerLoseScore(u.UserID, preBankerWin, order, dl.RoundID, func(data *User) {
-					//dl.bankerWin, _ = decimal.NewFromFloat(data.BankerBalance).Sub(decimal.NewFromFloat(preBankerBalance)).Float64()
 					dl.bankerMoney = data.BankerBalance
 				})
 				ResultMoney = preBankerWin
@@ -239,18 +231,11 @@ func (dl *Dealer) Settle() {
 					log.Error("<----- 运营接入数据插入失败 ~ ----->:%+v", err)
 				}
 			}
-			// todo 
-			//time.Sleep(200 * time.Millisecond)
 		}
 	default:
 		{
 			if preBankerWin > 0 {
 				dl.bankerWin = preBankerWin * 0.95
-				////机器人跑马灯
-				//u := dl.Bankers[0].(User)
-				//if dl.bankerWin > PaoMaDeng {
-				//	c4c.NoticeWinMoreThan(u.UserID, u.NickName, dl.bankerWin)
-				//}
 				dl.bankerMoney = dl.bankerMoney + dl.bankerWin
 			} else {
 				dl.bankerWin = preBankerWin
@@ -259,7 +244,6 @@ func (dl *Dealer) Settle() {
 		}
 	}
 
-	// log.Debug("settle... %+v", dl.RoomID)
 	dl.playerSettle()
 
 	r := util.Random{}
@@ -305,10 +289,6 @@ func (dl *Dealer) playerSettle() {
 
 		var winFlag bool
 
-		//if dl.UserIsDownBet[user.UserID] == false {
-		//	return true
-		//}
-
 		if user.LockMoney > 0 {
 			order := bson.NewObjectId().Hex()
 			uid := util.UUID{}
@@ -321,7 +301,7 @@ func (dl *Dealer) playerSettle() {
 			uWin = uWin - dl.UserBets[user.UserID][dl.res]
 
 			pac := packageTax[user.PackageId]
-			taxR := float64(pac) / 100
+			taxR := pac / 100
 			data += uWin - (uWin * taxR)
 			log.Debug("uWin:%v,data:%v", uWin, data)
 			user.Balance += dl.UserBets[user.UserID][dl.res] + data
@@ -335,12 +315,6 @@ func (dl *Dealer) playerSettle() {
 				user.Balance = data.Balance
 				user.BalanceLock.Unlock()
 			})
-			//select {
-			//case t := <-winChan:
-			//	if t == true {
-			//		break
-			//	}
-			//}
 		} else {
 			winFlag = false
 		}
@@ -360,12 +334,6 @@ func (dl *Dealer) playerSettle() {
 						user.BalanceLock.Unlock()
 					})
 					uLose = result
-					//select {
-					//case t := <-loseChan:
-					//	if t == true {
-					//		break
-					//	}
-					//}
 				}
 			} else {
 				uBet = user.DownBetTotal
@@ -376,12 +344,6 @@ func (dl *Dealer) playerSettle() {
 					user.BalanceLock.Unlock()
 				})
 				uLose = -user.DownBetTotal
-				//select {
-				//case t := <-loseChan:
-				//	if t == true {
-				//		break
-				//	}
-				//}
 			}
 		}
 
@@ -393,19 +355,19 @@ func (dl *Dealer) playerSettle() {
 		}
 
 		// 玩家结算记录
-		if uWin == 0 && uBet == 0 {
-			//log.Debug("空数据,不插入")
-		} else {
-			order := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05")
-			sdb := daoC.Settle2DB(*user, order, dl.RoundID, winFlag, uBet, uWin)
-			err := db.CUserSettle(sdb)
-			if err != nil {
-				log.Debug("保存用户结算数据错误 %+v", err)
-			}
+		if !dl.IsSpecial {
+			if uWin != 0 || uBet != 0 {
+				order := strconv.Itoa(int(user.UserID)) + "-" + time.Now().Format("2006-01-02 15:04:05")
+				sdb := daoC.Settle2DB(*user, order, dl.RoundID, winFlag, uBet, uWin)
+				err := db.CUserSettle(sdb)
+				if err != nil {
+					log.Debug("保存用户结算数据错误 %+v", err)
+				}
 
-			err = db.UProfitPool(uBet, uWin, dl.RoomID)
-			if err != nil {
-				log.Debug("更新盈余池失败 %+v", err)
+				err = db.UProfitPool(uBet, uWin, dl.RoomID)
+				if err != nil {
+					log.Debug("更新盈余池失败 %+v", err)
+				}
 			}
 		}
 
@@ -715,6 +677,7 @@ func (dl *Dealer) ClearData() {
 			player := p.(*User)
 			dl.Users.Delete(userID)
 			delete(Mgr.UserRoom, userID)
+			dl.DeleteRoomRecord()
 			c4c.UserLogoutCenter(userID, func(data *User) {
 				dl.AutoBetRecord[player.UserID] = nil
 				Mgr.UserRecord.Delete(player.UserID)
@@ -737,4 +700,22 @@ func (dl *Dealer) ClearData() {
 
 func SetPackageTaxM(packageT uint16, tax float64) {
 	packageTax[packageT] = tax
+}
+
+//PlayerTrueLength 房间当前真实玩家人数
+func (dl *Dealer) PlayerTrueLength() int32 {
+	var num int32
+	dl.Users.Range(func(key, value interface{}) bool {
+		num++
+		return true
+	})
+	return num
+}
+
+// 判断当前房间真实玩家是否为0，为0则清空该房间
+func (dl *Dealer) DeleteRoomRecord() {
+	if dl.PlayerTrueLength() == 0 {
+		log.Debug("删除该 :%v 品牌房间", dl.RoomID)
+		Mgr.RoomRecord.Delete(dl.RoomID)
+	}
 }

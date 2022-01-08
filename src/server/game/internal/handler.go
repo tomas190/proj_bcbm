@@ -2,7 +2,6 @@ package internal
 
 import (
 	"github.com/name5566/leaf/gate"
-	"math/rand"
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
@@ -186,46 +185,10 @@ func handleJoinRoom(args []interface{}) {
 
 	log.Debug("recv %+v, addr %+v, %+v", reflect.TypeOf(m), a.RemoteAddr(), m)
 
-	au := a.UserData().(*User)
-
-	rid := Mgr.UserRoom[au.UserID]
-	v, _ := Mgr.RoomRecord.Load(rid)
-	if v != nil {
-		dl := v.(*Dealer)
-		log.Debug("au.Status: %v", au.Status)
-		//if au.DownBetTotal > 0 || au.Status == constant.BSGrabbingBanker || au.Status == constant.BSBeingBanker {
-		//	log.Debug("玩家请求房间ID为:%v,已在当前房间:%v", m.RoomID, rid)
-		//	if m.RoomID == rid {
-		//		Mgr.AllocateUser(au, dl, false)
-		//	} else {
-		//		resp := &msg.RespRoomStatus{
-		//			InGame: false,
-		//			RoomID: rid,
-		//		}
-		//		a.WriteMsg(resp)
-		//	}
-		//	return
-		//}
-		Mgr.AllocateUser(au, dl, false)
-		return
+	au, ok := a.UserData().(*User)
+	if ok {
+		Mgr.PlayerJoinRoom(m.RoomID, au)
 	}
-
-	// 找到当前房间的玩家 dealer.getPlayerInfoResp()
-	v, exist := Mgr.RoomRecord.Load(m.RoomID)
-	room := v.(*Dealer)
-	if !exist {
-		errorResp(a, msg.ErrorCode_RoomNotExist, "房间不存在")
-		return
-	}
-
-	// fixme 最大人数
-	//if len(room.UserBets) == constant.MaxPlayerCount {
-	//	log.Debug("房间人数为:%v", len(room.UserBets))
-	//	errorResp(a, msg.ErrorCode_RoomFull, "房间已满")
-	//	return
-	//}
-
-	Mgr.AllocateUser(au, room, true)
 }
 
 /*************************************
@@ -266,17 +229,6 @@ func handleRoomEvent(args []interface{}) {
 		}
 	} else {
 		errorResp(a, msg.ErrorCode_UserNotInRoom, "")
-	}
-}
-
-// 测试用
-func randomLoginMsg() *msg.Login {
-	rand.Seed(time.Now().Unix())
-	userIDs := []uint32{955509280}
-	uID := userIDs[rand.Intn(len(userIDs)-1)]
-	return &msg.Login{
-		UserID:   uID,
-		Password: "123456",
 	}
 }
 

@@ -23,7 +23,7 @@ type UserDB struct {
 type ProfitDB struct {
 	UpdateTime     time.Time `bson:"UpdateTime"`
 	UpdateTimeStr  string    `bson:"UpdateTimeStr"`
-	RoomID         uint32    `bson:"RoomID"`
+	RoomID         string    `bson:"RoomID"`
 	PlayerThisWin  float64   `bson:"PlayerThisWin"`
 	PlayerThisLost float64   `bson:"PlayerThisLost"`
 	PlayerAllWin   float64   `bson:"PlayerAllWin"`
@@ -56,8 +56,8 @@ type PlayerDownBetRecode struct {
 	Id              string    `json:"id" bson:"id"`                             // 玩家Id
 	GameId          string    `json:"game_id" bson:"game_id"`                   // GameId
 	RoundId         string    `json:"round_id" bson:"round_id"`                 // 随机Id
-	RoomId          uint32    `json:"room_id" bson:"room_id"`                   // 所在房间
-	DownBetInfo     []float64 `json:"down_bet_info" bson:"down_bet_info"`       // 8个注池个下注金额
+	RoomId          string    `json:"room_id" bson:"room_id"`                   // 所在房间
+	DownBetInfo     []float64 `json:"down_bet_info" bson:"down_bet_info"`       // 8个注池各下注金额
 	DownBetTime     int64     `json:"down_bet_time" bson:"down_bet_time"`       // 下注时间
 	StartTime       int64     `json:"start_time" bson:"start_time"`             // 开始时间
 	EndTime         int64     `json:"end_time" bson:"end_time"`                 // 结束时间

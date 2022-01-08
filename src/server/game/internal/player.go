@@ -2,7 +2,10 @@ package internal
 
 import (
 	"github.com/name5566/leaf/gate"
+	"proj_bcbm/src/server/msg"
+	"proj_bcbm/src/server/util"
 	"sync"
+	"time"
 )
 
 type User struct {
@@ -20,17 +23,15 @@ type User struct {
 	betAmount     float64    // 玩家总投注金额
 	LockMoney     float64    // 下注锁定的钱
 	IsAction      bool       // 玩家是否行动
-	LockSucc      int        // 是否锁钱成功
 }
 
-func (u *User) Init() {
-	u.Balance = 0
-	u.BankerBalance = 0
-	u.DownBetTotal = 0
-	u.winCount = 0
-	u.betAmount = 0
-	u.IsAction = false
-	u.LockSucc = 0
+func (au *User) Init() {
+	au.Balance = 0
+	au.BankerBalance = 0
+	au.DownBetTotal = 0
+	au.winCount = 0
+	au.betAmount = 0
+	au.IsAction = false
 }
 
 type Bot struct {
@@ -54,21 +55,21 @@ type Player interface {
 	GetPlayerAccount() (uint32, float64)
 }
 
-func (u User) GetBalance() float64 {
-	return u.Balance
+func (au User) GetBalance() float64 {
+	return au.Balance
 }
 
-func (u User) GetBankerBalance() float64 {
-	return u.BankerBalance
+func (au User) GetBankerBalance() float64 {
+	return au.BankerBalance
 }
 
-func (u User) GetPlayerBasic() (uint32, string, string, float64) {
-	return u.UserID, u.NickName, u.Avatar, u.Balance
+func (au User) GetPlayerBasic() (uint32, string, string, float64) {
+	return au.UserID, au.NickName, au.Avatar, au.Balance
 }
 
 // 返回玩家投注了的近20局获胜局数和总下注数
-func (u User) GetPlayerAccount() (uint32, float64) {
-	return u.winCount, u.betAmount
+func (au User) GetPlayerAccount() (uint32, float64) {
+	return au.winCount, au.betAmount
 }
 
 func (b Bot) GetBalance() float64 {
@@ -85,4 +86,43 @@ func (b Bot) GetPlayerBasic() (uint32, string, string, float64) {
 
 func (b Bot) GetPlayerAccount() (uint32, float64) {
 	return b.WinCount, b.BetAmount
+}
+
+func (au *User) PlayerReqExit(dl *Dealer) {
+	math := util.Math{}
+	uBets, _ := math.SumSliceFloat64(dl.UserBets[au.UserID]).Float64() // 获取下注金额
+	if au.IsAction == false || uBets == 0 {
+		au.winCount = 0
+		au.betAmount = 0
+		dl.UserIsDownBet[au.UserID] = false
+		au.IsAction = false
+		dl.UserBets[au.UserID] = []float64{0, 0, 0, 0, 0, 0, 0, 0, 0}
+		dl.Users.Delete(au.UserID)
+		delete(Mgr.UserRoom, au.UserID)
+		dl.DeleteRoomRecord()
+	} else {
+		var exist bool
+		for _, v := range dl.UserLeave {
+			if v == au.UserID {
+				exist = true
+			}
+		}
+		if exist == false {
+			dl.UserLeave = append(dl.UserLeave, au.UserID)
+		}
+	}
+
+	dl.AutoBetRecord[au.UserID] = nil
+
+	resp := &msg.LeaveRoomR{
+		User: &msg.UserInfo{
+			UserID:   au.UserID,
+			Avatar:   au.Avatar,
+			NickName: au.NickName,
+			Money:    au.Balance,
+		},
+		Rooms:      Mgr.GetRoomsInfoResp(),
+		ServerTime: uint32(time.Now().Unix()),
+	}
+	au.ConnAgent.WriteMsg(resp)
 }

@@ -10,9 +10,6 @@ import (
 
 // 根据盈余池开奖
 func (dl *Dealer) profitPoolLottery() uint32 {
-	// 盈余池 随机从10%到50%取一个值，算出一个预计赔付数
-	//randomUtil := util.Random{}
-	//profitPoolRatePercent := randomUtil.RandInRange(constant.ProfitPoolMinPercent, constant.ProfitPoolMaxPercent)
 
 	sur, _ := db.GetSurPool()
 	loseRate := sur.PlayerLoseRateAfterSurplusPool * 100
@@ -21,6 +18,14 @@ func (dl *Dealer) profitPoolLottery() uint32 {
 	percentageLose := sur.RandomPercentageAfterLose * 100
 	countLose := sur.RandomCountAfterLose
 	surplusPool := sur.SurplusPool
+
+	if dl.IsSpecial { // 特殊品牌赢率
+		percentageWin = 95
+		countWin = 4
+		percentageLose = 0
+		countLose = 0
+	}
+
 	log.Debug("当前开奖盈余数据为:%v", sur)
 
 	r := util.Random{}
@@ -166,10 +171,6 @@ func (dl *Dealer) fairLottery() uint32 {
 func (dl *Dealer) preUserWin(preArea uint32) float64 {
 	// 玩家投注开奖
 	userWin := dl.DownBetArea[preArea] * constant.AreaX[preArea]
-	// 庄家开奖
-	//math := util.Math{}
-	//preBankerWin, _ := math.SumSliceFloat64(dl.AreaBets).Sub(math.MultiFloat64(con.AreaX[preArea], dl.AreaBets[preArea])).Float64()
-	//return (userWin - dl.TotalDownMoney) + preBankerWin
 	return userWin - dl.TotalDownMoney
 }
 
