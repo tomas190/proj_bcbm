@@ -199,7 +199,7 @@ func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 			dl.History = h.History[rID]
 		}
 		v2, _ := h.RoomRecord.Load(rID)
-		if v != nil {
+		if v2 != nil {
 			dl := v2.(*Dealer)
 			dl.History = h.History[rID]
 		}
