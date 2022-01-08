@@ -8,6 +8,7 @@ import (
 	"proj_bcbm/src/server/log"
 	"proj_bcbm/src/server/msg"
 	"proj_bcbm/src/server/util"
+	"sort"
 	"strconv"
 	"sync"
 	"time"
@@ -24,6 +25,7 @@ type HRMsg struct {
 type Hall struct {
 	UserRecord sync.Map            // 用户记录
 	RoomRecord sync.Map            // 房间记录
+	FakeRoom   sync.Map            // 大厅房间假数据
 	UserRoom   map[uint32]string   // 用户房间
 	History    map[string][]uint32 // 各房间历史记录
 	HRChan     chan HRMsg          // 房间大厅通信
@@ -35,6 +37,7 @@ func NewHall() *Hall {
 	return &Hall{
 		UserRecord:    sync.Map{},
 		RoomRecord:    sync.Map{},
+		FakeRoom:      sync.Map{},
 		UserRoom:      make(map[uint32]string),
 		History:       make(map[string][]uint32),
 		HRChan:        make(chan HRMsg, 6),
@@ -46,7 +49,7 @@ func NewHall() *Hall {
 // 大厅和房间之间通过channel通信
 func (h *Hall) OpenCasino() {
 	for i := 0; i < constant.RoomCount; i++ {
-		go h.openRoom(strconv.Itoa(i + 1))
+		go h.openRoom(strconv.Itoa(i+1), true)
 	}
 
 	// 收到房间channel消息后发广播
@@ -61,7 +64,7 @@ func (h *Hall) OpenCasino() {
 }
 
 // 大厅开房
-func (h *Hall) openRoom(rID string) *Dealer {
+func (h *Hall) openRoom(rID string, hallRoom bool) *Dealer {
 
 	dl := NewDealer(rID, h.HRChan)
 
@@ -83,14 +86,14 @@ func (h *Hall) openRoom(rID string) *Dealer {
 
 	dl.bankerMoney = dl.Bankers[0].(Bot).Balance
 
-	h.RoomRecord.Store(rID, dl)
+	if hallRoom {
+		h.RoomRecord.Store(rID, dl)
+	} else {
+		h.FakeRoom.Store(rID, dl)
+	}
 	dl.StartGame()
 
 	return dl
-}
-
-func (h *Hall) CreatePackageRoom() {
-
 }
 
 func (h *Hall) PlayerJoinRoom(roomId string, au *User) {
@@ -171,7 +174,7 @@ func (h *Hall) CreatJoinPackageIdRoom(roomId string, au *User) {
 	rid := fmt.Sprintf(roomId + "-" + strconv.Itoa(int(au.PackageId)))
 
 	go func() {
-		dl := h.openRoom(rid)
+		dl := h.openRoom(rid, false)
 		dl.PackageId = au.PackageId
 		if dl.PackageId == 8 || dl.PackageId == 11 {
 			dl.IsSpecial = true
@@ -190,19 +193,18 @@ func (h *Hall) ChangeRoomStatus(hrMsg HRMsg) {
 		if len(h.History[rID]) > constant.HisCount {
 			h.History[rID] = h.History[rID][1:]
 		}
-		v, _ := h.RoomRecord.Load(rID)
+		v, _ := h.FakeRoom.Load(rID)
 		v.(*Dealer).History = h.History[rID]
 	}
 
 	converter := &DTOConverter{}
-	v, _ := h.RoomRecord.Load(rID)
+	v, _ := h.FakeRoom.Load(rID)
 	res := converter.RChangeHB(hrMsg, *(v.(*Dealer)))
 	h.BroadCast(&res)
 }
 
 // 大厅广播
 func (h *Hall) BroadCast(bMsg interface{}) {
-	// log.Debug("hall brd msg %+v, content: %+v", reflect.TypeOf(bMsg), bMsg)
 	h.UserRecord.Range(func(key, value interface{}) bool {
 		user := value.(*User)
 		if user.ConnAgent != nil {
@@ -217,12 +219,21 @@ func (h *Hall) GetRoomsInfoResp() []*msg.RoomInfo {
 	var roomsInfoResp []*msg.RoomInfo
 	converter := &DTOConverter{}
 
-	Mgr.RoomRecord.Range(func(key, value interface{}) bool {
+	Mgr.FakeRoom.Range(func(key, value interface{}) bool {
 		dl := value.(*Dealer)
 		roomMsg := converter.R2Msg(*dl)
 		roomsInfoResp = append(roomsInfoResp, &roomMsg)
 		return true
 	})
+
+	// 房间排序
+	sort.SliceStable(roomsInfoResp, func(i, j int) bool {
+		if roomsInfoResp[i].RoomID < roomsInfoResp[j].RoomID {
+			return true
+		}
+		return false
+	})
+
 	return roomsInfoResp
 }
 
