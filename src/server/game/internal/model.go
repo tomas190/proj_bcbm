@@ -178,7 +178,7 @@ func (h *Hall) CreatJoinPackageIdRoom(roomId string, au *User) {
 		}
 		// 加入房间
 		h.AllocateUser(au, dl, false)
-		log.Debug("品牌房间首次进入玩家:%v, %v", dl.PackageId, au.Id)
+		log.Debug("品牌房间首次进入玩家:%v, %v", dl.PackageId, au.UserID)
 	}()
 }
 
