@@ -176,7 +176,7 @@ func (h *Hall) CreatJoinPackageIdRoom(roomId string, au *User) {
 	go func() {
 		dl := h.openRoom(rid, false)
 		dl.PackageId = au.PackageId
-		if dl.PackageId == 8 || dl.PackageId == 11 {
+		if dl.PackageId == 8 || dl.PackageId == 11 || dl.PackageId == 12 {
 			dl.IsSpecial = true
 		}
 		// 加入房间
